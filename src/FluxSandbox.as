@@ -33,6 +33,7 @@ package
 	import flux.util.FluxDeserializer;
 	import icons.Bin;
 	
+	[SWF( backgroundColor="0x101010", frameRate="60" )]
 	public class FluxSandbox extends VBox 
 	{
 		public var list			:List;
