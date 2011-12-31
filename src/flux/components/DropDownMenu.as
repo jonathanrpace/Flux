@@ -138,7 +138,7 @@ package flux.components
 			return _dataProvider;
 		}
 		
-		public function set maxVisibleItems( value:int )
+		public function set maxVisibleItems( value:int ):void
 		{
 			if ( value == _maxVisibleItems ) return;
 			_maxVisibleItems = value;

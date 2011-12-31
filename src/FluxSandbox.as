@@ -64,10 +64,8 @@ package
 					<Tree id="tree" width="100%" height="100%" allowMultipleSelection="true" />
 					
 					<TabNavigator id="tabNavigator" width="100%" height="100%" padding="4" >
-						<InputField width="100%" />
-						<ScrollCanvas width="100%" height="100%">
-							<DropDownMenu id="dropDownMenu" width="200" />
-						</ScrollCanvas>
+						<InputField width="100%" label="InputField" />
+						<DropDownMenu id="dropDownMenu" width="100%" label="DropDownMenu" />
 						<PushButton label="Button 2 longer" toggle="false" />
 						<PushButton label="Button 3 with a really long label" toggle="true" resizeToContent="true" />
 						<TabNavigator width="100%" height="100%" padding="4" label="Nested Tab Navigator" >

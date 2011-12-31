@@ -195,7 +195,7 @@ package flux.components
 			background.visible = value;
 		}
 		
-		public function get showBackground()
+		public function get showBackground():Boolean
 		{
 			return background.visible;
 		}
