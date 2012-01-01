@@ -2,6 +2,7 @@ package flux.components
 {
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.TextEvent;
 	import flash.text.TextField;
 	import flash.text.TextFieldType;
 	import flash.text.TextFormat;
@@ -11,7 +12,7 @@ package flux.components
 	{
 		// Child elements
 		protected var skin				:Sprite;
-		protected var labelField		:TextField;
+		protected var textField			:TextField;
 		
 		public function InputField() 
 		{
@@ -26,28 +27,46 @@ package flux.components
 			_width = skin.width;
 			_height = skin.height;
 			
-			labelField = new TextField();
-			labelField.defaultTextFormat = new TextFormat( Style.fontFace, Style.fontSize, Style.fontColor );
-			//labelField.addEventListener( Event.CHANGE, labelFieldChangeHandler );
-			labelField.selectable = true;
-			labelField.type = TextFieldType.INPUT;
-			labelField.multiline = false;
+			textField = new TextField();
+			textField.defaultTextFormat = new TextFormat( Style.fontFace, Style.fontSize, Style.fontColor );
+			textField.selectable = true;
+			textField.type = TextFieldType.INPUT;
+			textField.multiline = false;
 			
-			SelectionColor.setFieldSelectionColor(labelField, 0xCCCCCC);
+			SelectionColor.setFieldSelectionColor(textField, 0xCCCCCC);
 			
-			addChild( labelField );
+			addChild( textField );
 		}
 		
 		override protected function validate():void
 		{
-			labelField.x = 4;
-			labelField.width = _width - 4;
-			labelField.height = Math.min(labelField.textHeight + 4, _height);
-			labelField.y = (_height - (labelField.height)) >> 1;
+			textField.x = 4;
+			textField.width = _width - 4;
+			textField.height = Math.min(textField.textHeight + 4, _height);
+			textField.y = (_height - (textField.height)) >> 1;
 			
 			skin.width = _width;
 			skin.height = _height;
 		}
+		
+		public function set restrict( value:String ):void
+		{
+			textField.restrict = value;
+		}
+		
+		public function get restrict():String
+		{
+			return textField.restrict;
+		}
+		
+		public function set text( value:String ):void
+		{
+			textField.text = value;
+		}
+		
+		public function get text():String
+		{
+			return textField.text;
+		}
 	}
-
 }

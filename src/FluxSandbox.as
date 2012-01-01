@@ -4,10 +4,10 @@ package
 	 * TODO
 	 * 
 	 * RadioButton + groups
-	 * NumericStepper
 	 * List Drag and Drop
 	 * Tabnavigator close buttons and drag and drop
 	 * InputField
+	 * ProgressBar
 	 */
 	
 	import flash.display.StageAlign;
@@ -79,12 +79,10 @@ package
 					</TabNavigator>
 					
 					<VBox width="100%" height="100%"  >
-						<CheckBox label="Button 1" selected="true" indeterminate="true" width="100%" height="100%" />
-						<CheckBox label="Button 1" selected="false" indeterminate="true" width="100%" height="100%" />
-						<CheckBox label="Button 1" selected="true" width="100%" height="100%" />
-						<CheckBox label="Button 1" selected="true" width="100%" height="100%" />
-						<CheckBox label="Button 1" selected="true" width="100%" height="100%" />
-						<CheckBox label="Button 1" selected="true" width="100%" height="100%" />
+						<CheckBox label="Button 1" selected="true" indeterminate="true" />
+						<CheckBox label="Button 1" selected="false" indeterminate="true" />
+						<CheckBox label="Button 1" selected="true" width="100%" />
+						<NumericStepper width="100%" />
 					</VBox>
 					
 				</HBox>
@@ -101,7 +99,6 @@ package
 			</VBox>
 			
 			FluxDeserializer.deserialize( xml, this );
-			
 			
 			// Build an example data provider
 			var dp:Object = { };

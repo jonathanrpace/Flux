@@ -17,24 +17,26 @@ package flux.components
 		private static const REPEAT_TIME	:int = 100;
 		
 		// Child elements
-		protected var track				:Sprite;
-		protected var thumb				:PushButton;
-		protected var upBtn				:PushButton;
-		protected var downBtn			:PushButton;
+		private var track					:Sprite;
+		private var thumb					:PushButton;
+		private var upBtn					:PushButton;
+		private var downBtn					:PushButton;
 		
 		// Properties
-		protected var _value			:Number = 0;
-		protected var _max				:Number = 10;
-		protected var _thumbSizeRatio	:Number = 0.5;
-		protected var _scrollSpeed		:Number = 1;
-		protected var _pageScrollSpeed	:Number = 4;
-		protected var repeatSpeed		:int;
-		protected var dragStartRatio	:Number;
-		protected var dragStartValue		:int;
-		protected var delayTimer		:Timer;
-		protected var repeatTimer		:Timer;
-		protected var defaultUpBtnHeight:Number;
-		protected var defaultDownBtnHeight:Number;
+		private var _value					:Number = 0;
+		private var _max					:Number = 10;
+		private var _thumbSizeRatio			:Number = 0.5;
+		private var _scrollSpeed			:Number = 1;
+		private var _pageScrollSpeed		:Number = 4;
+		
+		// Internal vars
+		private var repeatSpeed				:int;
+		private var dragStartRatio			:Number;
+		private var dragStartValue			:int;
+		private var delayTimer				:Timer;
+		private var repeatTimer				:Timer;
+		private var defaultUpBtnHeight		:Number;
+		private var defaultDownBtnHeight	:Number;
 		
 		public function ScrollBar() 
 		{
@@ -209,6 +211,7 @@ package flux.components
 		{
 			stage.removeEventListener( MouseEvent.MOUSE_MOVE, mouseMoveHandler );
 			stage.removeEventListener(MouseEvent.MOUSE_UP, endScrollRepeatHandler);
+			stage.removeEventListener(MouseEvent.MOUSE_UP, endThumbDragHandler);
 		}
 		
 		private function delayCompleteHandler( event:TimerEvent ):void

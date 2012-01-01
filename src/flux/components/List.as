@@ -342,7 +342,7 @@ package flux.components
 			selectedItems = _selectedItems;
 			invalidate();
 			
-			dispatchEvent( new SelectEvent( SelectEvent.SELECT, visibleData[index] ) );
+			dispatchEvent( new SelectEvent( SelectEvent.SELECT, flattenedData[index] ) );
 		}
 		
 		private function mouseWheelHandler( event:MouseEvent ):void

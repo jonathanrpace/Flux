@@ -28,10 +28,6 @@ package flux.components
 		// Internal vars
 		protected var buttonWidth	:int;
 		
-		
-		
-		
-		
 		public function DropDownMenu() 
 		{
 			
@@ -85,7 +81,7 @@ package flux.components
 			updateListHeight();
 			list.validateNow();
 			
-			if ( list.visible )
+			if ( list.stage )
 			{
 				stage.addEventListener( MouseEvent.MOUSE_DOWN, mouseDownStageHandler );
 			}
