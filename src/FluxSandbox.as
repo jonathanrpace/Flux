@@ -1,12 +1,36 @@
+/**
+ * FluxSandbox.as
+ * 
+ * Copyright (c) 2011 Jonathan Pace
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package  
 {
 	/*
 	 * TODO
 	 * 
+	 * Add support for axis aligned layout values on all layouts.
 	 * RadioButton + groups
 	 * List Drag and Drop
 	 * Tabnavigator close buttons and drag and drop
-	 * InputField
 	 * ProgressBar
 	 */
 	
@@ -16,32 +40,20 @@ package
 	import flash.events.KeyboardEvent;
 	import flash.ui.Keyboard;
 	import flash.utils.getDefinitionByName;
-	import flux.components.Canvas;
-	import flux.components.CheckBox;
-	import flux.components.DropDownMenu;
-	import flux.components.HBox;
-	import flux.components.List;
-	import flux.components.MenuBar;
-	import flux.components.PushButton;
-	import flux.components.SingletonExample;
-	import flux.components.TabNavigator;
-	import flux.components.Tree;
-	import flux.components.UIComponent;
-	import flux.components.VBox;
-	import flux.components.ViewStack;
+	import flux.components.*;
 	import flux.data.ArrayCollection;
 	import flux.util.FluxDeserializer;
 	import icons.Bin;
 	
 	[SWF( backgroundColor="0x101010", frameRate="60" )]
-	public class FluxSandbox extends VBox 
+	public class FluxSandbox extends Container 
 	{
 		public var list			:List;
 		public var tree			:Tree;
-		public var buttonBar	:HBox;
 		public var tabNavigator	:TabNavigator;
 		public var dropDownMenu	:DropDownMenu;
 		public var menuBar		:MenuBar;
+		public var panel		:Panel;
 		
 		public function FluxSandbox() 
 		{
@@ -57,46 +69,58 @@ package
 			stage.addEventListener( Event.RESIZE, stageResizeHandler );
 			
 			var xml:XML = 
-			<VBox showBackground="false" padding="20" spacing="-1" >
+			<Container padding="20">
 				
-				<MenuBar id="menuBar" width="100%"/>
-				<HBox width="100%" height="100%" showBackground="false" >
-					<List id="list" width="100%" height="100%" allowMultipleSelection="false" />
-					<Tree id="tree" width="100%" height="100%" allowMultipleSelection="true" />
+				<VBox width="100%" height="100%" >
 					
-					<TabNavigator id="tabNavigator" width="100%" height="100%" padding="4" >
-						<InputField width="100%" label="InputField" />
-						<DropDownMenu id="dropDownMenu" width="100%" label="DropDownMenu" />
-						<PushButton label="Button 2 longer" toggle="false" />
-						<PushButton label="Button 3 with a really long label" toggle="true" resizeToContent="true" />
-						<TabNavigator width="100%" height="100%" padding="4" label="Nested Tab Navigator" >
-							<ScrollCanvas width="100%" height="100%">
-								<DropDownMenu width="200" />
-							</ScrollCanvas>
+					<MenuBar id="menuBar" width="100%"/>
+					<HBox width="100%" height="100%" >
+						<List id="list" width="100%" height="100%" allowMultipleSelection="false" />
+						<Tree id="tree" width="100%" height="100%" allowMultipleSelection="true" />
+						
+						<TabNavigator id="tabNavigator" width="100%" height="100%" padding="4" >
+							<InputField width="100%" label="InputField" />
+							<DropDownMenu id="dropDownMenu" width="100%" label="DropDownMenu" />
 							<PushButton label="Button 2 longer" toggle="false" />
-							<PushButton label="Button 3 with a really long label" toggle="true" resizeToContent="true" width="200" />
+							<PushButton label="Button 3 with a really long label" toggle="true" resizeToContent="true" />
+							<TabNavigator width="100%" height="100%" padding="4" label="Nested Tab Navigator" >
+								<ScrollPane width="100%" height="100%">
+									<DropDownMenu width="200" />
+								</ScrollPane>
+								<PushButton label="Button 2 longer" toggle="false" />
+								<PushButton label="Button 3 with a really long label" toggle="true" resizeToContent="true" width="200" />
+							</TabNavigator>
 						</TabNavigator>
-					</TabNavigator>
+						
+						<VBox width="100%" height="100%"  >
+							<CheckBox label="Button 1" selected="true" indeterminate="true" />
+							<CheckBox label="Button 1" selected="false" indeterminate="true" />
+							<CheckBox label="Button 1" selected="true" width="100%" />
+							<NumericStepper width="100%" />
+						</VBox>
+						
+					</HBox>
 					
-					<VBox width="100%" height="100%"  >
-						<CheckBox label="Button 1" selected="true" indeterminate="true" />
-						<CheckBox label="Button 1" selected="false" indeterminate="true" />
-						<CheckBox label="Button 1" selected="true" width="100%" />
-						<NumericStepper width="100%" />
-					</VBox>
-					
-				</HBox>
+					<Panel id="panel" title="I'm a Panel" width="100%" height="80" >
+						<PushButton label="Button 2" toggle="false" width="100%" height="100%" />
+						<PushButton label="Button 3" toggle="true" width="100%" height="100%" />
+						<PushButton label="Button 4" toggle="false" width="100%" height="100%" />
+						<PushButton label="Button 5" toggle="true" width="100%" height="100%" />
+						<PushButton label="Button 6" toggle="false" width="100%" height="100%" />
+						<PushButton label="Button 7" toggle="true" width="100%" height="100%" />
+						
+						<layout>
+							<HorizontalLayout/>
+						</layout>
+						
+						<controlBar>
+							<PushButton label="OK"/>
+							<PushButton label="Cancel"/>
+						</controlBar>
+					</Panel>
+				</VBox>
 				
-				<HBox id="buttonBar" width="100%" height="40" align="center" showBackground="false" >
-					<PushButton label="Button 2" toggle="false" width="100%" height="100%" />
-					<PushButton label="Button 3" toggle="true" width="100%" height="100%" />
-					<PushButton label="Button 4" toggle="false" width="100%" height="100%" />
-					<PushButton label="Button 5" toggle="true" width="100%" height="100%" />
-					<PushButton label="Button 6" toggle="false" width="100%" height="100%" />
-					<PushButton label="Button 7" toggle="true" width="100%" height="100%" />
-				</HBox>
-					
-			</VBox>
+			</Container>
 			
 			FluxDeserializer.deserialize( xml, this );
 			

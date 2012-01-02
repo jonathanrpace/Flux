@@ -1,13 +1,42 @@
+/**
+ * TabNavigator.as
+ * 
+ * Copyright (c) 2011 Jonathan Pace
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package flux.components 
 {
+	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
 	import flux.events.PropertyChangeEvent;
 	import flux.layouts.HorizontalLayout;
 	import flux.layouts.LayoutAlign;
+	import flux.skins.TabNavigatorSkin;
+	
 	public class TabNavigator extends ViewStack 
 	{
-		private var tabBar	:Canvas;
+		// Child elements
+		private var tabBar		:Container;
+		private var background	:Sprite;
 		
 		public function TabNavigator() 
 		{
@@ -16,19 +45,22 @@ package flux.components
 		
 		override protected function init():void
 		{
+			background = new TabNavigatorSkin();
+			addRawChild(background);
+			
 			super.init();
+			
+			_width = background.width;
+			_height = background.height;
 			
 			var testTab:TabNavigatorTab = new TabNavigatorTab();
 			
-			tabBar = new Canvas();
-			tabBar.showBackground = false;
+			tabBar = new Container();
 			tabBar.height = testTab.height;
 			tabBar.layout = new HorizontalLayout( -1, LayoutAlign.BOTTOM);
 			addRawChild(tabBar);
 			
 			tabBar.addEventListener( MouseEvent.MOUSE_DOWN, mouseDownTabHandler );
-			
-			showBackground = true;
 		}
 		
 		override protected function onChildrenChanged( child:UIComponent, index:int, added:Boolean ):void
@@ -70,6 +102,7 @@ package flux.components
 			
 			var layoutArea:Rectangle = getChildrenLayoutArea();
 			
+			background.width = _width;
 			background.y = (tabBar.height-1);
 			background.height = _height - (tabBar.height-1);
 			tabBar.width = _width;

@@ -1,14 +1,40 @@
+/**
+ * NumericStepper.as
+ * 
+ * Copyright (c) 2011 Jonathan Pace
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package flux.components 
 {
 	import flash.events.Event;
 	import flash.events.FocusEvent;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.events.TextEvent;
 	import flash.events.TimerEvent;
 	import flash.text.TextField;
+	import flash.ui.Keyboard;
 	import flash.utils.Timer;
-	import flux.skins.NumericStepperUpBtnSkin;
 	import flux.skins.NumericStepperDownBtnSkin;
+	import flux.skins.NumericStepperUpBtnSkin;
 	
 	public class NumericStepper extends UIComponent 
 	{
@@ -43,6 +69,7 @@ package flux.components
 			inputField.restrict = "0-9."
 			inputField.addEventListener(TextEvent.TEXT_INPUT, textInputHandler);
 			inputField.addEventListener(FocusEvent.FOCUS_OUT, focusOutInputFieldHandler);
+			inputField.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
 			addChild(inputField);
 			
 			_width = inputField.width;
@@ -89,7 +116,6 @@ package flux.components
 		private function textInputHandler( event:TextEvent ):void
 		{
 			var textField:TextField = TextField(event.target);
-			
 			if ( event.text == "." && textField.text.indexOf(".") != -1 )
 			{
 				event.preventDefault();
@@ -98,7 +124,16 @@ package flux.components
 		
 		private function focusOutInputFieldHandler( event:FocusEvent ):void
 		{
+			if ( inputField.text == "" ) inputField.text = "0";
 			value = Number( inputField.text );
+		}
+		
+		private function keyDownHandler( event:KeyboardEvent ):void
+		{
+			if ( event.keyCode == Keyboard.ENTER )
+			{
+				value = Number( inputField.text );
+			}
 		}
 		
 		private function mouseDownButtonHandler( event:MouseEvent ):void
@@ -136,7 +171,8 @@ package flux.components
 		public function set value( v:Number ):void
 		{
 			v = v < _min ? _min : v > _max ? _max : v;
-			if ( v == _value ) return;
+			if ( _value == v ) return;
+			
 			_value = v;
 			
 			var str:String = String(_value);
@@ -204,24 +240,6 @@ package flux.components
 		public function get numDecimalPlaces():uint
 		{
 			return _numDecimalPlaces;
-		}
-		
-		////////////////////////////////////////////////
-		// Private methods
-		////////////////////////////////////////////////
-		
-		/**
-		 * Util method for rounding a number to an arbitrary interval.
-		 * Eg, 4.7401 snapped to the nearest interval of 0.5 would return 4.5
-		 * The NumericStepper uses this to round the value to a certain number of decimal places.
-		 * @param	value 		The value to be snapped.
-		 * @param	interval	The interval the value should be snapped to.
-		 * @return				The value snapped to the nearest interval.
-		 */
-		private function snapToInterval( value:Number, interval:Number ):Number
-		{
-			var overshoot:Number = value % interval;
-			return overshoot < interval*0.5 ? value - overshoot : value + (interval-overshoot);
 		}
 	}
 }

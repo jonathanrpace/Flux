@@ -1,3 +1,29 @@
+/**
+ * UIComponent.as
+ * 
+ * Base class for all components
+ * 
+ * Copyright (c) 2011 Jonathan Pace
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package flux.components 
 {
 	import flash.display.Sprite;
@@ -18,7 +44,7 @@ package flux.components
 		protected var _resizeToContent	:Boolean = false;
 		protected var _enabled			:Boolean = true;
 		protected var _isInvalid		:Boolean = false;
-			
+		
 		public function UIComponent() 
 		{
 			_init();
@@ -30,8 +56,56 @@ package flux.components
 			invalidate();
 		}
 		
-		// Override this method to perform one-time init logic, such as creating children.
-		protected function init():void {}
+		////////////////////////////////////////////////
+		// Public methods
+		////////////////////////////////////////////////
+		
+		public function invalidate():void
+		{
+			if ( _isInvalid ) return;
+			_isInvalid = true;
+			addEventListener( Event.ENTER_FRAME, onInvalidateHandler );
+		}
+		
+		public function isInvalid():Boolean
+		{
+			return _isInvalid;
+		}
+		
+		public function validateNow():void
+		{
+			if ( _isInvalid == false ) return;
+			validate();
+			_isInvalid = false;
+			removeEventListener( Event.ENTER_FRAME, onInvalidateHandler );
+		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
+		
+		/**
+		 * Override this method to perform one-time init logic, such as creating children.
+		 */
+		protected function init():void { }
+		
+		/**
+		 * Override this method to do any work required to validate the component.
+		 */
+		protected function validate():void { }
+		
+		////////////////////////////////////////////////
+		// Event Handlers
+		////////////////////////////////////////////////
+		
+		private function onInvalidateHandler( event:Event ):void
+		{
+			validateNow();
+		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
 		
 		override public function set width( value:Number ):void
 		{
@@ -177,32 +251,5 @@ package flux.components
 		{
 			return _excludeFromLayout;
 		}
-		
-		public function invalidate():void
-		{
-			if ( _isInvalid ) return;
-			_isInvalid = true;
-			addEventListener( Event.ENTER_FRAME, onInvalidateHandler );
-		}
-		
-		public function isInvalid():Boolean
-		{
-			return _isInvalid;
-		}
-		
-		private function onInvalidateHandler( event:Event ):void
-		{
-			validateNow();
-		}
-		
-		public function validateNow():void
-		{
-			if ( _isInvalid == false ) return;
-			validate();
-			_isInvalid = false;
-			removeEventListener( Event.ENTER_FRAME, onInvalidateHandler );
-		}
-		
-		protected function validate():void {}
 	}
 }

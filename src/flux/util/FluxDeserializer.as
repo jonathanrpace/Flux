@@ -1,31 +1,41 @@
+/**
+ * FluxDeserializer.as
+ * 
+ * Copyright (c) 2011 Jonathan Pace
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package flux.util 
 {
 	import flash.utils.getDefinitionByName;
-	import flux.components.Canvas;
-	import flux.components.CheckBox;
-	import flux.components.DropDownMenu;
-	import flux.components.HBox;
-	import flux.components.InputField;
-	import flux.components.MenuBar;
-	import flux.components.NumericStepper;
-	import flux.components.PushButton;
-	import flux.components.ScrollCanvas;
-	import flux.components.TabNavigator;
-	import flux.components.Tree;
-	import flux.components.UIComponent;
-	import flux.components.VBox;
-	import flux.layouts.HorizontalLayout;
-	import flux.layouts.ILayout;
-	import flux.layouts.VerticalLayout;
+	import flux.components.*;
+	import flux.layouts.*;
 	
 	public class FluxDeserializer 
 	{
-		public static function deserialize( xml:XML, topLevel:Canvas ):UIComponent
+		public static function deserialize( xml:XML, topLevel:Container ):UIComponent
 		{
 			return parseComp( xml, topLevel, null, topLevel );
 		}
 		
-		private static function parseComp( xml:XML, topLevel:Canvas, parent:Canvas = null, instance:UIComponent = null ):UIComponent
+		private static function parseComp( xml:XML, topLevel:Container, parent:Container = null, instance:UIComponent = null ):UIComponent
 		{
 			if ( instance == null )
 			{
@@ -36,19 +46,19 @@ package flux.util
 			
 			if ( topLevel == null )
 			{
-				topLevel = instance as Canvas;
+				topLevel = instance as Container;
 			}
 			
 			parseAttributes(xml, instance, topLevel);
 			
-			if ( parent )
+			if ( parent && instance.stage == null )
 			{
 				parent.addChild(instance);
 			}
 			
-			if ( instance is Canvas )
+			if ( instance is Container )
 			{
-				var canvas:Canvas = Canvas(instance);
+				var container:Container = Container(instance);
 				
 				var childNodes:XMLList = xml.children();
 				for ( var i:int = 0; i < childNodes.length(); i++ )
@@ -56,27 +66,32 @@ package flux.util
 					var childNode:XML = childNodes[i];
 					var childNodeName:String = childNode.name();
 					
-					// Handle non-child component nodes
-					if ( childNodeName == "layout" )
+					if ( container.hasOwnProperty(childNodeName) )
 					{
-						var layoutInstanceNode:XML = childNode.children()[0];
-						var layoutType:Class = Class(getDefinitionByName( "flux.layouts." + layoutInstanceNode.name() ));
-						var layoutInstance:ILayout = new layoutType();
-						parseAttributes( childNode, layoutInstance, topLevel );
-						canvas.layout = layoutInstance;
+						if ( container[childNodeName] is ILayout )
+						{
+							var layoutInstanceNode:XML = childNode.children()[0];
+							var layoutType:Class = Class(getDefinitionByName( "flux.layouts." + layoutInstanceNode.name() ));
+							var layoutInstance:ILayout = new layoutType();
+							parseAttributes( childNode, layoutInstance, topLevel );
+							container.layout = layoutInstance;
+							continue;
+						}
+						else if ( container[childNodeName] is Container )
+						{
+							parseComp( childNode, topLevel, null, container[childNodeName] );
+							continue;
+						}
 					}
 					// Assume it's a child component
-					else
-					{
-						parseComp( childNode, topLevel, canvas );
-					}
+					parseComp( childNode, topLevel, container );
 				}
 			}
 			
 			return instance;
 		}
 		
-		private static function parseAttributes( xml:XML, instance:Object, topLevel:Canvas ):void
+		private static function parseAttributes( xml:XML, instance:Object, topLevel:Container ):void
 		{
 			for each ( var attribute:XML in xml.attributes() )
 			{
@@ -132,7 +147,8 @@ package flux.util
 		InputField;
 		NumericStepper;
 		MenuBar;
-		ScrollCanvas;
+		Panel;
+		ScrollPane;
 		TabNavigator;
 		Tree;
 		VBox;

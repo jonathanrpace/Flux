@@ -1,3 +1,27 @@
+/**
+ * PushButton.as
+ * 
+ * Copyright (c) 2011 Jonathan Pace
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package flux.components 
 {
 	import flash.display.Bitmap;
@@ -10,8 +34,6 @@ package flux.components
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
-	import flash.text.TextFormatAlign;
-	import flash.text.TextLineMetrics;
 	import flux.skins.PushButtonSkin;
 	
 	public class PushButton extends UIComponent 
@@ -44,7 +66,8 @@ package flux.components
 			addChild( skin );
 			
 			labelField = new TextField();
-			labelField.defaultTextFormat = new TextFormat( Style.fontFace, Style.fontSize, Style.fontColor );
+			labelField.defaultTextFormat = new TextFormat( TextStyles.fontFace, TextStyles.fontSize, TextStyles.fontColor );
+			labelField.embedFonts = TextStyles.embedFonts;
 			labelField.selectable = false;
 			labelField.multiline = false;
 			labelField.mouseEnabled = false;
@@ -142,17 +165,14 @@ package flux.components
 			var tf:TextFormat = labelField.defaultTextFormat;
 			if ( _resizeToContent )
 			{
-				tf.align = TextFormatAlign.LEFT;
 				labelField.autoSize = TextFieldAutoSize.LEFT;
-				labelField.defaultTextFormat = tf;
 				_width = labelField.x + labelField.width + 4;
 			}
 			else
 			{
-				tf.align = TextFormatAlign.CENTER;
 				labelField.autoSize = TextFieldAutoSize.NONE;
-				labelField.defaultTextFormat = tf;
-				labelField.width = _width - labelField.x;
+				labelField.width = Math.min( _width -4, labelField.textWidth + 4 );
+				labelField.x += ((_width - (labelField.x + 2)) - labelField.width) >> 1;
 			}
 			
 			skin.width = _width;

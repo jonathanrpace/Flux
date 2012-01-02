@@ -1,3 +1,27 @@
+/**
+ * HorizontalLayout.as
+ * 
+ * Copyright (c) 2011 Jonathan Pace
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package flux.layouts 
 {
 	import flash.display.DisplayObject;
@@ -8,13 +32,15 @@ package flux.layouts
 	
 	public class HorizontalLayout implements ILayout 
 	{
-		public var spacing		:int;
-		public var align		:String;
+		public var spacing				:int;
+		public var horizontalAlign		:String;
+		public var verticalAlign		:String;
 		
-		public function HorizontalLayout( spacing:int = 4, align:String = "none" ) 
+		public function HorizontalLayout( spacing:int = 4, horizontalAlign:String = "left", verticalAlign:String = "none" ) 
 		{
 			this.spacing = spacing;
-			this.align = align;
+			this.horizontalAlign = horizontalAlign;
+			this.verticalAlign = verticalAlign;
 		}
 		
 		public function layout(content:DisplayObjectContainer, visibleWidth:Number, visibleHeight:Number, allowProportional:Boolean = true):Rectangle 
@@ -60,7 +86,7 @@ package flux.layouts
 				var isProportionalWidth:Boolean = allowProportional && isNaN( child.percentWidth ) == false;
 				var isProportionalHeight:Boolean = allowProportional && isNaN( child.percentHeight ) == false;
 				
-				switch ( align )
+				switch ( verticalAlign )
 				{
 					case LayoutAlign.TOP :
 						child.x = 0;
@@ -106,6 +132,27 @@ package flux.layouts
 				
 				contentSize.width = child.x + child.width > contentSize.width ? child.x + child.width : contentSize.width;
 				contentSize.height = child.y + child.height > contentSize.height ? child.x + child.height : contentSize.height;
+			}
+			
+			switch ( horizontalAlign )
+			{
+				case LayoutAlign.RIGHT :
+					var shift:int = visibleWidth - contentSize.width;
+					for ( i = 0; i < content.numChildren; i++ )
+					{
+						child = UIComponent(content.getChildAt(i));
+						child.x += shift;
+					}
+					break
+					
+				case LayoutAlign.CENTRE :
+					shift = (visibleWidth - contentSize.width) >> 1;
+					for ( i = 0; i < content.numChildren; i++ )
+					{
+						child = UIComponent(content.getChildAt(i));
+						child.x += shift;
+					}
+					break;
 			}
 			
 			return contentSize;

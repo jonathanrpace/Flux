@@ -1,5 +1,5 @@
 /**
- * ListItemRenderer.as
+ * TextStyles.as
  * 
  * Copyright (c) 2011 Jonathan Pace
  * 
@@ -20,62 +20,28 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ * 
+ * Components with text make use of the font Pixel Arial by Max
+ * This is a free font obtained from http://www.dafont.com/pixel-arial-11.font
  */
 
 package flux.components 
 {
-	import flash.text.TextFormat;
-	import flash.text.TextFormatAlign;
-	import flux.skins.ListItemRendererSkin;
-	
-	public class ListItemRenderer extends PushButton implements IItemRenderer
+	public class TextStyles 
 	{
-		// Parent
-		protected var _list			:List;
+		// NOTE: Flex 4 introduces DefineFont4, which is used by default and does not work in native text fields.
+		// Use the embedAsCFF="false" param to switch back to DefineFont4. In earlier Flex 4 SDKs this was cff="false".
+		// So if you are using the Flex 3.x sdk compiler, remove the embedAsCFF="false" parameter.
+		[Embed(source="../assets/PixelArial.ttf", embedAsCFF="false", fontName="Pixel Arial 11", mimeType="application/x-font")]
+		protected static var PixelArial:Class;
 		
-		// State and data
-		protected var _data			:Object;
+		[Embed(source="../assets/PixelArialBold.ttf", embedAsCFF="false", fontWeight="bold",  fontName="Pixel Arial 11", mimeType="application/x-font")]
+		protected static var PixelArialBold:Class;
 		
-		public function ListItemRenderer(skinClass:Class = null) 
-		{
-			super(skinClass == null ? ListItemRendererSkin : skinClass );
-		}
-		
-		override protected function validate():void
-		{
-			super.validate();
-			var textFormat:TextFormat = labelField.defaultTextFormat;
-			textFormat.align = TextFormatAlign.LEFT;
-			labelField.defaultTextFormat = textFormat;
-		}
-		
-		public function set data( value:Object ):void
-		{
-			_data = value;
-			if ( _data )
-			{
-				label = list.dataDescriptor.getLabel(_data);
-				icon = list.dataDescriptor.getIcon(_data);
-			}
-			else
-			{
-				label = "";
-			}
-		}
-		
-		public function get data():Object
-		{
-			return _data;
-		}
-		
-		public function set list( value:List ):void
-		{
-			_list = value;
-		}
-		
-		public function get list():List
-		{
-			return _list;
-		}
+		public static var embedFonts		:Boolean = true;
+		public static var fontFace			:String = "Pixel Arial 11";
+		public static var fontSize			:int = 8;
+		public static var fontColor			:uint = 0xFFFFFF;
+		public static var fontColorDimmed	:uint = 0xCCCCCC;
 	}
 }
