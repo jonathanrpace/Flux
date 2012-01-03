@@ -22,16 +22,14 @@
  * THE SOFTWARE.
  */
 
-package  
+package
 {
 	/*
 	 * TODO
-	 * 
-	 * Add support for axis aligned layout values on all layouts.
+	 * PushButton center label alignment aliasing issues
 	 * RadioButton + groups
 	 * List Drag and Drop
-	 * Tabnavigator close buttons and drag and drop
-	 * ProgressBar
+	 * Tabnavigator drag and drop
 	 */
 	
 	import flash.display.StageAlign;
@@ -42,6 +40,7 @@ package
 	import flash.utils.getDefinitionByName;
 	import flux.components.*;
 	import flux.data.ArrayCollection;
+	import flux.events.TabNavigatorEvent;
 	import flux.util.FluxDeserializer;
 	import icons.Bin;
 	
@@ -83,20 +82,14 @@ package
 							<DropDownMenu id="dropDownMenu" width="100%" label="DropDownMenu" />
 							<PushButton label="Button 2 longer" toggle="false" />
 							<PushButton label="Button 3 with a really long label" toggle="true" resizeToContent="true" />
-							<TabNavigator width="100%" height="100%" padding="4" label="Nested Tab Navigator" >
-								<ScrollPane width="100%" height="100%">
-									<DropDownMenu width="200" />
-								</ScrollPane>
-								<PushButton label="Button 2 longer" toggle="false" />
-								<PushButton label="Button 3 with a really long label" toggle="true" resizeToContent="true" width="200" />
-							</TabNavigator>
 						</TabNavigator>
 						
 						<VBox width="100%" height="100%"  >
 							<CheckBox label="Button 1" selected="true" indeterminate="true" />
 							<CheckBox label="Button 1" selected="false" indeterminate="true" />
 							<CheckBox label="Button 1" selected="true" width="100%" />
-							<NumericStepper width="100%" />
+							<NumericStepper width="100%" min="-10" max="10" />
+							<ProgressBar width="100%" progress="0.4" indeterminate="true" />
 						</VBox>
 						
 					</HBox>
@@ -141,10 +134,17 @@ package
 			dropDownMenu.dataProvider = dp.children;
 			menuBar.dataProvider = dp.children;
 			
+			tabNavigator.addEventListener(TabNavigatorEvent.CLOSE_TAB, closeTabHandler);
+			
 			stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandler );
 			stageResizeHandler(null);
 			
 			validateNow();
+		}
+		
+		private function closeTabHandler( event:TabNavigatorEvent ):void
+		{
+			tabNavigator.removeChildAt(event.tabIndex);
 		}
 		
 		private function keyDownHandler( event:KeyboardEvent ):void
@@ -193,6 +193,7 @@ package
 			if ( event && event.target != stage ) return;
 			width = stage.stageWidth;
 			height = stage.stageHeight;
+			validateNow();
 		}
 	}
 }

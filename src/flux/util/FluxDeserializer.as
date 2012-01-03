@@ -148,6 +148,7 @@ package flux.util
 		NumericStepper;
 		MenuBar;
 		Panel;
+		ProgressBar;
 		ScrollPane;
 		TabNavigator;
 		Tree;
