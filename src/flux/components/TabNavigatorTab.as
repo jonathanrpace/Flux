@@ -24,20 +24,78 @@
 
 package flux.components 
 {
+	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.text.TextFieldAutoSize;
 	import flux.skins.TabNavigatorTabSkin;
+	import flux.skins.TabNavigatorTabCloseBtnSkin;
 	
 	public class TabNavigatorTab extends PushButton
 	{
+		// Properties
+		private var _showCloseBtn	:Boolean = true;
+		
+		// Child elements
+		private var closeBtn		:PushButton;
+		
 		public function TabNavigatorTab() 
 		{
 			super( TabNavigatorTabSkin );
 		}
 		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
+		
 		override protected function init():void
 		{
 			super.init();
 			_resizeToContent = true;
+			
+			closeBtn = new PushButton( TabNavigatorTabCloseBtnSkin );
+			closeBtn.addEventListener(MouseEvent.CLICK, clickCloseHandler);
+			addChild(closeBtn);
+		}
+		
+		override protected function validate():void
+		{
+			super.validate();
+			
+			if ( closeBtn.visible )
+			{
+				closeBtn.x = labelField.x + labelField.width + 0;
+				closeBtn.y = (_height - closeBtn.height) >> 1;
+				_width = closeBtn.x + closeBtn.width + 4;
+			}
+			
+			skin.width = _width;
+			skin.height = _height;
+		}
+		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
+		
+		private function clickCloseHandler( event:MouseEvent ):void
+		{
+			dispatchEvent( new Event( Event.CLOSE, true, true ) );
+		}
+		
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
+		
+		public function set showCloseButton( value:Boolean ):void
+		{
+			if ( closeBtn.visible == value ) return;
+			closeBtn.visible = value;
+			invalidate();
+		}
+		
+		public function get showCloseButton():Boolean
+		{
+			return closeBtn.visible;
 		}
 	}
 }

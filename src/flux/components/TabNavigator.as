@@ -25,13 +25,16 @@
 package flux.components 
 {
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
 	import flux.events.PropertyChangeEvent;
+	import flux.events.TabNavigatorEvent;
 	import flux.layouts.HorizontalLayout;
 	import flux.layouts.LayoutAlign;
 	import flux.skins.TabNavigatorSkin;
 	
+	[Event( type="flux.events.TabNavigatorEvent", name="closeTab" )]
 	public class TabNavigator extends ViewStack 
 	{
 		// Child elements
@@ -42,6 +45,10 @@ package flux.components
 		{
 			
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{
@@ -61,7 +68,36 @@ package flux.components
 			addRawChild(tabBar);
 			
 			tabBar.addEventListener( MouseEvent.MOUSE_DOWN, mouseDownTabHandler );
+			tabBar.addEventListener( Event.CLOSE, closeTabHandler );
 		}
+		
+		override protected function validate():void
+		{
+			super.validate();
+			
+			var layoutArea:Rectangle = getChildrenLayoutArea();
+			
+			background.width = _width;
+			background.y = (tabBar.height-1);
+			background.height = _height - (tabBar.height-1);
+			tabBar.width = _width;
+			tabBar.validateNow();
+			
+			for ( var i:int = 0; i < tabBar.numChildren; i++ )
+			{
+				var tab:TabNavigatorTab = TabNavigatorTab( tabBar.getChildAt(i) );
+				tab.selected = i == _visibleIndex;
+			}
+		}
+		
+		override protected function getChildrenLayoutArea():Rectangle
+		{
+			return new Rectangle( _paddingLeft, _paddingTop + (tabBar.height-1), _width - (_paddingRight+_paddingLeft), _height - ((_paddingBottom+_paddingTop) + (tabBar.height-1)) );
+		}
+		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
 		
 		override protected function onChildrenChanged( child:UIComponent, index:int, added:Boolean ):void
 		{
@@ -96,29 +132,6 @@ package flux.components
 			tabBar.invalidate();
 		}
 		
-		override protected function validate():void
-		{
-			super.validate();
-			
-			var layoutArea:Rectangle = getChildrenLayoutArea();
-			
-			background.width = _width;
-			background.y = (tabBar.height-1);
-			background.height = _height - (tabBar.height-1);
-			tabBar.width = _width;
-			
-			for ( var i:int = 0; i < tabBar.numChildren; i++ )
-			{
-				var tab:TabNavigatorTab = TabNavigatorTab( tabBar.getChildAt(i) );
-				tab.selected = i == _visibleIndex;
-			}
-		}
-		
-		override protected function getChildrenLayoutArea():Rectangle
-		{
-			return new Rectangle( _paddingLeft, _paddingTop + (tabBar.height-1), _width - (_paddingRight+_paddingLeft), _height - ((_paddingBottom+_paddingTop) + (tabBar.height-1)) );
-		}
-		
 		private function mouseDownTabHandler( event:MouseEvent ):void
 		{
 			var tab:TabNavigatorTab = event.target as TabNavigatorTab;
@@ -126,6 +139,14 @@ package flux.components
 			
 			var index:int = tabBar.getChildIndex(tab);
 			visibleIndex = index;
+		}
+		
+		private function closeTabHandler( event:Event ):void
+		{
+			var tab:TabNavigatorTab = TabNavigatorTab(event.target);
+			event.stopImmediatePropagation();
+			var index:int = tabBar.getChildIndex(tab);
+			dispatchEvent( new TabNavigatorEvent( TabNavigatorEvent.CLOSE_TAB, index, true ) );
 		}
 	}
 }
