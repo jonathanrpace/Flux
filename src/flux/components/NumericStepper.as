@@ -1,6 +1,8 @@
 /**
  * NumericStepper.as
  * 
+ * Wraps a NumberInputField and provides up/down buttons for changing the value with the mouse.
+ * 
  * Copyright (c) 2011 Jonathan Pace
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,13 +27,8 @@
 package flux.components 
 {
 	import flash.events.Event;
-	import flash.events.FocusEvent;
-	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
-	import flash.events.TextEvent;
 	import flash.events.TimerEvent;
-	import flash.text.TextField;
-	import flash.ui.Keyboard;
 	import flash.utils.Timer;
 	import flux.skins.NumericStepperDownBtnSkin;
 	import flux.skins.NumericStepperUpBtnSkin;
@@ -41,17 +38,13 @@ package flux.components
 		private static const DELAY_TIME		:int = 500;
 		private static const REPEAT_TIME	:int = 100;
 		
+		// Properties
+		private var _stepSize			:Number = 1;
+		
 		// Child elements
-		private var inputField			:InputField;
+		private var inputField			:NumberInputField;
 		private var upBtn				:PushButton;
 		private var downBtn				:PushButton;
-		
-		// Properties
-		private var _value				:Number;
-		private var _stepSize			:Number = 1;
-		private var _min				:Number = -Number.MAX_VALUE;
-		private var _max				:Number = Number.MAX_VALUE;
-		private var _numDecimalPlaces	:uint = 2;
 		
 		// Internal vars
 		private var delayTimer			:Timer;
@@ -63,13 +56,13 @@ package flux.components
 			
 		}
 		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
+		
 		override protected function init():void
 		{
-			inputField = new InputField();
-			inputField.restrict = "0-9."
-			inputField.addEventListener(TextEvent.TEXT_INPUT, textInputHandler);
-			inputField.addEventListener(FocusEvent.FOCUS_OUT, focusOutInputFieldHandler);
-			inputField.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
+			inputField = new NumberInputField();
 			addChild(inputField);
 			
 			_width = inputField.width;
@@ -87,14 +80,13 @@ package flux.components
 			delayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, delayCompleteHandler);
 			repeatTimer = new Timer( REPEAT_TIME, 0 );
 			repeatTimer.addEventListener(TimerEvent.TIMER, repeatHandler);
-			
-			value = 0;
 		}
 		
 		override protected function validate():void
 		{
 			inputField.width = _width - upBtn.width;
 			inputField.height = _height;
+			inputField.validateNow();
 			
 			upBtn.height = _height >> 1;
 			upBtn.x = inputField.width;
@@ -107,35 +99,7 @@ package flux.components
 		////////////////////////////////////////////////
 		// Event Handlers
 		////////////////////////////////////////////////
-		
-		/**
-		 * Performs validation on input text.
-		 * The field is already restricted to 0-9 and . characters, so we only
-		 * need to dissallow a second '.' character.
-		 */
-		private function textInputHandler( event:TextEvent ):void
-		{
-			var textField:TextField = TextField(event.target);
-			if ( event.text == "." && textField.text.indexOf(".") != -1 )
-			{
-				event.preventDefault();
-			}
-		}
-		
-		private function focusOutInputFieldHandler( event:FocusEvent ):void
-		{
-			if ( inputField.text == "" ) inputField.text = "0";
-			value = Number( inputField.text );
-		}
-		
-		private function keyDownHandler( event:KeyboardEvent ):void
-		{
-			if ( event.keyCode == Keyboard.ENTER )
-			{
-				value = Number( inputField.text );
-			}
-		}
-		
+			
 		private function mouseDownButtonHandler( event:MouseEvent ):void
 		{
 			repeatDirection = event.target == upBtn ? 1 : -1;
@@ -168,59 +132,6 @@ package flux.components
 		// Getters/Setters
 		////////////////////////////////////////////////
 		
-		public function set value( v:Number ):void
-		{
-			v = v < _min ? _min : v > _max ? _max : v;
-			if ( _value == v ) return;
-			
-			_value = v;
-			
-			var str:String = String(_value);
-			
-			if ( _numDecimalPlaces > 0 && str.indexOf(".") != -1 )
-			{
-				var index:int = str.indexOf(".");
-				var wholeNumber:String = str.substring( 0, index );
-				var fraction:String = str.substr( index, _numDecimalPlaces+1 );
-				str = wholeNumber + fraction;
-			}
-			else
-			{
-				str = String(int(_value));
-			}
-			
-			inputField.text = str;
-			
-			dispatchEvent( new Event( Event.CHANGE ) );
-		}
-		
-		public function get value():Number
-		{
-			return _value;
-		}
-		
-		public function set min( v:Number ):void
-		{
-			_min = v;
-			value = _value;
-		}
-		
-		public function get min():Number
-		{
-			return _min;
-		}
-		
-		public function set max( v:Number ):void
-		{
-			_max = v;
-			value = _value;
-		}
-		
-		public function get max():Number
-		{
-			return _max;
-		}
-		
 		public function set stepSize( v:Number ):void
 		{
 			_stepSize = v;
@@ -231,15 +142,45 @@ package flux.components
 			return _stepSize;
 		}
 		
+		public function set value( v:Number ):void
+		{
+			inputField.value = v;
+			dispatchEvent( new Event( Event.CHANGE ) );
+		}
+		
+		public function get value():Number
+		{
+			return inputField.value;
+		}
+		
+		public function set min( v:Number ):void
+		{
+			inputField.min = v;
+		}
+		
+		public function get min():Number
+		{
+			return inputField.min
+		}
+		
+		public function set max( v:Number ):void
+		{
+			inputField.max = v;
+		}
+		
+		public function get max():Number
+		{
+			return inputField.max;
+		}
+		
 		public function set numDecimalPlaces( v:uint ):void
 		{
-			_numDecimalPlaces = v;
-			value = _value;
+			inputField.numDecimalPlaces = v;
 		}
 		
 		public function get numDecimalPlaces():uint
 		{
-			return _numDecimalPlaces;
+			return inputField.numDecimalPlaces;
 		}
 	}
 }
