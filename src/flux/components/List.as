@@ -25,9 +25,10 @@
 package flux.components 
 {
 	import flash.display.DisplayObject;
-	import flash.display.InteractiveObject;
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 	import flux.data.ArrayCollection;
@@ -37,15 +38,11 @@ package flux.components
 	import flux.events.ArrayCollectionEvent;
 	import flux.events.SelectEvent;
 	import flux.layouts.VerticalLayout;
+	import flux.skins.ListDropIndicatorSkin;
 	
 	public class List extends Canvas 
 	{
-		// Child elements
-		protected var vScrollBar				:ScrollBar;
-		protected var visibleItemRenderers		:Vector.<IItemRenderer>
-		protected var itemRendererPool			:Vector.<IItemRenderer>
-		
-		// Settable properties
+		// Properties
 		protected var _dataProvider				:ArrayCollection;
 		protected var _selectedItems			:Array;
 		protected var _allowMultipleSelection	:Boolean = false;
@@ -55,16 +52,30 @@ package flux.components
 		protected var _itemRendererClass		:Class;
 		protected var _clickSelect				:Boolean = false;
 		
+		// Child elements
+		protected var vScrollBar				:ScrollBar;
+		protected var visibleItemRenderers		:Vector.<IItemRenderer>;
+		protected var itemRendererPool			:Vector.<IItemRenderer>;
+		protected var dropIndicator				:Sprite;
+		
 		// Internal vars
 		protected var focusedItem				:Object
 		protected var flattenedData				:Array;
 		protected var visibleData				:Array;
 		protected var _itemRendererHeight		:int;
+		private var mouseDownDragStart			:Point;
+		private var dragOffset					:Point;
+		private var draggedItem					:Object;
+		private var draggedItemRenderer			:DisplayObject;
 		
 		public function List() 
 		{
 			
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{
@@ -89,46 +100,14 @@ package flux.components
 			vScrollBar.pageScrollSpeed = _itemRendererHeight * 4;
 			addRawChild(vScrollBar);
 			
+			dropIndicator = new ListDropIndicatorSkin();
+			addRawChild(dropIndicator);
+			dropIndicator.visible = false;
+			
 			_clickSelect = true;
 			clickSelect = false;
+			content.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownContentHandler);
 			addEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelHandler);
-		}
-		
-		public function set dataProvider( value:ArrayCollection ):void
-		{
-			if ( _dataProvider )
-			{
-				_dataProvider.removeEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
-			}
-			_dataProvider = value;
-			if ( _dataProvider )
-			{
-				_dataProvider.addEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
-			}
-			_selectedItems = [];
-			invalidate();
-		}
-		
-		public function get dataProvider():ArrayCollection
-		{
-			return _dataProvider;
-		}
-		
-		protected function dataProviderChangeHandler( event:ArrayCollectionEvent ):void
-		{
-			if ( event.changeKind == ArrayCollectionChangeKind.REFRESH )
-			{
-				_selectedItems = [];
-			}
-			else if ( event.changeKind == ArrayCollectionChangeKind.REMOVE )
-			{
-				var selectedIndex:int = _selectedItems.indexOf(event.item);
-				if ( selectedIndex != -1 )
-				{
-					_selectedItems.splice(selectedIndex, 1);
-				}
-			}
-			invalidate();
 		}
 		
 		override protected function validate():void
@@ -269,35 +248,26 @@ package flux.components
 			endIndex = endIndex > flattenedData.length ? flattenedData.length : endIndex;
 			visibleData = flattenedData.slice( startIndex, endIndex );
 		}
-				
-		public function set selectedItems( value:Array ):void
+		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
+		
+		protected function dataProviderChangeHandler( event:ArrayCollectionEvent ):void
 		{
-			_selectedItems = value.slice();
-			
-			// Clear the array of duplicates
-			var table:Dictionary = new Dictionary(true);
-			for ( var i:int = 0; i < _selectedItems.length; i++ )
+			if ( event.changeKind == ArrayCollectionChangeKind.REFRESH )
 			{
-				var item:Object = _selectedItems[i];
-				if ( table[item] )
+				_selectedItems = [];
+			}
+			else if ( event.changeKind == ArrayCollectionChangeKind.REMOVE )
+			{
+				var selectedIndex:int = _selectedItems.indexOf(event.item);
+				if ( selectedIndex != -1 )
 				{
-					_selectedItems.splice(i, 1);
-					i--;
-				}
-				else
-				{
-					table[item] = true;
+					_selectedItems.splice(selectedIndex, 1);
 				}
 			}
-			
-			dispatchEvent( new Event( Event.CHANGE ) );
-			
 			invalidate();
-		}
-		
-		public function get selectedItems():Array
-		{
-			return _selectedItems.slice();
 		}
 		
 		private function mouseSelectContentHandler( event:MouseEvent ):void
@@ -382,7 +352,162 @@ package flux.components
 			invalidate();
 		}
 		
-		public function get maxScrollY():int { return vScrollBar.max; }
+		private function mouseDownContentHandler( event:MouseEvent ):void
+		{
+			mouseDownDragStart = new Point( content.mouseX, content.mouseY );
+			stage.addEventListener( MouseEvent.MOUSE_MOVE, mouseMoveDragHandler );
+			stage.addEventListener( MouseEvent.MOUSE_UP, endDragHandler );
+		}
+		
+		private function mouseMoveDragHandler( event:MouseEvent ):void
+		{
+			if ( draggedItem == null )
+			{
+				var dis:int = Math.abs(content.mouseX - mouseDownDragStart.x) + Math.abs(content.mouseY - mouseDownDragStart.y);
+				if ( dis > 3 )
+				{
+					for ( var i:int = 0; i < content.numChildren; i++ )
+					{
+						var itemRenderer:DisplayObject = content.getChildAt(i);
+						if ( itemRenderer.hitTestPoint( stage.mouseX, stage.mouseY ) )
+						{
+							draggedItem = IItemRenderer(itemRenderer).data;
+							dropIndicator.visible = true;
+							
+							draggedItemRenderer = new itemRendererClass();
+							IItemRenderer(draggedItemRenderer).list = this;
+							IItemRenderer(draggedItemRenderer).data = draggedItem;
+							IItemRenderer(draggedItemRenderer).selected = IItemRenderer(itemRenderer).selected;
+							draggedItemRenderer.width = itemRenderer.width;
+							draggedItemRenderer.height = itemRenderer.height;
+							draggedItemRenderer.alpha = 0.5;
+							IItemRenderer(draggedItemRenderer).validateNow();
+							
+							dragOffset = new Point( itemRenderer.mouseX, itemRenderer.mouseY );
+							
+							stage.addChild( draggedItemRenderer );
+							draggedItemRenderer.x = stage.mouseX - dragOffset.x;
+							draggedItemRenderer.y = stage.mouseY - dragOffset.y;
+							
+							break;
+						}
+					}
+				}
+			}
+			
+			if ( draggedItem != null )
+			{
+				draggedItemRenderer.x = stage.mouseX - dragOffset.x;
+				draggedItemRenderer.y = stage.mouseY - dragOffset.y;
+				
+				// Calculate drop position
+				for ( i = 0; i < content.numChildren; i++ )
+				{
+					itemRenderer = content.getChildAt(i);
+					if ( itemRenderer.hitTestPoint( stage.mouseX, stage.mouseY ) )
+					{
+						// Before this item
+						if ( itemRenderer.mouseY < (itemRenderer.height >> 1) )
+						{
+							updateDropIndicator( IItemRenderer(itemRenderer), false );
+						}
+						// After this item
+						else
+						{
+							updateDropIndicator( IItemRenderer(itemRenderer), true );
+						}
+					}
+				}
+			}
+		}
+		
+		protected function updateDropIndicator( itemRenderer:IItemRenderer, after:Boolean ):void
+		{
+			if ( after )
+			{
+				dropIndicator.x = itemRenderer.x;
+				dropIndicator.y = itemRenderer.y + itemRenderer.height;
+			}
+			else
+			{
+				dropIndicator.x = itemRenderer.x;
+				dropIndicator.y = itemRenderer.y;
+			}
+			
+			dropIndicator.width = itemRenderer.width;
+		}
+		
+		private function endDragHandler( event:MouseEvent ):void
+		{
+			if ( draggedItemRenderer )
+			{
+				stage.removeChild( draggedItemRenderer );
+				draggedItem = null;
+				draggedItemRenderer = null;
+			}
+			dropIndicator.visible = false;
+			stage.removeEventListener( MouseEvent.MOUSE_MOVE, mouseMoveDragHandler );
+			stage.removeEventListener( MouseEvent.MOUSE_UP, endDragHandler );
+		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
+		
+		public function set dataProvider( value:ArrayCollection ):void
+		{
+			if ( _dataProvider )
+			{
+				_dataProvider.removeEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
+			}
+			_dataProvider = value;
+			if ( _dataProvider )
+			{
+				_dataProvider.addEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
+			}
+			_selectedItems = [];
+			invalidate();
+		}
+		
+		public function get dataProvider():ArrayCollection
+		{
+			return _dataProvider;
+		}
+		
+		public function set selectedItems( value:Array ):void
+		{
+			_selectedItems = value.slice();
+			
+			// Clear the array of duplicates
+			var table:Dictionary = new Dictionary(true);
+			for ( var i:int = 0; i < _selectedItems.length; i++ )
+			{
+				var item:Object = _selectedItems[i];
+				if ( table[item] )
+				{
+					_selectedItems.splice(i, 1);
+					i--;
+				}
+				else
+				{
+					table[item] = true;
+				}
+			}
+			
+			dispatchEvent( new Event( Event.CHANGE ) );
+			
+			invalidate();
+		}
+		
+		public function get selectedItems():Array
+		{
+			return _selectedItems.slice();
+		}
+		
+		public function get maxScrollY():int 
+		{ 
+			return vScrollBar.max; 
+		}
 		
 		public function set scrollY( value:int ):void
 		{
@@ -391,7 +516,10 @@ package flux.components
 			vScrollBar.addEventListener( Event.CHANGE, onChangeVScrollBar );
 			invalidate();
 		}
-		public function get scrollY():int { return vScrollBar.value; }
+		public function get scrollY():int 
+		{ 
+			return vScrollBar.value; 
+		}
 		
 		public function get itemRendererHeight():int
 		{

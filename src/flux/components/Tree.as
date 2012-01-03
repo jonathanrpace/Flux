@@ -28,8 +28,10 @@ package flux.components
 	import flash.utils.Dictionary;
 	import flux.data.ArrayCollection;
 	import flux.events.ArrayCollectionEvent;
+	
 	public class Tree extends List 
 	{
+		// Internal vars
 		private var isOpenedTable	:Dictionary;
 		private var depthTable		:Dictionary;
 		
@@ -38,15 +40,9 @@ package flux.components
 			
 		}
 		
-		override protected function init():void
-		{
-			super.init();
-			isOpenedTable = new Dictionary(true);
-			depthTable = new Dictionary(true);
-			_itemRendererClass = TreeItemRenderer;
-			
-			content.addEventListener(Event.CHANGE, itemRendererChangeHandler);
-		}
+		////////////////////////////////////////////////
+		// Public methods
+		////////////////////////////////////////////////
 		
 		public function setItemOpened( item:Object, opened:Boolean ):void
 		{
@@ -58,6 +54,20 @@ package flux.components
 		public function getItemOpened( item:Object ):Boolean
 		{
 			return isOpenedTable[item];
+		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
+		
+		override protected function init():void
+		{
+			super.init();
+			isOpenedTable = new Dictionary(true);
+			depthTable = new Dictionary(true);
+			_itemRendererClass = TreeItemRenderer;
+			
+			content.addEventListener(Event.CHANGE, itemRendererChangeHandler);
 		}
 		
 		override protected function calculateFlattenedData():void
@@ -94,6 +104,26 @@ package flux.components
 				itemRenderer.depth = depthTable[itemRenderer.data];
 			}
 		}
+		
+		override protected function updateDropIndicator( itemRenderer:IItemRenderer, after:Boolean ):void
+		{
+			var treeItemRenderer:TreeItemRenderer = TreeItemRenderer(itemRenderer);
+			if ( after )
+			{
+				dropIndicator.y = itemRenderer.y + itemRenderer.height;
+			}
+			else
+			{
+				dropIndicator.y = itemRenderer.y;
+			}
+			
+			dropIndicator.x = treeItemRenderer.depth * 16;
+			dropIndicator.width = itemRenderer.width - dropIndicator.x;
+		}
+		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
 		
 		private function itemRendererChangeHandler( event:Event ):void
 		{
