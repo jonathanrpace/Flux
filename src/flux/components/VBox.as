@@ -34,11 +34,19 @@ package flux.components
 			
 		}
 		
+		////////////////////////////////////////////////
+		// Properted methods
+		////////////////////////////////////////////////
+				
 		override protected function init():void
 		{
 			super.init();
 			_layout = new VerticalLayout();
 		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
 		
 		public function set spacing( value:int ):void
 		{
@@ -52,12 +60,12 @@ package flux.components
 		
 		public function set align( value:String ):void
 		{
-			VerticalLayout(_layout).align = value;
+			VerticalLayout(_layout).verticalAlign = value;
 		}
 		
 		public function get align():String
 		{
-			return VerticalLayout(_layout).align;
+			return VerticalLayout(_layout).verticalAlign;
 		}
 	}
 

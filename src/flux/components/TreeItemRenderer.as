@@ -31,17 +31,21 @@ package flux.components
 	
 	public class TreeItemRenderer extends ListItemRenderer implements ITreeItemRenderer
 	{
-		// Child elements
-		protected var openIcon	:MovieClip;
-		
-		// State and data
+		// Properties
 		protected var _depth		:int = 0;
 		protected var _opened		:Boolean = false;
+		
+		// Child elements
+		protected var openIcon	:MovieClip;
 		
 		public function TreeItemRenderer() 
 		{
 			
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{
@@ -68,6 +72,20 @@ package flux.components
 			labelField.width = _width - labelField.x;
 		}
 		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
+		
+		private function mouseDownOpenIconHandler( event:MouseEvent ):void
+		{
+			opened = !_opened;
+			dispatchEvent( new Event( Event.CHANGE, true, false ) );
+		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
+		
 		public function set opened( value:Boolean ):void
 		{
 			if ( value == _opened ) return;
@@ -91,12 +109,6 @@ package flux.components
 		public function get depth():int
 		{
 			return _depth;
-		}
-		
-		private function mouseDownOpenIconHandler( event:MouseEvent ):void
-		{
-			opened = !_opened;
-			dispatchEvent( new Event( Event.CHANGE, true, false ) );
 		}
 	}
 }

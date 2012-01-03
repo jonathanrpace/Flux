@@ -33,9 +33,6 @@ package flux.components
 	
 	public class Container extends UIComponent 
 	{
-		// Child elements
-		protected var content			:Sprite;
-		
 		// Properties
 		protected var _paddingLeft		:int = 0;
 		protected var _paddingRight		:int = 0;
@@ -43,24 +40,17 @@ package flux.components
 		protected var _paddingBottom	:int = 0;
 		protected var _layout			:ILayout;
 		
+		// Child elements
+		protected var content			:Sprite;
+		
 		public function Container() 
 		{
 			
 		}
 		
-		override protected function init():void
-		{
-			_layout = new AbsoluteLayout();
-			
-			_width = 100;
-			_height = 100;
-			
-			content = new Sprite();
-			content.scrollRect = new Rectangle();
-			addRawChild(content);
-			
-			content.addEventListener( Event.RESIZE, resizeHandler );
-		}
+		////////////////////////////////////////////////
+		// Public methods
+		////////////////////////////////////////////////
 		
 		public override function addChildAt(child:DisplayObject, index:int):DisplayObject
 		{
@@ -95,8 +85,6 @@ package flux.components
 			return child;
 		}
 		
-		protected function onChildrenChanged( child:UIComponent, index:int, added:Boolean ):void {}
-		
 		public override function getChildAt( index:int ):DisplayObject
 		{
 			return content.getChildAt(index);
@@ -116,6 +104,24 @@ package flux.components
 		{
 			super.addChild(child);
 			return child;
+		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
+		
+		override protected function init():void
+		{
+			_layout = new AbsoluteLayout();
+			
+			_width = 100;
+			_height = 100;
+			
+			content = new Sprite();
+			content.scrollRect = new Rectangle();
+			addRawChild(content);
+			
+			content.addEventListener( Event.RESIZE, resizeHandler );
 		}
 		
 		override protected function validate():void
@@ -144,10 +150,42 @@ package flux.components
 			content.scrollRect = scrollRect;
 		}
 		
+		/**
+		 * 'Virtual' method. Can be overriden to provide information when children change.
+		 * @param	child The child that has been added/removed from the child list.
+		 * @param	index The index of the child.
+		 * @param	added If true, the child has just been added, otherwise it's just been removed.
+		 */
+		protected function onChildrenChanged( child:UIComponent, index:int, added:Boolean ):void
+		{
+			// Intentionally blank
+		}
+		
+		/**
+		 * By default returns a rectangle the same size as the component, minus padding.
+		 * Override this for containers that need something more custom, and needs to take into account other chrome elements.
+		 * @return
+		 */
 		protected function getChildrenLayoutArea():Rectangle
 		{
 			return new Rectangle( _paddingLeft, _paddingTop, _width - (_paddingRight+_paddingLeft), _height - (_paddingBottom+_paddingTop) );
 		}
+		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
+		
+		private function resizeHandler( event:Event ):void
+		{
+			if ( event.target.parent == content )
+			{
+				invalidate();
+			}
+		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
 		
 		public function set padding( value:int ):void
 		{
@@ -215,14 +253,6 @@ package flux.components
 		public function get layout():ILayout
 		{
 			return _layout;
-		}
-		
-		private function resizeHandler( event:Event ):void
-		{
-			if ( event.target.parent == content )
-			{
-				invalidate();
-			}
 		}
 	}
 }

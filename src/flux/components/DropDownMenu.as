@@ -39,23 +39,27 @@ package flux.components
 	
 	public class DropDownMenu extends UIComponent 
 	{
-		// Child elements
-		protected var skin				:MovieClip;
-		protected var labelField		:TextField;
-		protected var list				:List;
-		
 		// Settable properties
 		protected var _maxVisibleItems	:int = 8;
 		protected var _dataProvider		:ArrayCollection;
 		protected var _selectedItem		:Object;
 		
+		// Child elements
+		protected var skin				:MovieClip;
+		protected var labelField		:TextField;
+		protected var list				:List;
+		
 		// Internal vars
-		protected var buttonWidth	:int;
+		protected var buttonWidth		:int;
 		
 		public function DropDownMenu() 
 		{
 			
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{
@@ -133,6 +137,59 @@ package flux.components
 			}
 		}
 		
+		protected function openList():void
+		{
+			if ( list.stage ) return;
+			stage.addChild(list);
+			invalidate();
+		}
+		
+		protected function closeList():void
+		{
+			if ( list.stage == null ) return;
+			stage.removeChild(list);
+			list.selectedItems = [];
+			stage.removeEventListener( MouseEvent.MOUSE_DOWN, mouseDownStageHandler );
+		}
+		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
+		
+		protected function listSelectHandler( event:SelectEvent ):void
+		{
+			_selectedItem = event.selectedItem;
+			dispatchEvent( new SelectEvent( SelectEvent.SELECT, selectedItem ) );
+			updateLabel();
+			closeList();
+		}
+		
+		protected function rollOverSkinHandler( event:MouseEvent ):void
+		{
+			skin.gotoAndPlay("Over");
+		}
+		
+		protected function rollOutSkinHandler( event:MouseEvent ):void
+		{
+			skin.gotoAndPlay("Out");
+		}
+		
+		protected function mouseDownSkinHandler( event:MouseEvent ):void
+		{
+			skin.gotoAndPlay("Down");
+			openList();
+		}
+		
+		protected function mouseDownStageHandler( event:MouseEvent ):void
+		{
+			if ( list.hitTestPoint( stage.mouseX, stage.mouseY ) ) return;
+			closeList();
+		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
+		
 		public function set selectedItem( value:Object ):void
 		{
 			if ( value == _selectedItem ) return;
@@ -169,51 +226,6 @@ package flux.components
 		public function get maxVisibleItems():int
 		{
 			return _maxVisibleItems;
-		}
-		
-		protected function openList():void
-		{
-			if ( list.stage ) return;
-			stage.addChild(list);
-			invalidate();
-		}
-		
-		protected function closeList():void
-		{
-			if ( list.stage == null ) return;
-			stage.removeChild(list);
-			list.selectedItems = [];
-			stage.removeEventListener( MouseEvent.MOUSE_DOWN, mouseDownStageHandler );
-		}
-		
-		protected function listSelectHandler( event:SelectEvent ):void
-		{
-			_selectedItem = event.selectedItem;
-			dispatchEvent( new SelectEvent( SelectEvent.SELECT, selectedItem ) );
-			updateLabel();
-			closeList();
-		}
-		
-		protected function rollOverSkinHandler( event:MouseEvent ):void
-		{
-			skin.gotoAndPlay("Over");
-		}
-		
-		protected function rollOutSkinHandler( event:MouseEvent ):void
-		{
-			skin.gotoAndPlay("Out");
-		}
-		
-		protected function mouseDownSkinHandler( event:MouseEvent ):void
-		{
-			skin.gotoAndPlay("Down");
-			openList();
-		}
-		
-		protected function mouseDownStageHandler( event:MouseEvent ):void
-		{
-			if ( list.hitTestPoint( stage.mouseX, stage.mouseY ) ) return;
-			closeList();
 		}
 	}
 

@@ -39,14 +39,14 @@ package flux.components
 	[Event( type="flux.events.SelectEvent", name="select" )]
 	public class MenuBar extends UIComponent 
 	{
+		// Properties
+		private var _dataProvider	:ArrayCollection;
+		private var _dataDescriptor	:IDataDescriptor;
+		
 		// Child elements
 		private var background		:Sprite;
 		private var buttonBar		:Container;
 		private var list			:List;
-		
-		// Properties
-		private var _dataProvider	:ArrayCollection;
-		private var _dataDescriptor	:IDataDescriptor;
 		
 		// Internal vars
 		private var selectedData	:Object;
@@ -55,6 +55,10 @@ package flux.components
 		{
 			
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{
@@ -76,26 +80,6 @@ package flux.components
 			list.dataDescriptor = _dataDescriptor;
 			
 			buttonBar.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownButtonBarHandler);
-		}
-		
-		public function set dataProvider( value:ArrayCollection ):void
-		{
-			if ( _dataProvider )
-			{
-				_dataProvider.removeEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
-			}
-			_dataProvider = value;
-			if ( _dataProvider )
-			{
-				_dataProvider.addEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
-			}
-			closeList();
-			invalidate();
-		}
-		
-		public function get dataProvider():ArrayCollection
-		{
-			return _dataProvider;
 		}
 		
 		override protected function validate():void
@@ -134,6 +118,7 @@ package flux.components
 			
 			buttonBar.width = _width;
 			buttonBar.height = _height;
+			buttonBar.validateNow();
 		}
 		
 		protected function openList():void
@@ -180,24 +165,11 @@ package flux.components
 			stage.removeEventListener(MouseEvent.MOUSE_DOWN, mouseDownStageHandler);
 		}
 		
-		private function dataProviderChangeHandler( event:ArrayCollectionEvent ):void
-		{
-			invalidate();
-		}
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
 		
-		public function set dataDescriptor( value:IDataDescriptor ):void
-		{
-			if ( value == _dataDescriptor ) return;
-			_dataDescriptor = value;
-			list.dataDescriptor = _dataDescriptor;
-		}
-		
-		public function get dataDescriptor():IDataDescriptor
-		{
-			return _dataDescriptor;
-		}
-		
-		protected function mouseDownButtonBarHandler( event:MouseEvent ):void
+		private function mouseDownButtonBarHandler( event:MouseEvent ):void
 		{
 			var btn:PushButton = event.target as PushButton;
 			if ( !btn ) return;
@@ -214,7 +186,7 @@ package flux.components
 			}
 		}
 		
-		protected function mouseOverButtonBarHandler( event:MouseEvent ):void
+		private function mouseOverButtonBarHandler( event:MouseEvent ):void
 		{
 			var btn:PushButton = event.target as PushButton;
 			if ( !btn ) return;
@@ -224,7 +196,7 @@ package flux.components
 			openList();
 		}
 		
-		protected function mouseUpListHandler( event:MouseEvent ):void
+		private function mouseUpListHandler( event:MouseEvent ):void
 		{
 			var itemRenderer:IItemRenderer = event.target as IItemRenderer;
 			if ( itemRenderer == null ) return;
@@ -234,11 +206,52 @@ package flux.components
 			closeList();
 		}
 		
-		protected function mouseDownStageHandler( event:MouseEvent ):void
+		private function mouseDownStageHandler( event:MouseEvent ):void
 		{
 			if ( list.hitTestPoint( event.stageX, event.stageY ) ) return;
 			if ( buttonBar.hitTestPoint( event.stageX, event.stageY ) ) return;
 			closeList();
+		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
+		
+		public function set dataProvider( value:ArrayCollection ):void
+		{
+			if ( _dataProvider )
+			{
+				_dataProvider.removeEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
+			}
+			_dataProvider = value;
+			if ( _dataProvider )
+			{
+				_dataProvider.addEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
+			}
+			closeList();
+			invalidate();
+		}
+		
+		public function get dataProvider():ArrayCollection
+		{
+			return _dataProvider;
+		}
+		
+		private function dataProviderChangeHandler( event:ArrayCollectionEvent ):void
+		{
+			invalidate();
+		}
+		
+		public function set dataDescriptor( value:IDataDescriptor ):void
+		{
+			if ( value == _dataDescriptor ) return;
+			_dataDescriptor = value;
+			list.dataDescriptor = _dataDescriptor;
+		}
+		
+		public function get dataDescriptor():IDataDescriptor
+		{
+			return _dataDescriptor;
 		}
 	}
 }

@@ -32,13 +32,13 @@ package flux.layouts
 	
 	public class VerticalLayout implements ILayout 
 	{
-		public var spacing		:int;
-		public var align		:String;
+		public var spacing				:int;
+		public var verticalAlign		:String;
 		
-		public function VerticalLayout( spacing:int = 4, align:String = "none" ) 
+		public function VerticalLayout( spacing:int = 4, verticalAlign:String = "none", horizontalAlign:String = "none" ) 
 		{
 			this.spacing = spacing;
-			this.align = align;
+			this.verticalAlign = verticalAlign;
 		}
 		
 		public function layout(content:DisplayObjectContainer, visibleWidth:Number, visibleHeight:Number, allowProportional:Boolean = true):Rectangle 
@@ -84,7 +84,7 @@ package flux.layouts
 				var isProportionalWidth:Boolean = allowProportional && isNaN( child.percentWidth ) == false;
 				var isProportionalHeight:Boolean = allowProportional && isNaN( child.percentHeight ) == false;
 				
-				switch ( align )
+				switch ( verticalAlign )
 				{
 					case LayoutAlign.LEFT :
 						child.x = 0;
@@ -130,6 +130,26 @@ package flux.layouts
 				
 				contentSize.width = child.x + child.width > contentSize.width ? child.x + child.width : contentSize.width;
 				contentSize.height = child.y + child.height > contentSize.height ? child.x + child.height : contentSize.height;
+			}
+			
+			if ( verticalAlign != LayoutAlign.NONE )
+			{
+				var shift:int = 0;
+				switch ( verticalAlign )
+				{
+					case LayoutAlign.BOTTOM :
+						shift = visibleHeight - contentSize.height;
+						break
+					case LayoutAlign.CENTRE :
+						shift = (visibleHeight - contentSize.width) >> 1;
+						break;
+					
+					for ( i = 0; i < content.numChildren; i++ )
+					{
+						child = UIComponent(content.getChildAt(i));
+						child.y += shift;
+					}
+				}
 			}
 			
 			return contentSize;

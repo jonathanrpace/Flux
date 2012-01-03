@@ -26,7 +26,6 @@ package flux.components
 {
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
@@ -34,12 +33,17 @@ package flux.components
 	
 	public class CheckBox extends PushButton 
 	{
+		// Properties
 		protected var _indeterminate		:Boolean = false;
 		
 		public function CheckBox() 
 		{
 			super( CheckBoxSkin );
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{
@@ -53,17 +57,6 @@ package flux.components
 			labelField.autoSize = TextFieldAutoSize.LEFT;
 			
 			iconContainer.visible = false;
-		}
-		
-		public function set indeterminate( value:Boolean ):void
-		{
-			_indeterminate = value;
-			updateSkinState();
-		}
-		
-		public function get indeterminate():Boolean
-		{
-			return _indeterminate;
 		}
 		
 		override protected function validate():void
@@ -91,6 +84,10 @@ package flux.components
 				_down ? skin.gotoAndPlay("IndeterminateDown") : _over ? skin.gotoAndPlay("IndeterminateOver") : skin.gotoAndPlay("IndeterminateUp");
 			}
 		}
+		
+		////////////////////////////////////////////////
+		// Event Handlers
+		////////////////////////////////////////////////
 		
 		override protected function rollOverHandler(event:MouseEvent):void
 		{
@@ -126,6 +123,22 @@ package flux.components
 			updateSkinState();
 			
 			stage.removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
+		}
+		
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
+		
+		public function set indeterminate( value:Boolean ):void
+		{
+			_indeterminate = value;
+			updateSkinState();
+		}
+		
+		public function get indeterminate():Boolean
+		{
+			return _indeterminate;
 		}
 	}
 }

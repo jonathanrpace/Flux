@@ -25,15 +25,60 @@
 package flux.components 
 {
 	import flash.display.DisplayObject;
+	import flash.events.Event;
 	
+	[Event( type="flash.events.Event", name="change" )]
 	public class ViewStack extends Container 
 	{
+		// Properties
 		protected var _visibleIndex		:int = -1;
 		
 		public function ViewStack() 
 		{
 			
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
+		
+		override protected function validate():void
+		{
+			for ( var i:int = 0; i < content.numChildren; i++ )
+			{
+				var child:UIComponent = UIComponent(content.getChildAt(i));
+				child.visible = i == _visibleIndex;
+				child.excludeFromLayout = !child.visible;
+			}
+			
+			super.validate();
+		}
+		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
+		
+		override protected function onChildrenChanged( child:UIComponent, index:int, added:Boolean ):void
+		{
+			if ( added && content.numChildren == 1 && _visibleIndex == -1 )
+			{
+				visibleIndex = 0;
+			}
+			else if ( index <= _visibleIndex )
+			{
+				var temp:int = _visibleIndex;
+				if ( numChildren == 0 )
+				{
+					temp = -1;
+				}
+				_visibleIndex = -1;
+				visibleIndex = added ? temp + 1 : temp;
+			}
+		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
 		
 		public function set visibleIndex( value:int ):void
 		{
@@ -46,35 +91,12 @@ package flux.components
 			if ( _visibleIndex == value ) return;
 			_visibleIndex = value
 			invalidate();
-		}
-		
-		override protected function onChildrenChanged( child:UIComponent, index:int, added:Boolean ):void
-		{
-			if ( added && content.numChildren == 1 && _visibleIndex == -1 )
-			{
-				visibleIndex = 0;
-			}
-			else if ( _visibleIndex >= index )
-			{
-				added ? visibleIndex++ : visibleIndex--;
-			}
+			dispatchEvent( new Event(Event.CHANGE, true) );
 		}
 		
 		public function get visibleIndex():int
 		{
 			return _visibleIndex;
-		}
-		
-		override protected function validate():void
-		{
-			for ( var i:int = 0; i < content.numChildren; i++ )
-			{
-				var child:UIComponent = UIComponent(content.getChildAt(i));
-				child.visible = i == _visibleIndex;
-				child.excludeFromLayout = !child.visible;
-			}
-			
-			super.validate();
 		}
 	}
 }

@@ -28,11 +28,14 @@ package flux.components
 	
 	public class HBox extends Container 
 	{
-		
 		public function HBox() 
 		{
 			
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{
@@ -40,6 +43,10 @@ package flux.components
 			
 			_layout = new HorizontalLayout();
 		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
 		
 		public function set spacing( value:int ):void
 		{

@@ -30,17 +30,22 @@ package flux.components
 	
 	public class ScrollPane extends Container 
 	{
-		protected var vScrollBar		:ScrollBar;
-		protected var hScrollBar		:ScrollBar;
-		
+		// Properties
 		protected var _autoHideVScrollBar	:Boolean = true;
 		protected var _autoHideHScrollBar	:Boolean = true;
 		
+		// Child elements
+		protected var vScrollBar		:ScrollBar;
+		protected var hScrollBar		:ScrollBar;
 		
 		public function ScrollPane() 
 		{
 			
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{
@@ -117,6 +122,10 @@ package flux.components
 			content.scrollRect = scrollRect;
 		}
 		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
+		
 		private function onChangeVScrollBar( event:Event ):void
 		{
 			invalidate();
@@ -127,20 +136,39 @@ package flux.components
 			invalidate();
 		}
 		
-		public function get maxScrollX():int { return hScrollBar.max; }
-		public function get maxScrollY():int { return vScrollBar.max; }
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
+		
+		public function get maxScrollX():int
+		{ 
+			return hScrollBar.max; 
+		}
+		
+		public function get maxScrollY():int 
+		{ 
+			return vScrollBar.max;
+		}
 		
 		public function set scrollX( value:int ):void
 		{
 			hScrollBar.value = value;
 		}
-		public function get scrollX():int { return hScrollBar.value; }
+		
+		public function get scrollX():int
+		{ 
+			return hScrollBar.value;
+		}
 		
 		public function set scrollY( value:int ):void
 		{
 			vScrollBar.value = value;
 		}
-		public function get scrollY():int { return vScrollBar.value; }
+		
+		public function get scrollY():int
+		{ 
+			return vScrollBar.value;
+		}
 	}
-
 }

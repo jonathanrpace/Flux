@@ -43,6 +43,10 @@ package flux.components
 			
 		}
 		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
+		
 		override protected function init():void
 		{
 			skin = new InputFieldSkin();
@@ -73,6 +77,10 @@ package flux.components
 			skin.width = _width;
 			skin.height = _height;
 		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
 		
 		public function set restrict( value:String ):void
 		{

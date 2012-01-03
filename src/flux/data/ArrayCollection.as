@@ -47,16 +47,9 @@ package flux.data
 			dispatcher = new EventDispatcher(this);
 		}
 		
-		public function set source( value:Array ):void
-		{
-			array = value;
-			dispatcher.dispatchEvent( new ArrayCollectionEvent( ArrayCollectionEvent.CHANGE, ArrayCollectionChangeKind.REFRESH ) );
-		}
-		
-		public function get source():Array
-		{
-			return array;
-		}
+		////////////////////////////////////////////////
+		// Public methods
+		////////////////////////////////////////////////
 		
 		public function addItemAt( item:*, index:int ):void
 		{
@@ -89,6 +82,26 @@ package flux.data
 				return;
 			}
 			removeItemAt(index);
+		}
+		
+		public function push( value:* ):void
+		{
+			this[array.length] = value;
+		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
+		
+		public function set source( value:Array ):void
+		{
+			array = value;
+			dispatcher.dispatchEvent( new ArrayCollectionEvent( ArrayCollectionEvent.CHANGE, ArrayCollectionChangeKind.REFRESH ) );
+		}
+		
+		public function get source():Array
+		{
+			return array;
 		}
 		
 		override flash_proxy function getProperty(name:*):*
@@ -125,15 +138,14 @@ package flux.data
 			dispatcher.dispatchEvent( new ArrayCollectionEvent( ArrayCollectionEvent.CHANGE, changeKind, index, value ) );
 		}
 		
-		public function push( value:* ):void
-		{
-			this[array.length] = value;
-		}
-		
 		public function get length():int
 		{
 			return array.length;
 		}
+		
+		////////////////////////////////////////////////
+		// Implement IEventDispatcher
+		////////////////////////////////////////////////
 		
 		public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false):void
 		{

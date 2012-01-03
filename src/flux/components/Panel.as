@@ -1,6 +1,8 @@
 /**
  * Panel.as
  * 
+ * Container component with a title bar and control bar.
+ * 
  * Copyright (c) 2011 Jonathan Pace
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,18 +39,22 @@ package flux.components
 		// Styles
 		public static var styleTitleBarHeight	:int = 22;
 		
+		// Properties
+		private var _titleBarHeight	:int = Panel.styleTitleBarHeight;
+		
 		// Child elements
 		private var background		:Sprite;
 		private var _controlBar		:Container;
 		private var titleField		:TextField;
 		
-		// Properties
-		private var _titleBarHeight	:int = Panel.styleTitleBarHeight;
-		
 		public function Panel() 
 		{
 			
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{

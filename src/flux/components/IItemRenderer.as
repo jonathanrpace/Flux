@@ -33,5 +33,4 @@ package flux.components
 		function set selected( value:Boolean ):void
 		function get selected():Boolean
 	}
-	
 }

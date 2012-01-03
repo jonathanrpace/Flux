@@ -1,6 +1,8 @@
 /**
  * Canvas.as
  * 
+ * Adds a background to the basic Container class
+ * 
  * Copyright (c) 2011 Jonathan Pace
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,9 +29,6 @@ package flux.components
 	import flash.display.Sprite;
 	import flux.skins.CanvasSkin;
 	
-	/**
-	 * Adds a background to the basic Container class
-	 */
 	public class Canvas extends Container 
 	{
 		// Child elements

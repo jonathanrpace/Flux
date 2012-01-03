@@ -40,18 +40,18 @@ package flux.components
 		private static const DELAY_TIME		:int = 500;
 		private static const REPEAT_TIME	:int = 100;
 		
-		// Child elements
-		private var track					:Sprite;
-		private var thumb					:PushButton;
-		private var upBtn					:PushButton;
-		private var downBtn					:PushButton;
-		
 		// Properties
 		private var _value					:Number = 0;
 		private var _max					:Number = 10;
 		private var _thumbSizeRatio			:Number = 0.5;
 		private var _scrollSpeed			:Number = 1;
 		private var _pageScrollSpeed		:Number = 4;
+		
+		// Child elements
+		private var track					:Sprite;
+		private var thumb					:PushButton;
+		private var upBtn					:PushButton;
+		private var downBtn					:PushButton;
 		
 		// Internal vars
 		private var repeatSpeed				:int;
@@ -66,6 +66,10 @@ package flux.components
 		{
 			
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{
@@ -117,11 +121,79 @@ package flux.components
 			downBtn.y = track.y + track.height;
 			
 			thumb.height = track.height * _thumbSizeRatio;
+			thumb.validateNow();
 			
 			var lineRatio:Number = _value / _max;
 			lineRatio = isNaN(lineRatio) ? 0 : lineRatio;
 			thumb.y = upBtn.height + (track.height - thumb.height) * lineRatio;
 		}
+		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
+		
+		private function mouseDownBtnHandler( event:MouseEvent ):void
+		{
+			repeatSpeed = event.target == upBtn ? -_scrollSpeed : _scrollSpeed;
+			value += repeatSpeed;
+			delayTimer.start();
+			stage.addEventListener(MouseEvent.MOUSE_UP, endScrollRepeatHandler);
+		}
+		
+		private function mouseDownTrackHandler( event:MouseEvent ):void
+		{
+			repeatSpeed = mouseY <  thumb.y ? -_pageScrollSpeed : _pageScrollSpeed;
+			value += repeatSpeed;
+			delayTimer.start();
+			track.addEventListener(MouseEvent.ROLL_OUT, endScrollRepeatHandler);
+			stage.addEventListener(MouseEvent.MOUSE_UP, endScrollRepeatHandler);
+		}
+		
+		private function endScrollRepeatHandler( event:MouseEvent ):void
+		{
+			track.removeEventListener(MouseEvent.ROLL_OUT, endScrollRepeatHandler);
+			stage.removeEventListener(MouseEvent.MOUSE_UP, endScrollRepeatHandler);
+			delayTimer.stop();
+			repeatTimer.stop();
+		}
+		
+		private function mouseDownThumbHandler( event:MouseEvent ):void 
+		{
+			dragStartValue = _value;
+			dragStartRatio = (mouseY - track.y) / (track.height - thumb.height);
+			dragStartRatio = isNaN(dragStartRatio) || dragStartRatio == Infinity || dragStartRatio == -Infinity ? 0 : dragStartRatio;
+			stage.addEventListener(MouseEvent.MOUSE_UP, endThumbDragHandler);
+			stage.addEventListener( MouseEvent.MOUSE_MOVE, mouseMoveHandler );
+		}
+		
+		private function mouseMoveHandler( event:MouseEvent ):void
+		{
+			var currentDragRatio:Number = (mouseY - track.y) / (track.height - thumb.height);
+			currentDragRatio = isNaN(currentDragRatio) || currentDragRatio == Infinity || currentDragRatio == -Infinity ? 0 : currentDragRatio;
+			var ratioOffset:Number = currentDragRatio - dragStartRatio;
+			value = dragStartValue + ratioOffset * _max;
+		}
+		
+		private function endThumbDragHandler( event:MouseEvent ):void
+		{
+			stage.removeEventListener( MouseEvent.MOUSE_MOVE, mouseMoveHandler );
+			stage.removeEventListener(MouseEvent.MOUSE_UP, endScrollRepeatHandler);
+			stage.removeEventListener(MouseEvent.MOUSE_UP, endThumbDragHandler);
+		}
+		
+		private function delayCompleteHandler( event:TimerEvent ):void
+		{
+			repeatTimer.start();
+		}
+		
+		private function repeatHandler( event:TimerEvent ):void
+		{
+			value += repeatSpeed;
+		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
 		
 		public function set value( v:Number ):void
 		{
@@ -187,65 +259,6 @@ package flux.components
 		public function get pageScrollSpeed():Number
 		{
 			return _pageScrollSpeed;
-		}
-		
-		private function mouseDownBtnHandler( event:MouseEvent ):void
-		{
-			repeatSpeed = event.target == upBtn ? -_scrollSpeed : _scrollSpeed;
-			value += repeatSpeed;
-			delayTimer.start();
-			stage.addEventListener(MouseEvent.MOUSE_UP, endScrollRepeatHandler);
-		}
-		
-		private function mouseDownTrackHandler( event:MouseEvent ):void
-		{
-			repeatSpeed = mouseY <  thumb.y ? -_pageScrollSpeed : _pageScrollSpeed;
-			value += repeatSpeed;
-			delayTimer.start();
-			track.addEventListener(MouseEvent.ROLL_OUT, endScrollRepeatHandler);
-			stage.addEventListener(MouseEvent.MOUSE_UP, endScrollRepeatHandler);
-		}
-		
-		private function endScrollRepeatHandler( event:MouseEvent ):void
-		{
-			track.removeEventListener(MouseEvent.ROLL_OUT, endScrollRepeatHandler);
-			stage.removeEventListener(MouseEvent.MOUSE_UP, endScrollRepeatHandler);
-			delayTimer.stop();
-			repeatTimer.stop();
-		}
-		
-		private function mouseDownThumbHandler( event:MouseEvent ):void 
-		{
-			dragStartValue = _value;
-			dragStartRatio = (mouseY - track.y) / (track.height - thumb.height);
-			dragStartRatio = isNaN(dragStartRatio) || dragStartRatio == Infinity || dragStartRatio == -Infinity ? 0 : dragStartRatio;
-			stage.addEventListener(MouseEvent.MOUSE_UP, endThumbDragHandler);
-			stage.addEventListener( MouseEvent.MOUSE_MOVE, mouseMoveHandler );
-		}
-		
-		private function mouseMoveHandler( event:MouseEvent ):void
-		{
-			var currentDragRatio:Number = (mouseY - track.y) / (track.height - thumb.height);
-			currentDragRatio = isNaN(currentDragRatio) || currentDragRatio == Infinity || currentDragRatio == -Infinity ? 0 : currentDragRatio;
-			var ratioOffset:Number = currentDragRatio - dragStartRatio;
-			value = dragStartValue + ratioOffset * _max;
-		}
-		
-		private function endThumbDragHandler( event:MouseEvent ):void
-		{
-			stage.removeEventListener( MouseEvent.MOUSE_MOVE, mouseMoveHandler );
-			stage.removeEventListener(MouseEvent.MOUSE_UP, endScrollRepeatHandler);
-			stage.removeEventListener(MouseEvent.MOUSE_UP, endThumbDragHandler);
-		}
-		
-		private function delayCompleteHandler( event:TimerEvent ):void
-		{
-			repeatTimer.start();
-		}
-		
-		private function repeatHandler( event:TimerEvent ):void
-		{
-			value += repeatSpeed;
 		}
 	}
 

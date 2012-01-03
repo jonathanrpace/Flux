@@ -30,10 +30,8 @@ package flux.components
 	
 	public class ListItemRenderer extends PushButton implements IItemRenderer
 	{
-		// Parent
+		// Internal vars
 		protected var _list			:List;
-		
-		// State and data
 		protected var _data			:Object;
 		
 		public function ListItemRenderer(skinClass:Class = null) 
@@ -41,13 +39,19 @@ package flux.components
 			super(skinClass == null ? ListItemRendererSkin : skinClass );
 		}
 		
-		override protected function validate():void
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
+		
+		override protected function init():void
 		{
-			super.validate();
-			var textFormat:TextFormat = labelField.defaultTextFormat;
-			textFormat.align = TextFormatAlign.LEFT;
-			labelField.defaultTextFormat = textFormat;
+			super.init();
+			_labelAlign = TextFormatAlign.LEFT;
 		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
 		
 		public function set data( value:Object ):void
 		{

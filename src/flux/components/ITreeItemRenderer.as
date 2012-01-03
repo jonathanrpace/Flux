@@ -31,5 +31,4 @@ package flux.components
 		function set opened( value:Boolean ):void
 		function get opened():Boolean
 	}
-	
 }

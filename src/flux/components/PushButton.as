@@ -31,31 +31,42 @@ package flux.components
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.geom.Rectangle;
+	import flash.text.AntiAliasType;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
+	import flash.text.TextFormatAlign;
+	import flash.text.TextLineMetrics;
 	import flux.skins.PushButtonSkin;
 	
 	public class PushButton extends UIComponent 
 	{
+		// Properties
+		protected var _over				:Boolean = false;
+		protected var _down				:Boolean = false;
+		protected var _selected			:Boolean = false;
+		protected var _toggle			:Boolean = false;
+		protected var _labelAlign		:String = TextFormatAlign.CENTER;
+		
 		// Child elements
 		protected var skin				:MovieClip;
 		protected var iconContainer		:Sprite;
 		protected var labelField		:TextField;
 		
-		// State
-		protected var _over				:Boolean = false;
-		protected var _down				:Boolean = false;
-		protected var _selected			:Boolean = false;
-		protected var _toggle			:Boolean = false;
-		protected var iconIsInvalid		:Boolean = false;
+		// Internal vars
 		protected var skinClass			:Class;
+		protected var iconIsInvalid		:Boolean = false;
 		
 		public function PushButton( skinClass:Class = null ) 
 		{
 			this.skinClass = skinClass;
 			super();
 		}
+		
+		////////////////////////////////////////////////
+		// Protected methods
+		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{
@@ -83,6 +94,74 @@ package flux.components
 			addEventListener(Event.REMOVED_FROM_STAGE, removedFromStageHandler);
 		}
 		
+		override protected function validate():void
+		{
+			if ( iconIsInvalid )
+			{
+				if ( iconContainer.numChildren > 0 )
+				{
+					iconContainer.removeChildAt(0);
+				}
+				
+				if ( _icon )
+				{
+					var iconInstance:* = new _icon();
+					if ( iconInstance is DisplayObject )
+					{
+						iconContainer.addChild( DisplayObject(iconInstance) );
+					}
+					else if ( iconInstance is BitmapData )
+					{
+						iconContainer.addChild( new Bitmap(BitmapData(iconInstance)) );
+					}
+				}
+				
+				iconIsInvalid = false;
+			}
+			
+			iconContainer.x = 2;
+			iconContainer.y = (_height - iconContainer.height) >> 1;
+			
+			labelField.x = iconContainer.x + iconContainer.width + 4;
+			labelField.height = Math.min(labelField.textHeight + 4, _height);
+			labelField.y = (_height - (labelField.height)) >> 1;
+			
+			var tf:TextFormat = labelField.defaultTextFormat;
+			tf.align = _labelAlign;
+			if ( _resizeToContent )
+			{
+				tf.align = TextFormatAlign.LEFT;
+				labelField.autoSize = TextFieldAutoSize.LEFT;
+				_width = labelField.x + labelField.width + 4;
+			}
+			else
+			{
+				labelField.autoSize = TextFieldAutoSize.NONE;
+				labelField.width = _width - (labelField.x + 4);
+				
+				// Special case for CENTER alignment. Manually center textfield rather than using
+				// TextFormat.align = CENTER to avoid text aliasing.
+				if ( _labelAlign == TextFormatAlign.CENTER )
+				{
+					tf.align = TextFormatAlign.LEFT;
+					var newX:int = ((_width - labelField.x) - labelField.textWidth) >> 1;
+					labelField.x = newX > labelField.x ? newX : labelField.x;
+				}
+			}
+			
+			labelField.defaultTextFormat = tf;
+			labelField.setTextFormat(tf);
+			
+			
+			
+			skin.width = _width;
+			skin.height = _height;
+		}
+		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
+		
 		protected function removedFromStageHandler( event:Event ):void
 		{
 			stage.removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
@@ -90,6 +169,53 @@ package flux.components
 			_down = false;
 			_selected ? skin.gotoAndPlay( "SelectedUp" ) : skin.gotoAndPlay( "Up" );
 		}
+		
+		protected function rollOverHandler(event:MouseEvent):void
+		{
+			if ( event.target != this ) return;
+			_over = true;
+			
+			_selected ? 
+			(_down ? skin.gotoAndPlay( "SelectedDown" ) 	: skin.gotoAndPlay("SelectedOver")) : 
+			(_down ? skin.gotoAndPlay( "Down" ) 			: skin.gotoAndPlay("Over"))
+				
+			addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
+		}
+
+		protected function rollOutHandler(event:MouseEvent):void
+		{
+			if ( event.target != this ) return;
+			_over = false;
+			_selected ? skin.gotoAndPlay( "SelectedOut" ) : skin.gotoAndPlay( "Out" );
+			removeEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
+		}
+
+		protected function mouseDownHandler(event:MouseEvent):void
+		{
+			if ( event.target != this ) return;
+			_down = true;
+			_selected ? skin.gotoAndPlay( "SelectedDown" ) : skin.gotoAndPlay( "Down" );
+			stage.addEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
+		}
+
+		protected function mouseUpHandler(event:MouseEvent):void
+		{
+			if(_toggle && over)
+			{
+				_selected = !_selected;
+			}
+			_down = false;
+			
+			_selected ? 
+			(_over ? skin.gotoAndPlay( "SelectedOver" ) 	: skin.gotoAndPlay("SelectedUp")) : 
+			(_over ? skin.gotoAndPlay( "Over" ) 			: skin.gotoAndPlay("Up"))
+			
+			stage.removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
+		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
 		
 		override public function set label(str:String):void
 		{
@@ -130,96 +256,26 @@ package flux.components
 			return _toggle;
 		}
 		
-		override protected function validate():void
-		{
-			if ( iconIsInvalid )
-			{
-				if ( iconContainer.numChildren > 0 )
-				{
-					iconContainer.removeChildAt(0);
-				}
-				
-				if ( _icon )
-				{
-					var iconInstance:* = new _icon();
-					if ( iconInstance is DisplayObject )
-					{
-						iconContainer.addChild( DisplayObject(iconInstance) );
-					}
-					else if ( iconInstance is BitmapData )
-					{
-						iconContainer.addChild( new Bitmap(BitmapData(iconInstance)) );
-					}
-				}
-				
-				iconIsInvalid = false;
-			}
-			
-			iconContainer.x = 2;
-			iconContainer.y = (_height - iconContainer.height) >> 1;
-			
-			labelField.x = iconContainer.x + iconContainer.width + 4;
-			labelField.height = Math.min(labelField.textHeight + 4, _height);
-			labelField.y = (_height - (labelField.height)) >> 1;
-			
-			var tf:TextFormat = labelField.defaultTextFormat;
-			if ( _resizeToContent )
-			{
-				labelField.autoSize = TextFieldAutoSize.LEFT;
-				_width = labelField.x + labelField.width + 4;
-			}
-			else
-			{
-				labelField.autoSize = TextFieldAutoSize.NONE;
-				labelField.width = Math.min( _width -4, labelField.textWidth + 4 );
-				labelField.x += ((_width - (labelField.x + 2)) - labelField.width) >> 1;
-			}
-			
-			skin.width = _width;
-			skin.height = _height;
+		public function get over():Boolean
+		{ 
+			return _over;
 		}
 		
-		protected function rollOverHandler(event:MouseEvent):void
-		{
-			_over = true;
-			
-			_selected ? 
-			(_down ? skin.gotoAndPlay( "SelectedDown" ) 	: skin.gotoAndPlay("SelectedOver")) : 
-			(_down ? skin.gotoAndPlay( "Down" ) 			: skin.gotoAndPlay("Over"))
-				
-			addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
-		}
-
-		protected function rollOutHandler(event:MouseEvent):void
-		{
-			_over = false;
-			_selected ? skin.gotoAndPlay( "SelectedOut" ) : skin.gotoAndPlay( "Out" );
-			removeEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
-		}
-
-		protected function mouseDownHandler(event:MouseEvent):void
-		{
-			_down = true;
-			_selected ? skin.gotoAndPlay( "SelectedDown" ) : skin.gotoAndPlay( "Down" );
-			stage.addEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
-		}
-
-		protected function mouseUpHandler(event:MouseEvent):void
-		{
-			if(_toggle && over)
-			{
-				_selected = !_selected;
-			}
-			_down = false;
-			
-			_selected ? 
-			(_over ? skin.gotoAndPlay( "SelectedOver" ) 	: skin.gotoAndPlay("SelectedUp")) : 
-			(_over ? skin.gotoAndPlay( "Over" ) 			: skin.gotoAndPlay("Up"))
-			
-			stage.removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
+		public function get down():Boolean
+		{ 
+			return _down;
 		}
 		
-		public function get over():Boolean { return _over; }
-		public function get down():Boolean { return _down; }
+		public function set labelAlign( v:String ):void
+		{
+			if ( _labelAlign == v ) return;
+			_labelAlign = v;
+			invalidate();
+		}
+		
+		public function get labelAlign():String
+		{
+			return _labelAlign;
+		}
 	}
 }

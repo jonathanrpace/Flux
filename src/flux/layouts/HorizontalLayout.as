@@ -134,25 +134,24 @@ package flux.layouts
 				contentSize.height = child.y + child.height > contentSize.height ? child.x + child.height : contentSize.height;
 			}
 			
-			switch ( horizontalAlign )
+			if ( horizontalAlign != LayoutAlign.NONE )
 			{
-				case LayoutAlign.RIGHT :
-					var shift:int = visibleWidth - contentSize.width;
+				var shift:int = 0;
+				switch ( horizontalAlign )
+				{
+					case LayoutAlign.RIGHT :
+						shift = visibleWidth - contentSize.width;
+						break
+					case LayoutAlign.CENTRE :
+						shift = (visibleWidth - contentSize.width) >> 1;
+						break;
+						
 					for ( i = 0; i < content.numChildren; i++ )
 					{
 						child = UIComponent(content.getChildAt(i));
 						child.x += shift;
 					}
-					break
-					
-				case LayoutAlign.CENTRE :
-					shift = (visibleWidth - contentSize.width) >> 1;
-					for ( i = 0; i < content.numChildren; i++ )
-					{
-						child = UIComponent(content.getChildAt(i));
-						child.x += shift;
-					}
-					break;
+				}
 			}
 			
 			return contentSize;
