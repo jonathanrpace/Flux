@@ -100,12 +100,6 @@ package flux.components
 			return content.numChildren;
 		}
 		
-		public function addRawChild(child:DisplayObject):DisplayObject
-		{
-			super.addChild(child);
-			return child;
-		}
-		
 		////////////////////////////////////////////////
 		// Protected methods
 		////////////////////////////////////////////////
@@ -169,6 +163,12 @@ package flux.components
 		protected function getChildrenLayoutArea():Rectangle
 		{
 			return new Rectangle( _paddingLeft, _paddingTop, _width - (_paddingRight+_paddingLeft), _height - (_paddingBottom+_paddingTop) );
+		}
+		
+		protected function addRawChild(child:DisplayObject):DisplayObject
+		{
+			super.addChild(child);
+			return child;
 		}
 		
 		////////////////////////////////////////////////
