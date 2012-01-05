@@ -30,7 +30,7 @@ package flux.components
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	
-	import flux.components.ScrollBarTrackSkin;
+	import flux.skins.ScrollBarTrackSkin;
 	import flux.skins.ScrollBarThumbSkin;
 	import flux.skins.ScrollBarUpButtonSkin;
 	import flux.skins.ScrollBarDownButtonSkin;
