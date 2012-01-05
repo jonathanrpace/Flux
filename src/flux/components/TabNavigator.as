@@ -37,9 +37,12 @@ package flux.components
 	[Event( type="flux.events.TabNavigatorEvent", name="closeTab" )]
 	public class TabNavigator extends ViewStack 
 	{
+		// Properties
+		private var _showCloseButtons	:Boolean = true;
+		
 		// Child elements
-		private var tabBar		:Container;
-		private var background	:Sprite;
+		private var tabBar				:Container;
+		private var background			:Sprite;
 		
 		public function TabNavigator() 
 		{
@@ -81,13 +84,14 @@ package flux.components
 			background.y = (tabBar.height-1);
 			background.height = _height - (tabBar.height-1);
 			tabBar.width = _width;
-			tabBar.validateNow();
 			
 			for ( var i:int = 0; i < tabBar.numChildren; i++ )
 			{
 				var tab:TabNavigatorTab = TabNavigatorTab( tabBar.getChildAt(i) );
 				tab.selected = i == _visibleIndex;
+				tab.showCloseButton = _showCloseButtons;
 			}
+			tabBar.validateNow();
 		}
 		
 		override protected function getChildrenLayoutArea():Rectangle
@@ -147,6 +151,22 @@ package flux.components
 			event.stopImmediatePropagation();
 			var index:int = tabBar.getChildIndex(tab);
 			dispatchEvent( new TabNavigatorEvent( TabNavigatorEvent.CLOSE_TAB, index, true ) );
+		}
+		
+		////////////////////////////////////////////////
+		// Getters/Setters
+		////////////////////////////////////////////////
+		
+		public function set showCloseButtons( value:Boolean ):void
+		{
+			if ( _showCloseButtons == value ) return;
+			_showCloseButtons = value;
+			invalidate();
+		}
+		
+		public function get showCloseButtons():Boolean
+		{
+			return _showCloseButtons;
 		}
 	}
 }
