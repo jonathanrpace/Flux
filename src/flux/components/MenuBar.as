@@ -25,7 +25,6 @@
 package flux.components 
 {
 	import flash.display.Sprite;
-	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flux.data.ArrayCollection;
@@ -34,6 +33,7 @@ package flux.components
 	import flux.events.ArrayCollectionEvent;
 	import flux.events.SelectEvent;
 	import flux.layouts.HorizontalLayout;
+	import flux.skins.MenuBarButtonSkin;
 	import flux.skins.MenuBarSkin;
 	
 	[Event( type="flux.events.SelectEvent", name="select" )]
@@ -99,7 +99,7 @@ package flux.components
 				}
 				else
 				{
-					btn = new PushButton();
+					btn = new PushButton(MenuBarButtonSkin);
 					btn.resizeToContent = true;
 					buttonBar.addChild(btn);
 				}
@@ -134,7 +134,9 @@ package flux.components
 			pt = localToGlobal(pt);
 			list.x = pt.x;
 			list.y = pt.y;
-			list.dataProvider = _dataDescriptor.getChildren(selectedData);
+			var dp:ArrayCollection = _dataDescriptor.getChildren(selectedData);
+			list.dataProvider = dp;
+			list.visible = dp != null && dp.length > 0;
 			
 			for ( var i:int = 0; i < buttonBar.numChildren; i++ )
 			{
