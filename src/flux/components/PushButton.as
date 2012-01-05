@@ -30,6 +30,7 @@ package flux.components
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
 	import flash.text.AntiAliasType;
@@ -38,6 +39,7 @@ package flux.components
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
 	import flash.text.TextLineMetrics;
+	import flash.ui.Keyboard;
 	import flux.skins.PushButtonSkin;
 	
 	public class PushButton extends UIComponent 
@@ -202,7 +204,7 @@ package flux.components
 		{
 			if(_toggle && over)
 			{
-				_selected = !_selected;
+				selected = !_selected;
 			}
 			_down = false;
 			
@@ -220,7 +222,7 @@ package flux.components
 		override public function set label(str:String):void
 		{
 			_label = str;
-			labelField.text = _label;
+			labelField.text = _label ? _label : "";
 			if ( _resizeToContent )
 			{
 				invalidate();
@@ -238,9 +240,20 @@ package flux.components
 		public function set selected(value:Boolean):void
 		{
 			if ( _selected == value ) return;
+			var oldValue:Boolean = _selected;
 			_selected = value;
+			
+			var event:Event = new Event( Event.CHANGE, false, true );
+			dispatchEvent( event );
+			
+			if ( event.isDefaultPrevented() )
+			{
+				_selected = oldValue;
+				return;
+			}
+			
 			_selected ? skin.gotoAndPlay( "SelectedUp" ) : skin.gotoAndPlay( "Up" );
-			dispatchEvent( new Event( Event.CHANGE ) );
+			
 		}
 		public function get selected():Boolean
 		{
