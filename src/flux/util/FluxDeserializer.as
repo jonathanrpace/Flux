@@ -149,6 +149,8 @@ package flux.util
 		MenuBar;
 		Panel;
 		ProgressBar;
+		RadioButton;
+		RadioButtonGroup;
 		ScrollPane;
 		TabNavigator;
 		Tree;
