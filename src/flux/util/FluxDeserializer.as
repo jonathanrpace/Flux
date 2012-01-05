@@ -141,6 +141,7 @@ package flux.util
 		}
 		
 		CheckBox;
+		ColorPicker;
 		DropDownMenu;
 		HBox;
 		HorizontalLayout;

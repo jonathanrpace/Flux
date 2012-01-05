@@ -26,10 +26,6 @@ package
 {
 	/*
 	 * TODO
-	 * PushButton center label alignment aliasing issues
-	 * RadioButton + groups
-	 * List Drag and Drop
-	 * Tabnavigator drag and drop
 	 */
 	
 	import flash.display.StageAlign;
@@ -37,10 +33,11 @@ package
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.ui.Keyboard;
-	import flash.utils.getDefinitionByName;
 	import flux.components.*;
 	import flux.data.ArrayCollection;
+	import flux.events.DragAndDropEvent;
 	import flux.events.TabNavigatorEvent;
+	import flux.events.TreeEvent;
 	import flux.util.FluxDeserializer;
 	import icons.Bin;
 	
@@ -75,9 +72,9 @@ package
 					<MenuBar id="menuBar" width="100%"/>
 					<HBox width="100%" height="100%" >
 						<List id="list" width="100%" height="100%" allowMultipleSelection="false" />
-						<Tree id="tree" width="100%" height="100%" allowMultipleSelection="true" />
+						<Tree id="tree" width="100%" height="100%" allowMultipleSelection="true" showRoot="false" allowDragAndDrop="true" />
 						
-						<TabNavigator id="tabNavigator" width="100%" height="100%" padding="4" >
+						<TabNavigator id="tabNavigator" width="100%" height="100%" padding="4" showCloseButtons="false" >
 							<InputField width="100%" label="InputField" />
 							<DropDownMenu id="dropDownMenu" width="100%" label="DropDownMenu" />
 							<PushButton label="Button 2 longer" toggle="false" />
@@ -88,8 +85,20 @@ package
 							<CheckBox label="Button 1" selected="true" indeterminate="true" />
 							<CheckBox label="Button 1" selected="false" indeterminate="true" />
 							<CheckBox label="Button 1" selected="true" width="100%" />
+							
+							<RadioButtonGroup resizeToContent="true">
+								<RadioButton label="Radio Button A" selected="true" />
+								<RadioButton label="Radio Button B" selected="false" />
+								<RadioButton label="Radio Button C" selected="false" />
+								
+								<layout>
+									<VerticalLayout/>
+								</layout>
+							</RadioButtonGroup>
+							
 							<NumericStepper width="100%" min="-10" max="10" />
 							<ProgressBar width="100%" progress="0.4" indeterminate="true" />
+							<ColorPicker width="100%" />
 						</VBox>
 						
 					</HBox>
@@ -118,28 +127,49 @@ package
 			FluxDeserializer.deserialize( xml, this );
 			
 			// Build an example data provider
-			var dp:Object = { };
-			dp.children = createDataProvider(15, dp);
+			var dp:Object = { label:"root" };
+			dp.children = createDataProvider(15);
+			// Randomly insert second-level of data
 			for ( var i:int = 0; i < dp.children.length; i++ )
 			{
 				var data:Object = dp.children[i];
-				// Randomly insert second-level of data
 				if ( i < 7 )
 				{
-					data.children = createDataProvider(1 + Math.random() * 5, data);
+					data.children = createDataProvider(4);
 				}
 			}
+			
+			// Bind multiple controls to the same data provider.
 			list.dataProvider = dp.children;
-			tree.dataProvider = dp.children;
+			tree.dataProvider = dp;
 			dropDownMenu.dataProvider = dp.children;
 			menuBar.dataProvider = dp.children;
 			
-			tabNavigator.addEventListener(TabNavigatorEvent.CLOSE_TAB, closeTabHandler);
+			tree.addEventListener( DragAndDropEvent.DRAG_START, dragHandler);
+			tree.addEventListener( DragAndDropEvent.DRAG_OVER, dragHandler);
+			tree.addEventListener( DragAndDropEvent.DRAG_DROP, dragHandler);
+			tree.addEventListener( TreeEvent.ITEM_OPEN, itemOpenHandler);
+			tree.addEventListener( TreeEvent.ITEM_CLOSE, itemCloseHandler);
 			
+			tabNavigator.addEventListener(TabNavigatorEvent.CLOSE_TAB, closeTabHandler);
 			stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandler );
 			stageResizeHandler(null);
+		}
+		
+		private function itemOpenHandler( event:TreeEvent ):void
+		{
+			trace("open : " + event.item.label);
+		}
+		
+		private function itemCloseHandler( event:TreeEvent ):void
+		{
+			trace("close : " + event.item.label);
+		}
+		
+		private function dragHandler( event:DragAndDropEvent ):void
+		{
 			
-			validateNow();
+			trace( event.type + ", " + event.item.label + ", " + (event.targetCollection ? tree.getParent(event.targetCollection).label : "") + ", " + event.index );
 		}
 		
 		private function closeTabHandler( event:TabNavigatorEvent ):void
@@ -155,35 +185,18 @@ package
 				for ( var i:int = 0; i < selectedItems.length; i++ )
 				{
 					var selectedItem:Object = selectedItems[i];
-					selectedItem.parent.children.removeItem(selectedItem);
-				}
-			}
-			else if ( event.keyCode == Keyboard.ENTER )
-			{
-				UIComponent(tabNavigator.getChildAt(0)).label = "Blah";
-			}
-			else if ( event.keyCode == Keyboard.RIGHT )
-			{
-				if ( tabNavigator.visibleIndex < tabNavigator.numChildren - 1 )
-				{
-					tabNavigator.visibleIndex++;
-				}
-			}
-			else if ( event.keyCode == Keyboard.LEFT )
-			{
-				if ( tabNavigator.visibleIndex > -1 )
-				{
-					tabNavigator.visibleIndex--;
+					var parent:Object = tree.getParent(selectedItem, false);
+					parent.children.removeItem(selectedItem);
 				}
 			}
 		}
 		
-		private function createDataProvider( numItems:int, parent:Object = null ):ArrayCollection
+		private function createDataProvider( numItems:int ):ArrayCollection
 		{
 			var dp:ArrayCollection = new ArrayCollection();
 			for ( var i:int = 0; i < numItems; i++ )
 			{
-				dp.push( { label:"Item " + i, icon:Math.random() > 0.5 ? Bin : null, parent:parent } );
+				dp.push( { label:"Item " + i, icon:Math.random() > 0.5 ? Bin : null } );
 			}
 			return dp;
 		}
