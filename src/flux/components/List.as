@@ -25,6 +25,7 @@
 package flux.components 
 {
 	import flash.display.DisplayObject;
+	import flash.display.InteractiveObject;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -36,14 +37,18 @@ package flux.components
 	import flux.data.IDataDescriptor;
 	import flux.events.ArrayCollectionChangeKind;
 	import flux.events.ArrayCollectionEvent;
+	import flux.events.DragAndDropEvent;
 	import flux.events.SelectEvent;
 	import flux.layouts.VerticalLayout;
 	import flux.skins.ListDropIndicatorSkin;
 	
+	[Event( type = "flash.events.Event", name = "change" )]
+	[Event( type = "flux.events.DragAndDropEvent", name = "drop" )]
+	
 	public class List extends Canvas 
 	{
 		// Properties
-		protected var _dataProvider				:ArrayCollection;
+		protected var _dataProvider				:Object;;
 		protected var _selectedItems			:Array;
 		protected var _allowMultipleSelection	:Boolean = false;
 		protected var _dataDescriptor			:IDataDescriptor;
@@ -51,6 +56,7 @@ package flux.components
 		protected var _autoHideHScrollBar		:Boolean = true;
 		protected var _itemRendererClass		:Class;
 		protected var _clickSelect				:Boolean = false;
+		protected var _allowDragAndDrop			:Boolean = false;
 		
 		// Child elements
 		protected var vScrollBar				:ScrollBar;
@@ -63,10 +69,10 @@ package flux.components
 		protected var flattenedData				:Array;
 		protected var visibleData				:Array;
 		protected var _itemRendererHeight		:int;
+		protected var dropTargetCollection		:ArrayCollection;
+		protected var dropTargetIndex			:int;
+		protected var draggedItemRenderer		:DisplayObject;
 		private var mouseDownDragStart			:Point;
-		private var dragOffset					:Point;
-		private var draggedItem					:Object;
-		private var draggedItemRenderer			:DisplayObject;
 		
 		public function List() 
 		{
@@ -85,7 +91,7 @@ package flux.components
 			itemRendererPool = new Vector.<IItemRenderer>();
 			_itemRendererClass = ListItemRenderer;
 			
-			padding = 1;
+			padding = 4;
 			_layout = new VerticalLayout(0);
 			_dataDescriptor = new DefaultDataDescriptor();
 			
@@ -227,7 +233,14 @@ package flux.components
 				
 		protected function calculateFlattenedData():void
 		{
-			flattenedData = _dataProvider ? _dataProvider.source : [];
+			if ( _dataProvider is ArrayCollection )
+			{
+				flattenedData = ArrayCollection(_dataProvider).source;
+			}
+			else
+			{
+				flattenedData = [];
+			}
 		}
 		
 		protected function calculateVisibleData():void
@@ -247,6 +260,118 @@ package flux.components
 			var endIndex:int = startIndex + Math.ceil(  layoutArea.height / _itemRendererHeight ) + 1;
 			endIndex = endIndex > flattenedData.length ? flattenedData.length : endIndex;
 			visibleData = flattenedData.slice( startIndex, endIndex );
+		}
+		
+		protected function getItemRendererForData( data:Object ):IItemRenderer
+		{
+			for each ( var itemRenderer:IItemRenderer in visibleItemRenderers )
+			{
+				if ( itemRenderer.data == data ) return itemRenderer;
+			}
+			return null;
+		}
+		
+		////////////////////////////////////////////////
+		// Drag and drop protected methods
+		////////////////////////////////////////////////
+		
+		protected function beginDrag():void
+		{
+			// Find out which item renderer the mouse was over when the user pressed.
+			var pressPos:Point = content.localToGlobal(mouseDownDragStart);
+			for ( var i:int = 0; i < content.numChildren; i++ )
+			{
+				var itemRenderer:DisplayObject = content.getChildAt(i);
+				if ( itemRenderer.hitTestPoint( pressPos.x, pressPos.y ) == false ) continue;
+				
+				// Begin dragging this item renderer
+				// Clone the item renderer and attach it to the mouse.
+				dropIndicator.visible = true;
+				
+				draggedItemRenderer = new itemRendererClass();
+				InteractiveObject(draggedItemRenderer).mouseEnabled = false;
+				IItemRenderer(draggedItemRenderer).list = this;
+				IItemRenderer(draggedItemRenderer).data = IItemRenderer(itemRenderer).data;;
+				IItemRenderer(draggedItemRenderer).selected = IItemRenderer(itemRenderer).selected;
+				draggedItemRenderer.width = itemRenderer.width;
+				draggedItemRenderer.height = itemRenderer.height;
+				draggedItemRenderer.alpha = 0.5;
+				IItemRenderer(draggedItemRenderer).validateNow();
+				draggedItemRenderer.x = stage.mouseX - itemRenderer.mouseX;
+				draggedItemRenderer.y = stage.mouseY - itemRenderer.mouseY;
+				Sprite(draggedItemRenderer).startDrag(false);
+				stage.addChild( draggedItemRenderer );
+				
+				dispatchEvent( new DragAndDropEvent( DragAndDropEvent.DRAG_START, IItemRenderer(itemRenderer).data ) );
+				
+				return;
+			}
+		}
+				
+		protected function updateDropTarget():void
+		{
+			var newDropTargetCollection:ArrayCollection;
+			var newDropTargetIndex:int;
+			for each ( var itemRenderer:IItemRenderer in visibleItemRenderers )
+			{
+				if ( DisplayObject(itemRenderer).hitTestPoint( stage.mouseX, stage.mouseY ) == false ) continue;
+				
+				newDropTargetCollection = ArrayCollection(_dataProvider);
+				newDropTargetIndex = dropTargetCollection.getItemIndex(itemRenderer.data);
+				if ( DisplayObject(itemRenderer).mouseY > (itemRenderer.height >> 1) )
+				{
+					dropTargetIndex++;
+				}
+				break;
+			}
+			
+			if ( newDropTargetCollection == dropTargetCollection && newDropTargetIndex == dropTargetIndex ) return;
+			
+			var event:DragAndDropEvent = new DragAndDropEvent( DragAndDropEvent.DRAG_OVER, IItemRenderer(draggedItemRenderer).data, newDropTargetCollection, newDropTargetIndex );
+			dispatchEvent( event );
+			if ( event.isDefaultPrevented() )
+			{
+				dropTargetCollection = null;
+				dropTargetIndex = -1;
+				return;
+			}
+			dropTargetCollection = newDropTargetCollection;
+			dropTargetIndex = newDropTargetIndex;
+		}
+		
+		protected function updateDropIndicator( dropTargetCollection:ArrayCollection, dropTargetIndex:int ):void
+		{
+			var after:Boolean = dropTargetIndex >= dropTargetCollection.length;
+			
+			var dropTargetData:Object = dropTargetCollection[after ? dropTargetIndex - 1 : dropTargetIndex];
+			var itemRenderer:IItemRenderer = getItemRendererForData( dropTargetData );
+			
+			if ( after )
+			{
+				dropIndicator.y = -content.scrollRect.y + itemRenderer.y + itemRenderer.height;
+			}
+			else
+			{
+				dropIndicator.y = -content.scrollRect.y + itemRenderer.y;
+			}
+			dropIndicator.width = itemRenderer.width - dropIndicator.x - 10;
+		}
+		
+		protected function handleDrop( draggedItem:Object, targetCollection:ArrayCollection, targetIndex:int ):void
+		{
+			var event:DragAndDropEvent = new DragAndDropEvent( DragAndDropEvent.DRAG_DROP, draggedItem, targetCollection, targetIndex );
+			dispatchEvent(event);
+			
+			if ( event.isDefaultPrevented() ) return;
+			
+			// Removed the item from the data provider and re-insert it at the proper index
+			var draggedItemIndex:int = targetCollection.getItemIndex(draggedItem);
+			targetCollection.removeItemAt(draggedItemIndex);
+			if ( draggedItemIndex < targetIndex )
+			{
+				targetIndex--;		// Need to modify insertion index after previous item has been removed.
+			}
+			targetCollection.addItemAt(draggedItem, targetIndex);
 		}
 		
 		////////////////////////////////////////////////
@@ -354,122 +479,88 @@ package flux.components
 		
 		private function mouseDownContentHandler( event:MouseEvent ):void
 		{
+			if ( !_allowDragAndDrop ) return;
 			mouseDownDragStart = new Point( content.mouseX, content.mouseY );
-			stage.addEventListener( MouseEvent.MOUSE_MOVE, mouseMoveDragHandler );
+			stage.addEventListener( Event.ENTER_FRAME, dragHandler );
 			stage.addEventListener( MouseEvent.MOUSE_UP, endDragHandler );
 		}
 		
-		private function mouseMoveDragHandler( event:MouseEvent ):void
+		private function dragHandler( event:Event ):void
 		{
-			if ( draggedItem == null )
+			// If we're not yet dragging, check to see if we've moved the mouse enough from the press point.
+			if ( draggedItemRenderer == null )
 			{
 				var dis:int = Math.abs(content.mouseX - mouseDownDragStart.x) + Math.abs(content.mouseY - mouseDownDragStart.y);
 				if ( dis > 3 )
 				{
-					for ( var i:int = 0; i < content.numChildren; i++ )
-					{
-						var itemRenderer:DisplayObject = content.getChildAt(i);
-						if ( itemRenderer.hitTestPoint( stage.mouseX, stage.mouseY ) )
-						{
-							draggedItem = IItemRenderer(itemRenderer).data;
-							dropIndicator.visible = true;
-							
-							draggedItemRenderer = new itemRendererClass();
-							IItemRenderer(draggedItemRenderer).list = this;
-							IItemRenderer(draggedItemRenderer).data = draggedItem;
-							IItemRenderer(draggedItemRenderer).selected = IItemRenderer(itemRenderer).selected;
-							draggedItemRenderer.width = itemRenderer.width;
-							draggedItemRenderer.height = itemRenderer.height;
-							draggedItemRenderer.alpha = 0.5;
-							IItemRenderer(draggedItemRenderer).validateNow();
-							
-							dragOffset = new Point( itemRenderer.mouseX, itemRenderer.mouseY );
-							
-							stage.addChild( draggedItemRenderer );
-							draggedItemRenderer.x = stage.mouseX - dragOffset.x;
-							draggedItemRenderer.y = stage.mouseY - dragOffset.y;
-							
-							break;
-						}
-					}
+					beginDrag();
 				}
 			}
 			
-			if ( draggedItem != null )
+			if ( draggedItemRenderer )
 			{
-				draggedItemRenderer.x = stage.mouseX - dragOffset.x;
-				draggedItemRenderer.y = stage.mouseY - dragOffset.y;
-				
-				// Calculate drop position
-				for ( i = 0; i < content.numChildren; i++ )
+				if ( content.mouseY < 20 )
 				{
-					itemRenderer = content.getChildAt(i);
-					if ( itemRenderer.hitTestPoint( stage.mouseX, stage.mouseY ) )
-					{
-						// Before this item
-						if ( itemRenderer.mouseY < (itemRenderer.height >> 1) )
-						{
-							updateDropIndicator( IItemRenderer(itemRenderer), false );
-						}
-						// After this item
-						else
-						{
-							updateDropIndicator( IItemRenderer(itemRenderer), true );
-						}
-					}
+					scrollY -= 2;
+				}
+				else if ( content.mouseY > getChildrenLayoutArea().height - 20 )
+				{
+					scrollY += 2;
+				}
+				updateDropTarget();
+				
+				if ( dropTargetCollection == null )
+				{
+					dropIndicator.visible = false;
+				}
+				else
+				{
+					dropIndicator.visible = true;
+					updateDropIndicator( dropTargetCollection, dropTargetIndex );
 				}
 			}
-		}
-		
-		protected function updateDropIndicator( itemRenderer:IItemRenderer, after:Boolean ):void
-		{
-			if ( after )
-			{
-				dropIndicator.x = itemRenderer.x;
-				dropIndicator.y = itemRenderer.y + itemRenderer.height;
-			}
-			else
-			{
-				dropIndicator.x = itemRenderer.x;
-				dropIndicator.y = itemRenderer.y;
-			}
-			
-			dropIndicator.width = itemRenderer.width;
 		}
 		
 		private function endDragHandler( event:MouseEvent ):void
 		{
 			if ( draggedItemRenderer )
 			{
+				handleDrop(IItemRenderer(draggedItemRenderer).data, dropTargetCollection, dropTargetIndex);
+				
+				Sprite(draggedItemRenderer).stopDrag();
 				stage.removeChild( draggedItemRenderer );
-				draggedItem = null;
 				draggedItemRenderer = null;
+				dropTargetCollection = null;
+				dropTargetIndex - -1;
 			}
+			
 			dropIndicator.visible = false;
-			stage.removeEventListener( MouseEvent.MOUSE_MOVE, mouseMoveDragHandler );
+			stage.removeEventListener( Event.ENTER_FRAME, dragHandler );
 			stage.removeEventListener( MouseEvent.MOUSE_UP, endDragHandler );
 		}
+		
+		
 		
 		////////////////////////////////////////////////
 		// Getters/Setters
 		////////////////////////////////////////////////
 		
-		public function set dataProvider( value:ArrayCollection ):void
+		public function set dataProvider( value:Object ):void
 		{
-			if ( _dataProvider )
+			if ( _dataProvider is ArrayCollection )
 			{
-				_dataProvider.removeEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
+				ArrayCollection(_dataProvider).removeEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
 			}
 			_dataProvider = value;
-			if ( _dataProvider )
+			if ( _dataProvider is ArrayCollection )
 			{
-				_dataProvider.addEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
+				ArrayCollection(_dataProvider).addEventListener( ArrayCollectionEvent.CHANGE, dataProviderChangeHandler );
 			}
 			_selectedItems = [];
 			invalidate();
 		}
 		
-		public function get dataProvider():ArrayCollection
+		public function get dataProvider():Object
 		{
 			return _dataProvider;
 		}
@@ -592,6 +683,16 @@ package flux.components
 		public function get itemRendererClass():Class
 		{
 			return _itemRendererClass;
+		}
+		
+		public function set allowDragAndDrop( value:Boolean ):void
+		{
+			_allowDragAndDrop = value;
+		}
+		
+		public function get allowDragAndDrop():Boolean
+		{
+			return _allowDragAndDrop;
 		}
 	}
 }
