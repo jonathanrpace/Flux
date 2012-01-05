@@ -61,6 +61,7 @@ package flux.components
 			textField.selectable = true;
 			textField.type = TextFieldType.INPUT;
 			textField.multiline = false;
+			textField.addEventListener(Event.CHANGE, textFieldChangeHandler);
 			
 			SelectionColor.setFieldSelectionColor(textField, 0xCCCCCC);
 			
@@ -79,6 +80,16 @@ package flux.components
 		}
 		
 		////////////////////////////////////////////////
+		// Event Handlers
+		////////////////////////////////////////////////
+		
+		private function textFieldChangeHandler( event:Event ):void
+		{
+			event.stopImmediatePropagation();
+			dispatchEvent( new Event( Event.CHANGE ) );
+		}
+		
+		////////////////////////////////////////////////
 		// Getters/Setters
 		////////////////////////////////////////////////
 		
@@ -90,6 +101,16 @@ package flux.components
 		public function get restrict():String
 		{
 			return textField.restrict;
+		}
+		
+		public function set maxChars( value:int ):void
+		{
+			textField.maxChars = value;
+		}
+		
+		public function get maxChars():int
+		{
+			return textField.maxChars;
 		}
 		
 		public function set text( value:String ):void
