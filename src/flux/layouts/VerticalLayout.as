@@ -129,7 +129,7 @@ package flux.layouts
 				pos += child.height + spacing;
 				
 				contentSize.width = child.x + child.width > contentSize.width ? child.x + child.width : contentSize.width;
-				contentSize.height = child.y + child.height > contentSize.height ? child.x + child.height : contentSize.height;
+				contentSize.height = child.y + child.height > contentSize.height ? child.y + child.height : contentSize.height;
 			}
 			
 			if ( verticalAlign != LayoutAlign.NONE )
