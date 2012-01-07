@@ -62,6 +62,8 @@ package flux.components
 		
 		override protected function init():void
 		{
+			focusEnabled = true;
+			
 			background = new MenuBarSkin();
 			addChild(background);
 			_height = background.height;
@@ -100,6 +102,7 @@ package flux.components
 				else
 				{
 					btn = new PushButton(MenuBarButtonSkin);
+					btn.focusEnabled = false;
 					btn.resizeToContent = true;
 					buttonBar.addChild(btn);
 				}
@@ -175,6 +178,8 @@ package flux.components
 		{
 			var btn:PushButton = event.target as PushButton;
 			if ( !btn ) return;
+			
+			focusManager.setFocus(this);
 			
 			if ( selectedData )
 			{

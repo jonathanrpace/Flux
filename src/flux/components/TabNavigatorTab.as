@@ -50,8 +50,8 @@ package flux.components
 		override protected function init():void
 		{
 			super.init();
+			focusEnabled = false;
 			_resizeToContent = true;
-			
 			closeBtn = new PushButton( TabNavigatorTabCloseBtnSkin );
 			closeBtn.addEventListener(MouseEvent.CLICK, clickCloseHandler);
 			addChild(closeBtn);

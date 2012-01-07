@@ -26,11 +26,13 @@ package flux.components
 {
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.FocusEvent;
 	import flash.events.TextEvent;
 	import flash.text.TextField;
 	import flash.text.TextFieldType;
 	import flash.text.TextFormat;
 	import flux.skins.InputFieldSkin;
+	import flux.util.SelectionColor;
 	
 	public class InputField extends UIComponent 
 	{
@@ -49,19 +51,20 @@ package flux.components
 		
 		override protected function init():void
 		{
+			focusEnabled = true;
+			
 			skin = new InputFieldSkin();
 			addChild(skin);
 			
 			_width = skin.width;
 			_height = skin.height;
 			
-			textField = new TextField();
-			textField.defaultTextFormat = new TextFormat( TextStyles.fontFace, TextStyles.fontSize, TextStyles.fontColor );
-			textField.embedFonts = TextStyles.embedFonts;
+			textField = TextStyles.createTextField();
 			textField.selectable = true;
 			textField.type = TextFieldType.INPUT;
-			textField.multiline = false;
+			textField.mouseEnabled = true;
 			textField.addEventListener(Event.CHANGE, textFieldChangeHandler);
+			textField.addEventListener(FocusEvent.FOCUS_IN, textFieldFocusInHandler);
 			
 			SelectionColor.setFieldSelectionColor(textField, 0xCCCCCC);
 			
@@ -82,6 +85,15 @@ package flux.components
 		////////////////////////////////////////////////
 		// Event Handlers
 		////////////////////////////////////////////////
+		
+		private function textFieldFocusInHandler( event:FocusEvent ):void
+		{
+			if ( _focusEnabled )
+			{
+				event.stopImmediatePropagation();
+				focusManager.setFocus(this);
+			}
+		}
 		
 		private function textFieldChangeHandler( event:Event ):void
 		{

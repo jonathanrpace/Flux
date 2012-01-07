@@ -26,13 +26,21 @@
 
 package flux.components 
 {
+	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.FocusEvent;
+	import flash.events.MouseEvent;
 	import flux.events.PropertyChangeEvent;
+	import flux.managers.FocusManager;
+	import flux.skins.FocusRectSkin;
 	
 	[Event( type="flash.events.Event", name="resize" )]
-	public class UIComponent extends Sprite implements IUIComponent
+	public class UIComponent extends Sprite
 	{
+		static private var focusRectSkin	:Sprite;
+		static protected var focusManager	:FocusManager;
+		
 		// Properties
 		protected var _width			:Number = 0;
 		protected var _height			:Number = 0;
@@ -44,6 +52,8 @@ package flux.components
 		protected var _resizeToContent	:Boolean = false;
 		protected var _enabled			:Boolean = true;
 		protected var _isInvalid		:Boolean = false;
+		protected var _focusEnabled		:Boolean = false;
+		protected var _isFocused		:Boolean = false;
 		
 		public function UIComponent() 
 		{
@@ -52,6 +62,12 @@ package flux.components
 		
 		private function _init():void
 		{
+			if ( !focusManager )
+			{
+				focusRectSkin = new FocusRectSkin();
+				focusManager = new FocusManager();
+			}
+			
 			init();
 			invalidate();
 		}
@@ -76,6 +92,12 @@ package flux.components
 		{
 			if ( _isInvalid == false ) return;
 			validate();
+			
+			if ( _isFocused )
+			{
+				focusRectSkin.width = _width;
+				focusRectSkin.height = _height;
+			}
 			_isInvalid = false;
 			removeEventListener( Event.ENTER_FRAME, onInvalidateHandler );
 		}
@@ -102,7 +124,6 @@ package flux.components
 		{
 			validateNow();
 		}
-		
 		////////////////////////////////////////////////
 		// Getters/Setters
 		////////////////////////////////////////////////
@@ -250,6 +271,33 @@ package flux.components
 		public function get excludeFromLayout():Boolean
 		{
 			return _excludeFromLayout;
+		}
+		
+		public function set focusEnabled(value:Boolean):void 
+		{
+			if ( _focusEnabled == value ) return;
+			_focusEnabled = value;
+		}
+		
+		public function get focusEnabled():Boolean 
+		{
+			return _focusEnabled;
+		}
+		
+		
+		flux_internal function set isFocused( value:Boolean ):void
+		{
+			_isFocused = value;
+			if ( _isFocused )
+			{
+				super.addChild(focusRectSkin);
+			}
+			invalidate();
+		}
+		
+		flux_internal function get isFocused():Boolean
+		{
+			return _isFocused;
 		}
 	}
 }

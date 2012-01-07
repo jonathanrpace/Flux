@@ -72,18 +72,15 @@ package flux.components
 		
 		override protected function init():void
 		{
+			focusEnabled = true;
+			
 			skin = skinClass == null ? new PushButtonSkin() : new skinClass();
 			_width = skin.width;
 			_height = skin.height;
 			skin.mouseEnabled = false;
 			addChild( skin );
 			
-			labelField = new TextField();
-			labelField.defaultTextFormat = new TextFormat( TextStyles.fontFace, TextStyles.fontSize, TextStyles.fontColor );
-			labelField.embedFonts = TextStyles.embedFonts;
-			labelField.selectable = false;
-			labelField.multiline = false;
-			labelField.mouseEnabled = false;
+			labelField = TextStyles.createTextField();
 			addChild( labelField );
 			
 			iconContainer = new Sprite();
@@ -196,6 +193,7 @@ package flux.components
 		{
 			if ( event.target != this ) return;
 			_down = true;
+			focusManager.setFocus(this);
 			_selected ? skin.gotoAndPlay( "SelectedDown" ) : skin.gotoAndPlay( "Down" );
 			stage.addEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
 		}

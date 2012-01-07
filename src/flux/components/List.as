@@ -28,6 +28,7 @@ package flux.components
 	import flash.display.InteractiveObject;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.FocusEvent;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
@@ -80,12 +81,27 @@ package flux.components
 		}
 		
 		////////////////////////////////////////////////
+		// Public methods
+		////////////////////////////////////////////////
+		
+		public function getItemRendererForData( data:Object ):IItemRenderer
+		{
+			for each ( var itemRenderer:IItemRenderer in visibleItemRenderers )
+			{
+				if ( itemRenderer.data == data ) return itemRenderer;
+			}
+			return null;
+		}
+		
+		////////////////////////////////////////////////
 		// Protected methods
 		////////////////////////////////////////////////
 		
 		override protected function init():void
 		{
 			super.init();
+			
+			focusEnabled = true;
 			
 			visibleItemRenderers = new Vector.<IItemRenderer>();
 			itemRendererPool = new Vector.<IItemRenderer>();
@@ -99,7 +115,7 @@ package flux.components
 			
 			// Create an item renderer so we can pluck out its height
 			var itemRenderer:IItemRenderer = new _itemRendererClass();
-			_itemRendererHeight = itemRenderer.height;
+			_itemRendererHeight = UIComponent(itemRenderer).height;
 			
 			vScrollBar = new ScrollBar();
 			vScrollBar.scrollSpeed = _itemRendererHeight;
@@ -114,6 +130,7 @@ package flux.components
 			clickSelect = false;
 			content.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownContentHandler);
 			addEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelHandler);
+			addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
 		}
 		
 		override protected function validate():void
@@ -260,15 +277,6 @@ package flux.components
 			var endIndex:int = startIndex + Math.ceil(  layoutArea.height / _itemRendererHeight ) + 1;
 			endIndex = endIndex > flattenedData.length ? flattenedData.length : endIndex;
 			visibleData = flattenedData.slice( startIndex, endIndex );
-		}
-		
-		protected function getItemRendererForData( data:Object ):IItemRenderer
-		{
-			for each ( var itemRenderer:IItemRenderer in visibleItemRenderers )
-			{
-				if ( itemRenderer.data == data ) return itemRenderer;
-			}
-			return null;
 		}
 		
 		////////////////////////////////////////////////
@@ -460,6 +468,7 @@ package flux.components
 			invalidate();
 			
 			dispatchEvent( new SelectEvent( SelectEvent.SELECT, flattenedData[index] ) );
+			dispatchEvent( new Event( Event.CHANGE ) );
 		}
 		
 		private function mouseWheelHandler( event:MouseEvent ):void
@@ -477,14 +486,21 @@ package flux.components
 			invalidate();
 		}
 		
-		private function mouseDownContentHandler( event:MouseEvent ):void
+		private function mouseDownHandler( event:MouseEvent ):void
 		{
-			if ( !_allowDragAndDrop ) return;
-			mouseDownDragStart = new Point( content.mouseX, content.mouseY );
-			stage.addEventListener( Event.ENTER_FRAME, dragHandler );
-			stage.addEventListener( MouseEvent.MOUSE_UP, endDragHandler );
+			focusManager.setFocus(this);
 		}
 		
+		private function mouseDownContentHandler( event:MouseEvent ):void
+		{
+			if ( _allowDragAndDrop )
+			{
+				mouseDownDragStart = new Point( content.mouseX, content.mouseY );
+				stage.addEventListener( Event.ENTER_FRAME, dragHandler );
+				stage.addEventListener( MouseEvent.MOUSE_UP, endDragHandler );
+			}
+		}
+			
 		private function dragHandler( event:Event ):void
 		{
 			// If we're not yet dragging, check to see if we've moved the mouse enough from the press point.

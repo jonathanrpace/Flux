@@ -66,6 +66,7 @@ package flux.components
 			var testTab:TabNavigatorTab = new TabNavigatorTab();
 			
 			tabBar = new Container();
+			tabBar.focusEnabled = true;
 			tabBar.height = testTab.height;
 			tabBar.layout = new HorizontalLayout( -1, LayoutAlign.BOTTOM);
 			addRawChild(tabBar);
@@ -140,7 +141,7 @@ package flux.components
 		{
 			var tab:TabNavigatorTab = event.target as TabNavigatorTab;
 			if ( !tab ) return; // Looks like we've click the background, or some other chrome.
-			
+			focusManager.setFocus(tabBar);
 			var index:int = tabBar.getChildIndex(tab);
 			visibleIndex = index;
 		}

@@ -46,6 +46,7 @@ package flux.components
 		override protected function init():void
 		{
 			super.init();
+			focusEnabled = false;
 			_labelAlign = TextFormatAlign.LEFT;
 		}
 		
@@ -56,7 +57,7 @@ package flux.components
 		public function set data( value:Object ):void
 		{
 			_data = value;
-			if ( _data )
+			if ( _data != null )
 			{
 				label = list.dataDescriptor.getLabel(_data);
 				icon = list.dataDescriptor.getIcon(_data);

@@ -27,6 +27,7 @@
 package flux.components 
 {
 	import flash.events.Event;
+	import flash.events.FocusEvent;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
@@ -62,7 +63,10 @@ package flux.components
 		
 		override protected function init():void
 		{
+			focusEnabled = true;
+			
 			inputField = new NumberInputField();
+			inputField.focusEnabled = false;
 			addChild(inputField);
 			
 			_width = inputField.width;
@@ -80,6 +84,8 @@ package flux.components
 			delayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, delayCompleteHandler);
 			repeatTimer = new Timer( REPEAT_TIME, 0 );
 			repeatTimer.addEventListener(TimerEvent.TIMER, repeatHandler);
+			
+			addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
 		}
 		
 		override protected function validate():void
@@ -99,7 +105,11 @@ package flux.components
 		////////////////////////////////////////////////
 		// Event Handlers
 		////////////////////////////////////////////////
-			
+		private function mouseDownHandler( event:MouseEvent ):void
+		{
+			focusManager.setFocus(this);
+		}
+		
 		private function mouseDownButtonHandler( event:MouseEvent ):void
 		{
 			repeatDirection = event.target == upBtn ? 1 : -1;

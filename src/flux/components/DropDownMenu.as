@@ -37,6 +37,7 @@ package flux.components
 	import flux.skins.DropDownMenuSkin;
 	import flux.components.DropDownListItemRenderer;
 	
+	[Event( type="flash.events.Event", name="change" )]
 	public class DropDownMenu extends UIComponent 
 	{
 		// Settable properties
@@ -63,6 +64,8 @@ package flux.components
 		
 		override protected function init():void
 		{
+			focusEnabled = true;
+			
 			skin = new DropDownMenuSkin();
 			addChild(skin);
 			
@@ -71,13 +74,7 @@ package flux.components
 			_height = skin.height;
 			_width = skin.width;
 			
-			labelField = new TextField();
-			labelField.defaultTextFormat = new TextFormat( TextStyles.fontFace, TextStyles.fontSize, TextStyles.fontColor );
-			labelField.embedFonts = TextStyles.embedFonts;
-			labelField.selectable = false;
-			labelField.autoSize = TextFieldAutoSize.NONE;
-			labelField.multiline = false;
-			labelField.mouseEnabled = false;
+			labelField = TextStyles.createTextField();
 			labelField.text = "Label Label Label Label"
 			addChild( labelField );
 			
@@ -86,10 +83,12 @@ package flux.components
 			skin.addEventListener( MouseEvent.MOUSE_DOWN, mouseDownSkinHandler );
 			
 			list = new List();
+			list.focusEnabled = false;
 			list.itemRendererClass = DropDownListItemRenderer;
 			list.allowMultipleSelection = false;
 			list.clickSelect = true;
 			list.addEventListener( SelectEvent.SELECT, listSelectHandler );
+			addEventListener( Event.REMOVED_FROM_STAGE, removedFromStageHandler );
 		}
 		
 		override protected function validate():void
@@ -156,32 +155,38 @@ package flux.components
 		// Event handlers
 		////////////////////////////////////////////////
 		
-		protected function listSelectHandler( event:SelectEvent ):void
+		private function removedFromStageHandler( event:Event ):void
+		{
+			closeList();
+		}
+		
+		private function listSelectHandler( event:SelectEvent ):void
 		{
 			_selectedItem = event.selectedItem;
-			dispatchEvent( new SelectEvent( SelectEvent.SELECT, selectedItem ) );
+			dispatchEvent( new Event( Event.CHANGE ) );
 			updateLabel();
 			closeList();
 		}
 		
-		protected function rollOverSkinHandler( event:MouseEvent ):void
+		private function rollOverSkinHandler( event:MouseEvent ):void
 		{
 			skin.gotoAndPlay("Over");
 		}
 		
-		protected function rollOutSkinHandler( event:MouseEvent ):void
+		private function rollOutSkinHandler( event:MouseEvent ):void
 		{
 			skin.gotoAndPlay("Out");
 		}
 		
-		protected function mouseDownSkinHandler( event:MouseEvent ):void
+		private function mouseDownSkinHandler( event:MouseEvent ):void
 		{
 			skin.gotoAndPlay("Down");
 			openList();
 		}
 		
-		protected function mouseDownStageHandler( event:MouseEvent ):void
+		private function mouseDownStageHandler( event:MouseEvent ):void
 		{
+			if ( !stage ) return;
 			if ( list.hitTestPoint( stage.mouseX, stage.mouseY ) ) return;
 			closeList();
 		}
