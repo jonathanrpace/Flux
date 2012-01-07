@@ -69,10 +69,7 @@ package flux.components
 			_controlBar.padding = 4;
 			addRawChild(_controlBar)
 			
-			titleField = new TextField();
-			titleField.defaultTextFormat = new TextFormat( TextStyles.fontFace, TextStyles.fontSize, TextStyles.fontColor, true );
-			titleField.embedFonts = TextStyles.embedFonts;
-			titleField.selectable = false;
+			titleField = TextStyles.createTextField( true );
 			addRawChild(titleField);
 			
 			_width = background.width;

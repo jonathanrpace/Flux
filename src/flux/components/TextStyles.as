@@ -27,6 +27,8 @@
 
 package flux.components 
 {
+	import flash.text.TextField;
+	import flash.text.TextFormat;
 	public class TextStyles 
 	{
 		// NOTE: Flex 4 introduces DefineFont4, which is used by default and does not work in native text fields.
@@ -43,5 +45,17 @@ package flux.components
 		public static var fontSize			:int = 8;
 		public static var fontColor			:uint = 0xFFFFFF;
 		public static var fontColorDimmed	:uint = 0xCCCCCC;
+		
+		public static function createTextField( bold:Boolean = false ):TextField
+		{
+			var field:TextField = new TextField();
+			field.defaultTextFormat = new TextFormat( fontFace, fontSize, fontColor, bold  );
+			field.embedFonts = embedFonts;
+			field.selectable = false;
+			field.multiline = false;
+			field.tabEnabled = false;
+			field.mouseEnabled = false;
+			return field;
+		}
 	}
 }

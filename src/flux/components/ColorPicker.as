@@ -140,12 +140,9 @@ package flux.components
 			inputField.addEventListener(Event.CHANGE, changeInputFieldHandler);
 			addChild(inputField);
 			
-			hexLabel = new TextField();
-			hexLabel.defaultTextFormat = new TextFormat( TextStyles.fontFace, TextStyles.fontSize, TextStyles.fontColor );
-			hexLabel.embedFonts = TextStyles.embedFonts;
+			hexLabel = TextStyles.createTextField();
 			hexLabel.text = "#";
 			hexLabel.autoSize = TextFieldAutoSize.LEFT;
-			hexLabel.selectable = false;
 			addChild(hexLabel);
 			
 			swatchBorder = new ColorPickerSkin();
