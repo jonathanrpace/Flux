@@ -33,8 +33,11 @@ package flux.data
 		
 		public function getLabel(data:Object):String 
 		{
-			if ( data is String ) return String(data);
-			return data.label;
+			if ( data.hasOwnProperty("label") )
+			{
+				return String(data.label);
+			}
+			return String(data);
 		}
 		
 		public function getIcon(data:Object):Class 
