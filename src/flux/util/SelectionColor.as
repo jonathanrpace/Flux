@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components
+package flux.util
 {
 	import flash.geom.ColorTransform;
 	import flash.text.TextField;
