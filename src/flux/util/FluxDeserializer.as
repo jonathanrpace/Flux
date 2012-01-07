@@ -150,6 +150,7 @@ package flux.util
 		MenuBar;
 		Panel;
 		ProgressBar;
+		PropertyInspector;
 		RadioButton;
 		RadioButtonGroup;
 		ScrollPane;

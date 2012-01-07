@@ -31,6 +31,7 @@ package
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.events.FocusEvent;
 	import flash.events.KeyboardEvent;
 	import flash.ui.Keyboard;
 	import flux.components.*;
@@ -39,21 +40,22 @@ package
 	import flux.events.TabNavigatorEvent;
 	import flux.events.TreeEvent;
 	import flux.util.FluxDeserializer;
-	import icons.Bin;
+	import icons.Image;
 	
 	[SWF( backgroundColor="0x101010", frameRate="60" )]
 	public class FluxSandbox extends Container 
 	{
-		public var list			:List;
-		public var tree			:Tree;
-		public var tabNavigator	:TabNavigator;
-		public var dropDownMenu	:DropDownMenu;
-		public var menuBar		:MenuBar;
-		public var panel		:Panel;
+		public var propertyInspector	:PropertyInspector;
+		public var list					:List;
+		public var tree					:Tree;
+		public var tabNavigator			:TabNavigator;
+		public var dropDownMenu			:DropDownMenu;
+		public var menuBar				:MenuBar;
+		public var panel				:Panel;
 		
 		public function FluxSandbox() 
 		{
-			Bin;
+			
 		}
 		
 		override protected function init():void
@@ -71,35 +73,38 @@ package
 					
 					<MenuBar id="menuBar" width="100%"/>
 					<HBox width="100%" height="100%" >
+						<PropertyInspector id="propertyInspector" width="100%" height="100%" />
+					
 						<List id="list" width="100%" height="100%" allowMultipleSelection="false" />
 						<Tree id="tree" width="100%" height="100%" allowMultipleSelection="true" showRoot="false" allowDragAndDrop="true" />
 						
 						<TabNavigator id="tabNavigator" width="100%" height="100%" padding="4" showCloseButtons="false" >
+							<VBox width="100%" height="100%" label="Misc controls"  >
+								<CheckBox label="Button 1" selected="true" indeterminate="true" />
+								<CheckBox label="Button 1" selected="false" indeterminate="true" />
+								<CheckBox label="Button 1" selected="true" width="100%" />
+								
+								<RadioButtonGroup resizeToContent="true">
+									<RadioButton label="Radio Button A" selected="true" />
+									<RadioButton label="Radio Button B" selected="false" />
+									<RadioButton label="Radio Button C" selected="false" />
+									
+									<layout>
+										<VerticalLayout/>
+									</layout>
+								</RadioButtonGroup>
+								
+								<NumericStepper width="100%" min="-10" max="10" />
+								<ProgressBar width="100%" progress="0.4" indeterminate="true" />
+								<ColorPicker width="100%" />
+							</VBox>
+						
 							<InputField width="100%" label="InputField" />
 							<DropDownMenu id="dropDownMenu" width="100%" label="DropDownMenu" />
 							<PushButton label="Button 2 longer" toggle="false" />
 							<PushButton label="Button 3 with a really long label" toggle="true" resizeToContent="true" />
 						</TabNavigator>
 						
-						<VBox width="100%" height="100%"  >
-							<CheckBox label="Button 1" selected="true" indeterminate="true" />
-							<CheckBox label="Button 1" selected="false" indeterminate="true" />
-							<CheckBox label="Button 1" selected="true" width="100%" />
-							
-							<RadioButtonGroup resizeToContent="true">
-								<RadioButton label="Radio Button A" selected="true" />
-								<RadioButton label="Radio Button B" selected="false" />
-								<RadioButton label="Radio Button C" selected="false" />
-								
-								<layout>
-									<VerticalLayout/>
-								</layout>
-							</RadioButtonGroup>
-							
-							<NumericStepper width="100%" min="-10" max="10" />
-							<ProgressBar width="100%" progress="0.4" indeterminate="true" />
-							<ColorPicker width="100%" />
-						</VBox>
 						
 					</HBox>
 					
@@ -125,6 +130,11 @@ package
 			</Container>
 			
 			FluxDeserializer.deserialize( xml, this );
+			
+			// Create an inspectable data provider for the property inspector.
+			var propertyInspectorDataProvider:ArrayCollection = new ArrayCollection();
+			propertyInspectorDataProvider.push( new InspectableObject() );
+			propertyInspector.dataProvider = propertyInspectorDataProvider;
 			
 			// Build an example data provider
 			var dp:Object = { label:"root" };
@@ -154,6 +164,19 @@ package
 			tabNavigator.addEventListener(TabNavigatorEvent.CLOSE_TAB, closeTabHandler);
 			stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandler );
 			stageResizeHandler(null);
+			
+			stage.addEventListener( FocusEvent.FOCUS_IN, stageFocusInHandler );
+			stage.addEventListener( FocusEvent.FOCUS_OUT, stageFocusOutHandler );
+		}
+		
+		private function stageFocusInHandler( event:FocusEvent ):void
+		{
+			//trace("Focus in : " + event.target);
+		}
+		
+		private function stageFocusOutHandler( event:FocusEvent ):void
+		{
+			//trace("Focus out : " + event.target);
 		}
 		
 		private function itemOpenHandler( event:TreeEvent ):void
@@ -168,7 +191,6 @@ package
 		
 		private function dragHandler( event:DragAndDropEvent ):void
 		{
-			
 			trace( event.type + ", " + event.item.label + ", " + (event.targetCollection ? tree.getParent(event.targetCollection).label : "") + ", " + event.index );
 		}
 		
@@ -196,7 +218,7 @@ package
 			var dp:ArrayCollection = new ArrayCollection();
 			for ( var i:int = 0; i < numItems; i++ )
 			{
-				dp.push( { label:"Item " + i, icon:Math.random() > 0.5 ? Bin : null } );
+				dp.push( { label:"Item " + i, icon:Image } );
 			}
 			return dp;
 		}
