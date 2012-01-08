@@ -96,7 +96,7 @@ package flux.data
 		public function set source( value:Array ):void
 		{
 			array = value;
-			dispatcher.dispatchEvent( new ArrayCollectionEvent( ArrayCollectionEvent.CHANGE, ArrayCollectionChangeKind.REFRESH ) );
+			dispatcher.dispatchEvent( new ArrayCollectionEvent( ArrayCollectionEvent.CHANGE, ArrayCollectionChangeKind.RESET ) );
 		}
 		
 		public function get source():Array

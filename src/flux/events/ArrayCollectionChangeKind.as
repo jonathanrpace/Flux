@@ -29,6 +29,6 @@ package flux.events
 		public static const ADD			:int = 0;
 		public static const REMOVE		:int = 1;
 		public static const REPLACE		:int = 2;
-		public static const REFRESH		:int = 3;
+		public static const RESET		:int = 3;
 	}
 }
