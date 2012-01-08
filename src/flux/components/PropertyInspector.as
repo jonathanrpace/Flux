@@ -34,7 +34,9 @@ package flux.components
 	import flux.data.ArrayCollection;
 	import flux.data.PropertyInspectorField;
 	import flux.events.ArrayCollectionEvent;
+	import flux.events.PropertyInspectorEvent;
 	
+	[Event( type = "flux.events.PropertyInspectorEvent", name = "commitValue" )]
 	public class PropertyInspector extends UIComponent 
 	{
 		// Properties
@@ -200,6 +202,15 @@ package flux.components
 		{
 			if ( editor == null ) return;
 			var value:Object = editor[ editorDescriptor.valueField ];
+			
+			var event:PropertyInspectorEvent = new PropertyInspectorEvent( PropertyInspectorEvent.COMMIT_VALUE, [fieldBeingEdited.host], fieldBeingEdited.property, value, false, true );
+			dispatchEvent(event);
+			
+			if (event.isDefaultPrevented())
+			{
+				return;
+			}
+			
 			fieldBeingEdited.value = value;
 		}
 		
