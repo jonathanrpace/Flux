@@ -27,25 +27,30 @@
 package flux.components 
 {
 	import flash.display.Sprite;
+	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flux.layouts.HorizontalLayout;
 	import flux.layouts.LayoutAlign;
 	import flux.skins.PanelSkin;
+	import flux.skins.PanelCloseBtnSkin;
 	
+	[Event( type="flash.events.Event", name="close" )]
 	public class Panel extends Container 
 	{
 		// Styles
 		public static var styleTitleBarHeight	:int = 22;
 		
 		// Properties
-		private var _titleBarHeight	:int = Panel.styleTitleBarHeight;
+		protected var _titleBarHeight	:int = Panel.styleTitleBarHeight;
 		
 		// Child elements
 		private var background		:Sprite;
 		private var _controlBar		:Container;
 		private var titleField		:TextField;
+		private var closeBtn		:PushButton;
 		
 		public function Panel() 
 		{
@@ -72,6 +77,10 @@ package flux.components
 			titleField = TextStyles.createTextField( true );
 			addRawChild(titleField);
 			
+			closeBtn = new PushButton( PanelCloseBtnSkin );
+			addRawChild(closeBtn);
+			closeBtn.addEventListener(MouseEvent.CLICK, clickCloseBtnHandler);
+			
 			_width = background.width;
 			_height = background.height;
 			
@@ -95,6 +104,9 @@ package flux.components
 			titleField.width = _width - (_paddingLeft + _paddingRight);
 			titleField.height = Math.min(titleField.textHeight + 4, _height);
 			titleField.y = (_titleBarHeight - (titleField.height)) >> 1;
+			
+			closeBtn.x = _width - closeBtn.width;
+			closeBtn.y = (_titleBarHeight - closeBtn.height) >> 1;
 		}
 		
 		override protected function getChildrenLayoutArea():Rectangle
@@ -104,6 +116,16 @@ package flux.components
 			rect.top += titleBarHeight;
 			rect.bottom -= _controlBar.height;
 			return rect;
+		}
+		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
+		
+		private function clickCloseBtnHandler( event:MouseEvent ):void
+		{
+			event.stopImmediatePropagation();
+			dispatchEvent( new Event( Event.CLOSE ) );
 		}
 		
 		////////////////////////////////////////////////
@@ -134,6 +156,16 @@ package flux.components
 		public function get title():String
 		{
 			return titleField.text;
+		}
+		
+		public function set showCloseButton( value:Boolean ):void
+		{
+			closeBtn.visible = value;
+		}
+		
+		public function get showCloseButton():Boolean
+		{
+			return closeBtn.visible;
 		}
 	}
 }
