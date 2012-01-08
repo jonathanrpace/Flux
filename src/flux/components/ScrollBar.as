@@ -37,8 +37,11 @@ package flux.components
 	
 	public class ScrollBar extends UIComponent 
 	{
-		private static const DELAY_TIME		:int = 500;
-		private static const REPEAT_TIME	:int = 100;
+		private static const DELAY_TIME		:int = 400;
+		private static const REPEAT_TIME	:int = 80;
+		
+		// Styles
+		public static var styleThumbVerticalPadding	:int = -1;
 		
 		// Properties
 		private var _value					:Number = 0;
@@ -46,6 +49,7 @@ package flux.components
 		private var _thumbSizeRatio			:Number = 0.5;
 		private var _scrollSpeed			:Number = 1;
 		private var _pageScrollSpeed		:Number = 4;
+		private var _thumbVerticalPadding	:int = styleThumbVerticalPadding;
 		
 		// Child elements
 		private var track					:Sprite;
@@ -81,13 +85,16 @@ package flux.components
 			
 			thumb = new PushButton( ScrollBarThumbSkin );
 			thumb.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownThumbHandler);
+			thumb.focusEnabled = false;
 			addChild( thumb );
 			
 			upBtn = new PushButton( ScrollBarUpButtonSkin );
+			upBtn.focusEnabled = false;
 			defaultUpBtnHeight = upBtn.height;
 			addChild( upBtn );
 			
 			downBtn = new PushButton( ScrollBarDownButtonSkin );
+			downBtn.focusEnabled = false;
 			defaultDownBtnHeight = downBtn.height;
 			addChild( downBtn );
 			
@@ -125,7 +132,7 @@ package flux.components
 			
 			var lineRatio:Number = _value / _max;
 			lineRatio = isNaN(lineRatio) ? 0 : lineRatio;
-			thumb.y = upBtn.height + (track.height - thumb.height) * lineRatio;
+			thumb.y = (upBtn.height + _thumbVerticalPadding) + (track.height - thumb.height - _thumbVerticalPadding*2) * lineRatio;
 		}
 		
 		////////////////////////////////////////////////
@@ -259,6 +266,18 @@ package flux.components
 		public function get pageScrollSpeed():Number
 		{
 			return _pageScrollSpeed;
+		}
+		
+		public function get thumbVerticalPadding():int 
+		{
+			return _thumbVerticalPadding;
+		}
+		
+		public function set thumbVerticalPadding(value:int):void 
+		{
+			if ( value == _thumbVerticalPadding ) return;
+			_thumbVerticalPadding = value;
+			invalidate();
 		}
 	}
 
