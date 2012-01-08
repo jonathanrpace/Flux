@@ -26,11 +26,16 @@ package flux.components
 {
 	import flash.display.DisplayObject;
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
 	
 	public class ScrollPane extends Container 
 	{
+		// Styles
+		public static var styleScrollBarPadding	:int = 2;
+		
 		// Properties
+		protected var _scrollBarPadding		:int = styleScrollBarPadding;
 		protected var _autoHideVScrollBar	:Boolean = true;
 		protected var _autoHideHScrollBar	:Boolean = true;
 		
@@ -52,23 +57,25 @@ package flux.components
 			super.init();
 			
 			vScrollBar = new ScrollBar();
-			vScrollBar.scrollSpeed = 2;
-			vScrollBar.pageScrollSpeed = 10;
+			vScrollBar.scrollSpeed = 20;
+			vScrollBar.pageScrollSpeed = 60;
 			addRawChild(vScrollBar);
 			
 			hScrollBar = new ScrollBar();
 			hScrollBar.rotation = -90;
-			hScrollBar.scrollSpeed = 2;
-			hScrollBar.pageScrollSpeed = 10;
+			hScrollBar.scrollSpeed = 20;
+			hScrollBar.pageScrollSpeed = 60;
 			addRawChild(hScrollBar);
+			
+			addEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelHandler);
 		}
 		
 		override protected function validate():void
 		{
 			var layoutArea:Rectangle = getChildrenLayoutArea();
 			
-			var extraPaddingForVScrollBar:Number = _autoHideVScrollBar ? 0 : vScrollBar.width - _paddingRight;
-			var extraPaddingForHScrollBar:Number = _autoHideHScrollBar ? 0 : hScrollBar.width - _paddingBottom;
+			var extraPaddingForVScrollBar:Number = _autoHideVScrollBar ? 0 : (vScrollBar.width - _paddingRight) + _scrollBarPadding;
+			var extraPaddingForHScrollBar:Number = _autoHideHScrollBar ? 0 : (hScrollBar.width - _paddingBottom) + _scrollBarPadding;
 			layoutArea.width -= extraPaddingForVScrollBar;
 			layoutArea.height -= extraPaddingForHScrollBar;
 			
@@ -78,14 +85,14 @@ package flux.components
 			var requiresHScrollBar:Boolean = contentSize.width > layoutArea.width;
 			if ( requiresHScrollBar && _autoHideHScrollBar )
 			{
-				layoutArea.height -= hScrollBar.width - _paddingBottom;
+				layoutArea.height -= (hScrollBar.width - _paddingBottom) + _scrollBarPadding;
 				contentSize = _layout.layout( content, layoutArea.width, layoutArea.height );
 			}
 			
 			var requiresVScrollBar:Boolean = contentSize.height > layoutArea.height;
 			if ( requiresVScrollBar && _autoHideVScrollBar )
 			{
-				layoutArea.width -= vScrollBar.width - _paddingRight;
+				layoutArea.width -= (vScrollBar.width - _paddingRight) + _scrollBarPadding;
 				contentSize = _layout.layout( content, layoutArea.width, layoutArea.height );
 			}
 			
@@ -136,10 +143,27 @@ package flux.components
 			invalidate();
 		}
 		
+		private function mouseWheelHandler( event:MouseEvent ):void
+		{
+			vScrollBar.value += vScrollBar.scrollSpeed * (event.delta < 0 ? 1 : -1);
+		}
+		
 		
 		////////////////////////////////////////////////
 		// Getters/Setters
 		////////////////////////////////////////////////
+		
+		public function set scrollBarPadding( value:int ):void
+		{
+			if ( _scrollBarPadding == value ) return;
+			_scrollBarPadding = value;
+			invalidate();
+		}
+		
+		public function get scrollBarPadding():int
+		{
+			return _scrollBarPadding;
+		}
 		
 		public function get maxScrollX():int
 		{ 
