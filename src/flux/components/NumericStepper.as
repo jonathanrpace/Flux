@@ -39,8 +39,12 @@ package flux.components
 		private static const DELAY_TIME		:int = 500;
 		private static const REPEAT_TIME	:int = 100;
 		
+		// Styles
+		public static var styleGap		:int = -1;
+		
 		// Properties
 		private var _stepSize			:Number = 1;
+		private var _gap				:int = styleGap;
 		
 		// Child elements
 		private var inputField			:NumberInputField;
@@ -90,15 +94,15 @@ package flux.components
 		
 		override protected function validate():void
 		{
-			inputField.width = _width - upBtn.width;
+			inputField.width = (_width - upBtn.width) - _gap;;
 			inputField.height = _height;
 			inputField.validateNow();
 			
 			upBtn.height = _height >> 1;
-			upBtn.x = inputField.width;
+			upBtn.x = inputField.width + _gap;
 			
 			downBtn.height = _height - upBtn.height;
-			downBtn.x = inputField.width;
+			downBtn.x = upBtn.x;
 			downBtn.y = upBtn.height;
 		}
 		
@@ -191,6 +195,18 @@ package flux.components
 		public function get numDecimalPlaces():uint
 		{
 			return inputField.numDecimalPlaces;
+		}
+		
+		public function get gap():int 
+		{
+			return _gap;
+		}
+		
+		public function set gap(value:int):void 
+		{
+			if ( value == _gap ) return;
+			_gap = value;
+			invalidate();
 		}
 	}
 }
