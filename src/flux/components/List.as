@@ -53,6 +53,7 @@ package flux.components
 		protected var _selectedItems			:Array;
 		protected var _allowMultipleSelection	:Boolean = false;
 		protected var _dataDescriptor			:IDataDescriptor;
+		protected var _filterFunction			:Function;
 		protected var _autoHideVScrollBar		:Boolean = true;
 		protected var _autoHideHScrollBar		:Boolean = true;
 		protected var _itemRendererClass		:Class;
@@ -258,6 +259,21 @@ package flux.components
 			{
 				flattenedData = [];
 			}
+			
+			
+			if ( _filterFunction != null )
+			{
+				flattenedData = flattenedData.slice();
+				for ( var i:int = 0; i < flattenedData.length; i++ )
+				{
+					var data:Object = flattenedData[i];
+					if ( _filterFunction(data) == false )
+					{
+						flattenedData.splice(i, 1);
+						i--;
+					}
+				}
+			}
 		}
 		
 		protected function calculateVisibleData():void
@@ -388,11 +404,11 @@ package flux.components
 		
 		protected function dataProviderChangeHandler( event:ArrayCollectionEvent ):void
 		{
-			if ( event.changeKind == ArrayCollectionChangeKind.REFRESH )
+			if ( event.kind == ArrayCollectionChangeKind.RESET )
 			{
 				_selectedItems = [];
 			}
-			else if ( event.changeKind == ArrayCollectionChangeKind.REMOVE )
+			else if ( event.kind == ArrayCollectionChangeKind.REMOVE )
 			{
 				var selectedIndex:int = _selectedItems.indexOf(event.item);
 				if ( selectedIndex != -1 )
@@ -709,6 +725,17 @@ package flux.components
 		public function get allowDragAndDrop():Boolean
 		{
 			return _allowDragAndDrop;
+		}
+		
+		public function get filterFunction():Function 
+		{
+			return _filterFunction;
+		}
+		
+		public function set filterFunction(value:Function):void 
+		{
+			_filterFunction = value;
+			invalidate();
 		}
 	}
 }

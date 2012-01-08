@@ -37,7 +37,7 @@ package flux.components
 	public class Tree extends List 
 	{
 		// Properties
-		private var _showRoot		:Boolean = true;
+		protected var _showRoot		:Boolean = true;
 		
 		// Internal vars
 		private var isOpenedTable	:Dictionary;
@@ -126,6 +126,12 @@ package flux.components
 			while ( dataToParse.length > 0 )
 			{
 				var data:Object = dataToParse[0];
+				
+				if ( _filterFunction != null && _filterFunction( data ) == false )
+				{
+					continue;
+				}
+				
 				var depth:int = depthTable[data];
 				dataToParse.splice(0, 1);
 				if ( data != _dataProvider || showRoot )
