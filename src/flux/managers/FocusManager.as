@@ -24,18 +24,38 @@
 
 package flux.managers 
 {
+	import flash.events.EventDispatcher;
 	import flash.events.FocusEvent;
+	
 	import flux.components.UIComponent;
 	import flux.components.flux_internal;
+
 	use namespace flux_internal;
 	
-	public class FocusManager 
+	public class FocusManager extends EventDispatcher
 	{
+		private static var instance			:FocusManager;
+		
+		public static function getInstance():FocusManager
+		{
+			return instance;
+		}
+		
 		private var focusedComponent		:UIComponent;
 		
 		public function FocusManager() 
 		{
-			
+			if ( instance != null )
+			{
+				throw( new Error( "An instance of FocusManager already exists" ) );
+				return;
+			}
+			instance = this;
+		}
+		
+		public static function setFocus( value:UIComponent ):void
+		{
+			instance.setFocus( value );
 		}
 		
 		public function setFocus( value:UIComponent ):void
