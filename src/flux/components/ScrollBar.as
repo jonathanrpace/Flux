@@ -179,6 +179,7 @@ package flux.components
 			currentDragRatio = isNaN(currentDragRatio) || currentDragRatio == Infinity || currentDragRatio == -Infinity ? 0 : currentDragRatio;
 			var ratioOffset:Number = currentDragRatio - dragStartRatio;
 			value = dragStartValue + ratioOffset * _max;
+			event.updateAfterEvent();
 		}
 		
 		private function endThumbDragHandler( event:MouseEvent ):void
