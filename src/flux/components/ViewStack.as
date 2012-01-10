@@ -26,8 +26,11 @@ package flux.components
 {
 	import flash.display.DisplayObject;
 	import flash.events.Event;
+	import flux.events.IndexChangeEvent;
 	
 	[Event( type="flash.events.Event", name="change" )]
+	[Event( type="flux.events.IndexChangeEvent", name="indexChange" )]
+	
 	public class ViewStack extends Container 
 	{
 		// Properties
@@ -89,8 +92,10 @@ package flux.components
 			}
 			
 			if ( _visibleIndex == value ) return;
+			var oldIndex:int = _visibleIndex;
 			_visibleIndex = value
 			invalidate();
+			dispatchEvent( new IndexChangeEvent( IndexChangeEvent.INDEX_CHANGE, oldIndex, _visibleIndex, false, false ) );
 			dispatchEvent( new Event(Event.CHANGE, true) );
 		}
 		

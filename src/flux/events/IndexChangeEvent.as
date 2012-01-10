@@ -1,0 +1,60 @@
+/**
+ * IndexChangeEvent.as
+ * 
+ * Copyright (c) 2011 Jonathan Pace
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+package flux.events 
+{
+	import flash.events.Event;
+	
+	public class IndexChangeEvent extends Event 
+	{
+		public static const INDEX_CHANGE:String = "indexChange";
+		
+		private var _oldIndex		:int;
+		private var _newIndex		:int;
+		
+		public function IndexChangeEvent( type:String, oldIndex:int, newIndex:int, bubbles:Boolean = false, cancelable:Boolean = false ) 
+		{
+			super( type, false, cancelable );
+			_oldIndex = oldIndex;
+			_newIndex = newIndex;
+		}
+		
+		override public function clone():Event
+		{
+			return new IndexChangeEvent( IndexChangeEvent.INDEX_CHANGE, _oldIndex, _newIndex, bubbles, cancelable );
+		}
+		
+		public function get oldIndex():int 
+		{
+			return _oldIndex;
+		}
+		
+		public function get newIndex():int 
+		{
+			return _newIndex;
+		}
+		
+	}
+
+}
