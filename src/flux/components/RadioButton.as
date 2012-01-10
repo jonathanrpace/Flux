@@ -46,7 +46,7 @@ package flux.components
 			labelField.defaultTextFormat = textFormat;
 			labelField.autoSize = TextFieldAutoSize.LEFT;
 			
-			iconContainer.visible = false;
+			iconImage.visible = false;
 		}
 		
 		override protected function validate():void

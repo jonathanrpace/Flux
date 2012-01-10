@@ -50,15 +50,15 @@ package flux.components
 		protected var _selected			:Boolean = false;
 		protected var _toggle			:Boolean = false;
 		protected var _labelAlign		:String = TextFormatAlign.CENTER;
+		public    var userData			:*;
 		
 		// Child elements
 		protected var skin				:MovieClip;
-		protected var iconContainer		:Sprite;
+		protected var iconImage			:Image;
 		protected var labelField		:TextField;
 		
 		// Internal vars
 		protected var skinClass			:Class;
-		protected var iconIsInvalid		:Boolean = false;
 		
 		public function PushButton( skinClass:Class = null ) 
 		{
@@ -83,10 +83,10 @@ package flux.components
 			labelField = TextStyles.createTextField();
 			addChild( labelField );
 			
-			iconContainer = new Sprite();
-			iconContainer.mouseEnabled = false;
-			iconContainer.mouseChildren = false;
-			addChild(iconContainer);
+			iconImage = new Image();
+			iconImage.mouseEnabled = false;
+			iconImage.mouseChildren = false;
+			addChild(iconImage);
 			
 			addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
 			addEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
@@ -95,33 +95,11 @@ package flux.components
 		
 		override protected function validate():void
 		{
-			if ( iconIsInvalid )
-			{
-				if ( iconContainer.numChildren > 0 )
-				{
-					iconContainer.removeChildAt(0);
-				}
-				
-				if ( _icon )
-				{
-					var iconInstance:* = new _icon();
-					if ( iconInstance is DisplayObject )
-					{
-						iconContainer.addChild( DisplayObject(iconInstance) );
-					}
-					else if ( iconInstance is BitmapData )
-					{
-						iconContainer.addChild( new Bitmap(BitmapData(iconInstance)) );
-					}
-				}
-				
-				iconIsInvalid = false;
-			}
+			iconImage.validateNow();
+			iconImage.x = 6;
+			iconImage.y = (_height - iconImage.height) >> 1;
 			
-			iconContainer.x = 2;
-			iconContainer.y = (_height - iconContainer.height) >> 1;
-			
-			labelField.x = iconContainer.x + iconContainer.width + 4;
+			labelField.x = iconImage.x + iconImage.width + 4;
 			labelField.height = Math.min(labelField.textHeight + 4, _height);
 			labelField.y = (_height - (labelField.height)) >> 1;
 			
@@ -150,8 +128,6 @@ package flux.components
 			
 			labelField.defaultTextFormat = tf;
 			labelField.setTextFormat(tf);
-			
-			
 			
 			skin.width = _width;
 			skin.height = _height;
@@ -231,7 +207,7 @@ package flux.components
 		{
 			if ( _icon == value ) return;
 			_icon = value;
-			iconIsInvalid = true;
+			iconImage.source = value;
 			invalidate();
 		}
 
