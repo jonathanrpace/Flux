@@ -53,6 +53,7 @@ package flux.components
 		protected var _enabled			:Boolean = true;
 		protected var _isInvalid		:Boolean = false;
 		protected var _focusEnabled		:Boolean = false;
+		protected var _drawFocusRect	:Boolean = false;
 		protected var _isFocused		:Boolean = false;
 		
 		public function UIComponent() 
@@ -95,6 +96,7 @@ package flux.components
 			
 			if ( _isFocused )
 			{
+				focusRectSkin.visible = _drawFocusRect;
 				focusRectSkin.width = _width;
 				focusRectSkin.height = _height;
 			}
@@ -284,6 +286,15 @@ package flux.components
 			return _focusEnabled;
 		}
 		
+		public function set drawFocusRect(value:Boolean):void 
+		{
+			_drawFocusRect = value;
+		}
+		
+		public function get drawFocusRect():Boolean 
+		{
+			return _drawFocusRect;
+		}
 		
 		flux_internal function set isFocused( value:Boolean ):void
 		{
