@@ -145,12 +145,11 @@ package flux.layouts
 					case LayoutAlign.CENTRE :
 						shift = (visibleWidth - contentSize.width) >> 1;
 						break;
-						
-					for ( i = 0; i < content.numChildren; i++ )
-					{
-						child = UIComponent(content.getChildAt(i));
-						child.x += shift;
-					}
+				}
+				for ( i = 0; i < content.numChildren; i++ )
+				{
+					child = UIComponent(content.getChildAt(i));
+					child.x += shift;
 				}
 			}
 			
