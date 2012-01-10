@@ -91,8 +91,8 @@ package flux.components
 			addChild(list);
 			
 			editorDescriptorTable = { };
-			registerEditor( "InputField", InputField, "text" );
-			registerEditor( "NumberInputField", NumberInputField, "value" );
+			registerEditor( "TextInput", TextInput, "text" );
+			registerEditor( "NumberInput", NumberInput, "value" );
 			registerEditor( "DropDownMenu", DropDownMenu, "selectedItem" );
 			
 			list.addEventListener( Event.CHANGE, changeListHandler );
@@ -283,7 +283,7 @@ package flux.components
 					{
 						if ( field.value is Number )
 						{
-							field.editorID = "NumberInputField";
+							field.editorID = "NumberInput";
 						}
 						else if ( field.value is Boolean )
 						{
@@ -292,7 +292,7 @@ package flux.components
 						}
 						else
 						{
-							field.editorID = "InputField";
+							field.editorID = "TextInput";
 						}
 					}
 					
@@ -314,7 +314,10 @@ package flux.components
 				_dataProvider.removeEventListener( ArrayCollectionEvent.CHANGE, changeDataProviderHandler );
 			}
 			_dataProvider = value;
-			_dataProvider.addEventListener( ArrayCollectionEvent.CHANGE, changeDataProviderHandler );
+			if ( _dataProvider )
+			{
+				_dataProvider.addEventListener( ArrayCollectionEvent.CHANGE, changeDataProviderHandler );
+			}
 			dataIsInvalid = true;
 			invalidate();
 		}
