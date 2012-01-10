@@ -26,6 +26,11 @@ package
 {
 	/*
 	 * TODO
+	 * Panel, default button
+	 * TextArea
+	 * Label
+	 * Tooltips
+	 * Change InputField to TextInput
 	 */
 	
 	import flash.display.StageAlign;
@@ -39,8 +44,9 @@ package
 	import flux.events.DragAndDropEvent;
 	import flux.events.TabNavigatorEvent;
 	import flux.events.TreeEvent;
+	import flux.managers.PopUpManager;
 	import flux.util.FluxDeserializer;
-	import icons.Image;
+	import icons.*
 	
 	[SWF( backgroundColor="0x101010", frameRate="60" )]
 	public class FluxSandbox extends Container 
@@ -55,7 +61,7 @@ package
 		
 		public function FluxSandbox() 
 		{
-			
+			var myType:Class = FluxSandbox;
 		}
 		
 		override protected function init():void
@@ -73,7 +79,14 @@ package
 					
 					<MenuBar id="menuBar" width="100%"/>
 					<HBox width="100%" height="100%" >
-						<PropertyInspector id="propertyInspector" width="100%" height="100%" />
+					
+						<VBox width="100%" height="100%">
+							<PropertyInspector id="propertyInspector" width="100%" height="100%" />
+							<TextArea width="100%" height="100%" resizeToContent="true" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla viverra ultricies velit, id porttitor felis laoreet vitae. Mauris blandit ullamcorper magna, vitae accumsan massa adipiscing eget. Mauris condimentum egestas magna ac tristique. Mauris et ante nulla. Cras eget nisi sit amet augue tempor elementum a vitae justo."/>
+							<TextInput width="100%" height="100%" multiline="true" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla viverra ultricies velit, id porttitor felis laoreet vitae. Mauris blandit ullamcorper magna, vitae accumsan massa adipiscing eget. Mauris condimentum egestas magna ac tristique. Mauris et ante nulla. Cras eget nisi sit amet augue tempor elementum a vitae justo."/>
+						
+						</VBox>
+						
 					
 						<List id="list" width="100%" height="100%" allowMultipleSelection="false" />
 						<Tree id="tree" width="100%" height="100%" allowMultipleSelection="true" showRoot="false" allowDragAndDrop="true" />
@@ -96,10 +109,24 @@ package
 								
 								<NumericStepper width="100%" min="-10" max="10" />
 								<ProgressBar width="100%" progress="0.4" indeterminate="true" />
+								<Label text="I'm a label"/>
 								<ColorPicker width="100%" />
 							</VBox>
+							
+							<ScrollPane width = "100%" height = "100%" label="Collapsible Panels">
+								
+								<CollapsiblePanel width="100%" height="200"/>
+								<CollapsiblePanel width="100%" height="200"/>
+								<CollapsiblePanel width="100%" height="200"/>
+								<CollapsiblePanel width="100%" height="200"/>
+								
+								<layout>
+									<VerticalLayout/>
+								</layout>
+								
+							</ScrollPane>
 						
-							<InputField width="100%" label="InputField" />
+							<TextInput width="100%" label="TextInput" />
 							<DropDownMenu id="dropDownMenu" width="100%" label="DropDownMenu" />
 							<PushButton label="Button 2 longer" toggle="false" />
 							<PushButton label="Button 3 with a really long label" toggle="true" resizeToContent="true" />
@@ -125,6 +152,7 @@ package
 							<PushButton label="Cancel"/>
 						</controlBar>
 					</Panel>
+					
 				</VBox>
 				
 			</Container>
@@ -133,11 +161,12 @@ package
 			
 			// Create an inspectable data provider for the property inspector.
 			var propertyInspectorDataProvider:ArrayCollection = new ArrayCollection();
-			propertyInspectorDataProvider.push( new InspectableObject() );
+			propertyInspectorDataProvider.addItem( new InspectableObject() );
 			propertyInspector.dataProvider = propertyInspectorDataProvider;
 			
 			// Build an example data provider
 			var dp:Object = { label:"root" };
+			dp.icon = Folder16x16;
 			dp.children = createDataProvider(15);
 			// Randomly insert second-level of data
 			for ( var i:int = 0; i < dp.children.length; i++ )
@@ -145,12 +174,19 @@ package
 				var data:Object = dp.children[i];
 				if ( i < 7 )
 				{
+					data.icon = Folder16x16;
 					data.children = createDataProvider(4);
 				}
 			}
 			
 			// Bind multiple controls to the same data provider.
 			list.dataProvider = dp.children;
+			list.filterFunction = function (item:Object):Boolean
+			{
+				return item.index > 2 && item.index < 7;
+			}
+			
+			
 			tree.dataProvider = dp;
 			dropDownMenu.dataProvider = dp.children;
 			menuBar.dataProvider = dp.children;
@@ -167,6 +203,9 @@ package
 			
 			stage.addEventListener( FocusEvent.FOCUS_IN, stageFocusInHandler );
 			stage.addEventListener( FocusEvent.FOCUS_OUT, stageFocusOutHandler );
+			
+			new PopUpManager(stage);
+			Alert.show("Alert", "This is an alert", ["Cancel", "OK"], Info32x32);
 		}
 		
 		private function stageFocusInHandler( event:FocusEvent ):void
@@ -218,7 +257,7 @@ package
 			var dp:ArrayCollection = new ArrayCollection();
 			for ( var i:int = 0; i < numItems; i++ )
 			{
-				dp.push( { label:"Item " + i, icon:Image } );
+				dp.addItem( { label:"Item " + i, index:i, icon:FileIcon16x16 } );
 			}
 			return dp;
 		}
