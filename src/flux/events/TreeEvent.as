@@ -41,6 +41,11 @@ package flux.events
 			_item = item;
 		}
 		
+		override public function clone():Event
+		{
+			return new TreeEvent( type, _item, bubbles, cancelable );
+		}
+		
 		public function get item():Object
 		{
 			return _item;

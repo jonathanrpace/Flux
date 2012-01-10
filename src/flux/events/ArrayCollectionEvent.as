@@ -42,6 +42,11 @@ package flux.events
 			_item = item;
 		}
 		
+		override public function clone():Event
+		{
+			return new ArrayCollectionEvent( type, _kind, _index, _item );
+		}
+		
 		public function get kind():int
 		{
 			return _kind;

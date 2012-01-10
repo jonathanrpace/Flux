@@ -44,6 +44,11 @@ package flux.events
 			_value = value;
 		}
 		
+		override public function clone():Event
+		{
+			return new PropertyInspectorEvent( type, _hosts, _property, _value, bubbles, cancelable );
+		}
+		
 		public function get hosts():Array
 		{
 			return _hosts.slice();

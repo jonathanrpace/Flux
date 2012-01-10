@@ -47,6 +47,11 @@ package flux.events
 			_newValue = newValue;
 		}
 		
+		override public function clone():Event
+		{
+			return new PropertyChangeEvent( type, _oldValue, _newValue );
+		}
+		
 		public function get propertyName():String
 		{
 			return _propertyName;

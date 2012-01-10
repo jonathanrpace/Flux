@@ -38,6 +38,11 @@ package flux.events
 			_selectedItem = selectedItem;
 		}
 		
+		override public function clone():Event
+		{
+			return new SelectEvent( type, _selectedItem, bubbles, cancelable );
+		}
+		
 		public function get selectedItem():Object
 		{
 			return _selectedItem;

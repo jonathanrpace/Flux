@@ -46,6 +46,11 @@ package flux.events
 			_index = index;
 		}
 		
+		override public function clone():Event
+		{
+			return new DragAndDropEvent( type, _item, _targetCollection, _index );
+		}
+		
 		public function get item():Object
 		{
 			return _item;

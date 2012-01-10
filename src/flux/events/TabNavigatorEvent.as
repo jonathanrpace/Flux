@@ -38,6 +38,11 @@ package flux.events
 			_tabIndex = tabIndex;
 		}
 		
+		override public function clone():Event
+		{
+			return new TabNavigatorEvent( type, _tabIndex, bubbles );
+		}
+		
 		public function get tabIndex():int
 		{
 			return _tabIndex;
