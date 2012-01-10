@@ -67,8 +67,8 @@ package flux.components
 			openIcon.y = Math.round((_height - openIcon.height) * 0.5);
 			openIcon.visible = _list && _data && _list.dataDescriptor.hasChildren(_data);
 			
-			iconContainer.x = openIcon.x + openIcon.width + 2;
-			labelField.x = iconContainer.x + iconContainer.width + 4;
+			iconImage.x = openIcon.x + openIcon.width + 2;
+			labelField.x = iconImage.x + iconImage.width + 4;
 			labelField.width = _width - labelField.x;
 		}
 		
