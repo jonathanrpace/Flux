@@ -64,7 +64,7 @@ package flux.components
 		private var brightnessCursor		:Sprite;
 		private var swatchBorder			:Sprite;
 		private var swatch					:Shape;
-		private var inputField				:InputField;
+		private var inputField				:TextInput;
 		private var hexLabel				:TextField;
 		
 		// Internal vars
@@ -134,7 +134,7 @@ package flux.components
 			hueSaturationBorder.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownColorAreaHandler);
 			brightnessBorder.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownBrightnessAreaHandler);
 			
-			inputField = new InputField();
+			inputField = new TextInput();
 			inputField.maxChars = 6;
 			inputField.width = 50;
 			inputField.addEventListener(Event.CHANGE, changeInputFieldHandler);

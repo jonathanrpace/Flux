@@ -29,7 +29,8 @@ package flux.components
 	import flash.events.KeyboardEvent;
 	import flash.events.TextEvent;
 	import flash.ui.Keyboard;
-	public class NumberInputField extends InputField 
+	
+	public class NumberInput extends TextInput 
 	{
 		// Properties
 		private var _value				:Number;
@@ -37,7 +38,7 @@ package flux.components
 		private var _max				:Number = Number.MAX_VALUE;
 		private var _numDecimalPlaces	:uint = 2;
 		
-		public function NumberInputField() 
+		public function NumberInput() 
 		{
 			
 		}

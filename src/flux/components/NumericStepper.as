@@ -47,7 +47,7 @@ package flux.components
 		private var _gap				:int = styleGap;
 		
 		// Child elements
-		private var inputField			:NumberInputField;
+		private var inputField			:NumberInput;
 		private var upBtn				:PushButton;
 		private var downBtn				:PushButton;
 		
@@ -69,7 +69,7 @@ package flux.components
 		{
 			focusEnabled = true;
 			
-			inputField = new NumberInputField();
+			inputField = new NumberInput();
 			inputField.focusEnabled = false;
 			addChild(inputField);
 			
