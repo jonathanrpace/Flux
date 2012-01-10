@@ -36,7 +36,7 @@ package flux.data
 	import flux.events.ArrayCollectionEvent;
 	
 	[Event( type="flux.events.ArrayCollectionEvent", name="change" )]
-	public dynamic class ArrayCollection extends Proxy implements IEventDispatcher
+	public class ArrayCollection extends Proxy implements IEventDispatcher
 	{
 		private var array		:Array;
 		private var dispatcher	:EventDispatcher;
@@ -73,6 +73,11 @@ package flux.data
 			return array.indexOf(item);
 		}
 		
+		public function getItemAt( index:int ):*
+		{
+			return array[index];
+		}
+		
 		public function removeItem( item:* ):void
 		{
 			var index:int = array.indexOf(item);
@@ -84,9 +89,14 @@ package flux.data
 			removeItemAt(index);
 		}
 		
-		public function push( value:* ):void
+		public function addItem( value:* ):void
 		{
 			this[array.length] = value;
+		}
+		
+		public function contains( item:* ):Boolean
+		{
+			return source.indexOf(item) != -1;
 		}
 		
 		////////////////////////////////////////////////
