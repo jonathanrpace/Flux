@@ -627,6 +627,16 @@ package flux.components
 			return _selectedItems.slice();
 		}
 		
+		public function set selectedItem( value:Object ):void
+		{
+			selectedItems = value == null ? [] : [value];
+		}
+		
+		public function get selectedItem():Object
+		{
+			return _selectedItems.length == 0 ? null : _selectedItems[0];
+		}
+		
 		public function get maxScrollY():int 
 		{ 
 			return vScrollBar.max; 
