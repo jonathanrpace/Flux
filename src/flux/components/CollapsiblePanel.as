@@ -31,7 +31,7 @@ package flux.components
 	public class CollapsiblePanel extends Panel 
 	{
 		// Properties
-		private var _collapsed			:Boolean = false;
+		private var _opened			:Boolean = true;
 		
 		// Internal vars
 		private var openedHeight		:int = 0;
@@ -61,7 +61,7 @@ package flux.components
 		{
 			if ( mouseY < _titleBarHeight )
 			{
-				collapsed = !_collapsed;
+				opened = !_opened;
 			}
 		}
 		
@@ -69,25 +69,25 @@ package flux.components
 		// Getters/Setters
 		////////////////////////////////////////////////
 		
-		public function set collapsed( value:Boolean ):void
+		public function set opened( value:Boolean ):void
 		{
-			if ( value == _collapsed ) return;
-			_collapsed = value;
-			_height = _collapsed ? _titleBarHeight : openedHeight;
+			if ( value == _opened ) return;
+			_opened = value;
+			_height = _opened ? openedHeight : _titleBarHeight;
 			dispatchEvent( new Event( Event.RESIZE, true ) );
 			invalidate();
 		}
 		
-		public function get collapsed():Boolean
+		public function get opened():Boolean
 		{
-			return _collapsed;
+			return _opened;
 		}
 		
 		override public function set height( value:Number ):void
 		{
 			super.height = value;
 			openedHeight = value;
-			_collapsed = false;
+			_opened = true;
 		}
 	}
 }
