@@ -28,9 +28,11 @@ package flux.components
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Rectangle;
+	import flux.events.ContainerEvent;
 	import flux.layouts.AbsoluteLayout;
 	import flux.layouts.ILayout;
 	
+	[Event( type="flux.events.ContainerEvent", name="childrenChanged" )]
 	public class Container extends UIComponent 
 	{
 		// Properties
@@ -57,6 +59,7 @@ package flux.components
 			content.addChildAt(child, index);
 			invalidate();
 			onChildrenChanged( UIComponent(child), index, true );
+			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
 			return child;
 		}
 		
@@ -64,7 +67,8 @@ package flux.components
 		{
 			content.addChild(child);
 			invalidate();
-			onChildrenChanged( UIComponent(child), content.numChildren-1, true );
+			onChildrenChanged( UIComponent(child), content.numChildren - 1, true );
+			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
 			return child;
 		}
 		
@@ -73,6 +77,7 @@ package flux.components
 			invalidate();
 			var child:DisplayObject = content.removeChildAt(index);
 			onChildrenChanged( UIComponent(child), index, false );
+			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
 			return child;
 		}
 		
@@ -82,6 +87,7 @@ package flux.components
 			content.removeChild(child);
 			invalidate();
 			onChildrenChanged( UIComponent(child), index, false );
+			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
 			return child;
 		}
 		
@@ -179,6 +185,7 @@ package flux.components
 		{
 			if ( event.target.parent == content )
 			{
+				event.stopImmediatePropagation();
 				invalidate();
 			}
 		}
