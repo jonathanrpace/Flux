@@ -44,13 +44,14 @@ package flux.components
 		public static var styleTitleBarHeight	:int = 22;
 		
 		// Properties
+		public   var dragEnabled		:Boolean = false;
 		protected var _titleBarHeight	:int = Panel.styleTitleBarHeight;
 		
 		// Child elements
-		private var background		:Sprite;
-		private var _controlBar		:Container;
-		private var titleField		:TextField;
-		private var closeBtn		:PushButton;
+		protected var background	:Sprite;
+		protected var _controlBar	:Container;
+		protected var titleField	:TextField;
+		protected var closeBtn		:PushButton;
 		
 		public function Panel() 
 		{
@@ -84,6 +85,8 @@ package flux.components
 			_width = background.width;
 			_height = background.height;
 			
+			addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
+			
 			padding = 4;
 		}
 		
@@ -100,7 +103,7 @@ package flux.components
 			background.width = _width;
 			background.height = _height;
 			
-			titleField.x = _paddingLeft;
+			titleField.x = 4;
 			titleField.width = _width - (_paddingLeft + _paddingRight);
 			titleField.height = Math.min(titleField.textHeight + 4, _height);
 			titleField.y = (_titleBarHeight - (titleField.height)) >> 1;
@@ -121,6 +124,20 @@ package flux.components
 		////////////////////////////////////////////////
 		// Event handlers
 		////////////////////////////////////////////////
+		
+		private function mouseDownHandler( event:MouseEvent ):void
+		{
+			if ( dragEnabled == false ) return;
+			if ( event.target == closeBtn ) return;
+			if ( mouseY > _titleBarHeight ) return;
+			startDrag(false);
+			stage.addEventListener( MouseEvent.MOUSE_UP, mouseUpStageHandler );
+		}
+		
+		private function mouseUpStageHandler( event:MouseEvent ):void
+		{
+			stopDrag();
+		}
 		
 		private function clickCloseBtnHandler( event:MouseEvent ):void
 		{
