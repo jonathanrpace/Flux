@@ -31,6 +31,8 @@ package flux.components
 		function get x():Number;
 		function set y( value:Number ):void;
 		function get y():Number;
+		function set label( value:String ):void;
+		function get label():String;
 		function set width( value:Number ):void;
 		function get width():Number;
 		function set height( value:Number ):void;
