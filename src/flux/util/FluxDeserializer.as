@@ -25,17 +25,18 @@
 package flux.util 
 {
 	import flash.utils.getDefinitionByName;
+	
 	import flux.components.*;
 	import flux.layouts.*;
 	
 	public class FluxDeserializer 
 	{
-		public static function deserialize( xml:XML, topLevel:Container ):UIComponent
+		public static function deserialize( xml:XML, topLevel:UIComponent ):UIComponent
 		{
 			return parseComp( xml, topLevel, null, topLevel );
 		}
 		
-		private static function parseComp( xml:XML, topLevel:Container, parent:Container = null, instance:UIComponent = null ):UIComponent
+		private static function parseComp( xml:XML, topLevel:UIComponent, parent:UIComponent = null, instance:UIComponent = null ):UIComponent
 		{
 			if ( instance == null )
 			{
@@ -46,7 +47,7 @@ package flux.util
 			
 			if ( topLevel == null )
 			{
-				topLevel = instance as Container;
+				topLevel = instance;
 			}
 			
 			parseAttributes(xml, instance, topLevel);
@@ -56,42 +57,39 @@ package flux.util
 				parent.addChild(instance);
 			}
 			
-			if ( instance is Container )
+			var childNodes:XMLList = xml.children();
+			for ( var i:int = 0; i < childNodes.length(); i++ )
 			{
-				var container:Container = Container(instance);
+				var childNode:XML = childNodes[i];
+				var childNodeName:String = childNode.name();
 				
-				var childNodes:XMLList = xml.children();
-				for ( var i:int = 0; i < childNodes.length(); i++ )
+				if ( instance.hasOwnProperty(childNodeName) )
 				{
-					var childNode:XML = childNodes[i];
-					var childNodeName:String = childNode.name();
-					
-					if ( container.hasOwnProperty(childNodeName) )
+					var child:Object = instance[childNodeName];
+					if ( child is ILayout )
 					{
-						if ( container[childNodeName] is ILayout )
-						{
-							var layoutInstanceNode:XML = childNode.children()[0];
-							var layoutType:Class = Class(getDefinitionByName( "flux.layouts." + layoutInstanceNode.name() ));
-							var layoutInstance:ILayout = new layoutType();
-							parseAttributes( childNode, layoutInstance, topLevel );
-							container.layout = layoutInstance;
-							continue;
-						}
-						else if ( container[childNodeName] is Container )
-						{
-							parseComp( childNode, topLevel, null, container[childNodeName] );
-							continue;
-						}
+						var layoutInstanceNode:XML = childNode.children()[0];
+						var layoutType:Class = Class(getDefinitionByName( "flux.layouts." + layoutInstanceNode.name() ));
+						var layoutInstance:ILayout = new layoutType();
+						parseAttributes( layoutInstanceNode, layoutInstance, topLevel );
+						instance[childNodeName] = layoutInstance;
+						continue;
 					}
-					// Assume it's a child component
-					parseComp( childNode, topLevel, container );
+					else if ( child is UIComponent )
+					{
+						parseComp( childNode, topLevel, null, UIComponent(child) );
+						continue;
+					}
 				}
+				// Assume it's a child component
+				parseComp( childNode, topLevel, instance );
 			}
+			
 			
 			return instance;
 		}
 		
-		private static function parseAttributes( xml:XML, instance:Object, topLevel:Container ):void
+		private static function parseAttributes( xml:XML, instance:Object, topLevel:UIComponent ):void
 		{
 			for each ( var attribute:XML in xml.attributes() )
 			{
@@ -145,19 +143,24 @@ package flux.util
 		DropDownMenu;
 		HBox;
 		HorizontalLayout;
-		InputField;
+		HRule;
+		TextInput;
+		Label;
 		NumericStepper;
 		MenuBar;
 		Panel;
+		CollapsiblePanel;
 		ProgressBar;
 		PropertyInspector;
 		RadioButton;
 		RadioButtonGroup;
 		ScrollPane;
 		TabNavigator;
+		TextArea;
 		Tree;
 		VBox;
 		VerticalLayout;
+		VRule;
 	}
 
 }

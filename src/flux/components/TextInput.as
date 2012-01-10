@@ -1,5 +1,5 @@
 /**
- * InputField.as
+ * TextInput.as
  * 
  * Copyright (c) 2011 Jonathan Pace
  * 
@@ -34,13 +34,13 @@ package flux.components
 	import flux.skins.InputFieldSkin;
 	import flux.util.SelectionColor;
 	
-	public class InputField extends UIComponent 
+	public class TextInput extends UIComponent 
 	{
 		// Child elements
 		protected var skin				:Sprite;
 		protected var textField			:TextField;
 		
-		public function InputField() 
+		public function TextInput() 
 		{
 			
 		}
@@ -60,6 +60,7 @@ package flux.components
 			_height = skin.height;
 			
 			textField = TextStyles.createTextField();
+			textField.multiline = false;
 			textField.selectable = true;
 			textField.type = TextFieldType.INPUT;
 			textField.mouseEnabled = true;
@@ -73,10 +74,19 @@ package flux.components
 		
 		override protected function validate():void
 		{
+			if ( textField.multiline )
+			{
+				textField.height = _height;
+				textField.y = 0;
+			}
+			else
+			{
+				textField.height = Math.min(textField.textHeight + 4, _height);
+				textField.y = (_height - (textField.height)) >> 1;
+			}
+			
 			textField.x = 4;
 			textField.width = _width - 4;
-			textField.height = Math.min(textField.textHeight + 4, _height);
-			textField.y = (_height - (textField.height)) >> 1;
 			
 			skin.width = _width;
 			skin.height = _height;
@@ -133,6 +143,18 @@ package flux.components
 		public function get text():String
 		{
 			return textField.text;
+		}
+		
+		public function set multiline( value:Boolean ):void
+		{
+			if ( textField.multiline == value ) return;
+			textField.multiline = textField.wordWrap = value;
+			invalidate();
+		}
+		
+		public function get multiline():Boolean
+		{
+			return textField.multiline;
 		}
 	}
 }
