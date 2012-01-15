@@ -28,17 +28,20 @@ package flux.layouts
 	import flash.display.DisplayObjectContainer;
 	import flash.display.InteractiveObject;
 	import flash.geom.Rectangle;
+	
 	import flux.components.UIComponent;
 	
 	public class VerticalLayout implements ILayout 
 	{
 		public var spacing				:int;
 		public var verticalAlign		:String;
+		public var horizontalAlign		:String;
 		
-		public function VerticalLayout( spacing:int = 4, verticalAlign:String = "none", horizontalAlign:String = "none" ) 
+		public function VerticalLayout( spacing:int = 0, verticalAlign:String = "none", horizontalAlign:String = "none" ) 
 		{
 			this.spacing = spacing;
 			this.verticalAlign = verticalAlign;
+			this.horizontalAlign = horizontalAlign;
 		}
 		
 		public function layout(content:DisplayObjectContainer, visibleWidth:Number, visibleHeight:Number, allowProportional:Boolean = true):Rectangle 
@@ -55,18 +58,22 @@ package flux.layouts
 				var numProportionalChildren:int = 0;
 				for ( var i:int = 0; i < content.numChildren; i++ )
 				{
-					var child:UIComponent = UIComponent(content.getChildAt(i));
-					if ( child.excludeFromLayout ) continue;
+					var child:DisplayObject = content.getChildAt(i);
+					var component:UIComponent = child as UIComponent;
+					if ( component )
+					{
+						if ( component.excludeFromLayout ) continue;
+						if ( isNaN(component.percentHeight) )
+						{
+							component.validateNow();
+							totalExplicitSize += child.height;
+						}
+						else
+						{
+							numProportionalChildren++;
+						}
+					}
 					
-					if ( isNaN(child.percentHeight) )
-					{
-						child.validateNow();
-						totalExplicitSize += child.height;
-					}
-					else
-					{
-						numProportionalChildren++;
-					}
 				}
 				var proportionalSpaceRemaining:int = (visibleHeight-(spacing*(content.numChildren-1))) - totalExplicitSize;
 				proportionalSlotSize = proportionalSpaceRemaining / numProportionalChildren;
@@ -78,25 +85,31 @@ package flux.layouts
 			var errorAccumulator:Number = 0; 
 			for ( i = 0; i < content.numChildren; i++ )
 			{
-				child = UIComponent(content.getChildAt(i));
-				if ( child.excludeFromLayout ) continue;
+				child = content.getChildAt(i);
+				component = child as UIComponent;
 				
-				var isProportionalWidth:Boolean = allowProportional && isNaN( child.percentWidth ) == false;
-				var isProportionalHeight:Boolean = allowProportional && isNaN( child.percentHeight ) == false;
+				var isProportionalWidth:Boolean = false;
+				var isProportionalHeight:Boolean = false;
+				if ( component )
+				{
+					if ( component.excludeFromLayout ) continue;
+					isProportionalWidth = allowProportional && isNaN( component.percentWidth ) == false;
+					isProportionalHeight = allowProportional && isNaN( component.percentHeight ) == false;
+				}
 				
-				switch ( verticalAlign )
+				switch ( horizontalAlign )
 				{
 					case LayoutAlign.LEFT :
 						child.x = 0;
 						if ( isProportionalWidth )
 						{
-							child.width = (visibleWidth - child.x) * child.percentWidth * 0.01;
+							child.width = (visibleWidth - child.x) * component.percentWidth * 0.01;
 						}
 						break;
 					case LayoutAlign.RIGHT :
 						if ( isProportionalWidth )
 						{
-							child.width = visibleWidth * child.percentWidth * 0.01;
+							child.width = visibleWidth * component.percentWidth * 0.01;
 						}
 						child.x = visibleWidth - child.width;
 						
@@ -104,28 +117,31 @@ package flux.layouts
 					case LayoutAlign.CENTRE :
 						if ( isProportionalWidth )
 						{
-							child.width = visibleWidth * child.percentWidth * 0.01;
+							child.width = visibleWidth * component.percentWidth * 0.01;
 						}
 						child.x = (visibleWidth - child.width) * 0.5;
 						break;
 					default :
 						if ( isProportionalWidth )
 						{
-							child.width = (visibleWidth - child.x) * child.percentWidth * 0.01;
+							child.width = (visibleWidth - child.x) * component.percentWidth * 0.01;
 						}
 						break;
 				}
 				
 				if ( isProportionalHeight )
 				{
-					var fractionalValue:Number = proportionalSlotSize * child.percentHeight * 0.01 + errorAccumulator;
+					var fractionalValue:Number = proportionalSlotSize * component.percentHeight * 0.01 + errorAccumulator;
 					var roundedValue:int = Math.round( fractionalValue );
 					child.height = roundedValue;
 					errorAccumulator = fractionalValue-roundedValue;
 				}
 				
 				child.y = pos;
-				child.validateNow();
+				if ( component )
+				{
+					component.validateNow();
+				}
 				pos += child.height + spacing;
 				
 				contentSize.width = child.x + child.width > contentSize.width ? child.x + child.width : contentSize.width;
@@ -146,7 +162,7 @@ package flux.layouts
 				}
 				for ( i = 0; i < content.numChildren; i++ )
 				{
-					child = UIComponent(content.getChildAt(i));
+					child = content.getChildAt(i);
 					child.y += shift;
 				}
 			}

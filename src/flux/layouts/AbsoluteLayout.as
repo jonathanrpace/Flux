@@ -24,8 +24,10 @@
 
 package flux.layouts 
 {
+	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.geom.Rectangle;
+	
 	import flux.components.UIComponent;
 	
 	public class AbsoluteLayout implements ILayout 
@@ -41,24 +43,28 @@ package flux.layouts
 			
 			for ( var i:int = 0; i < content.numChildren; i++ )
 			{
-				var child:UIComponent = UIComponent(content.getChildAt(i));
+				var child:DisplayObject = content.getChildAt(i);
 				
-				if ( child.excludeFromLayout ) continue;
+				var component:UIComponent = child as UIComponent;
+				if ( component && component.excludeFromLayout ) continue;
 				
-				if ( allowProportional )
+				if ( component && allowProportional )
 				{
-					if ( isNaN(child.percentWidth) == false )
+					if ( isNaN(component.percentWidth) == false )
 					{
 						child.width = visibleWidth - child.x;
 					}
 					
-					if ( isNaN(child.percentHeight) == false )
+					if ( isNaN(component.percentHeight) == false )
 					{
 						child.height = visibleHeight - child.y;
 					}
 				}
 				
-				child.validateNow();
+				if ( component )
+				{
+					component.validateNow();
+				}
 				
 				contentSize.width = child.x + child.width > contentSize.width ? child.x + child.width : contentSize.width;
 				contentSize.height = child.y + child.height > contentSize.height ? child.x + child.height : contentSize.height;

@@ -36,7 +36,7 @@ package flux.layouts
 		public var horizontalAlign		:String;
 		public var verticalAlign		:String;
 		
-		public function HorizontalLayout( spacing:int = 4, horizontalAlign:String = "left", verticalAlign:String = "none" ) 
+		public function HorizontalLayout( spacing:int = 0, horizontalAlign:String = "left", verticalAlign:String = "none" ) 
 		{
 			this.spacing = spacing;
 			this.horizontalAlign = horizontalAlign;
@@ -51,24 +51,28 @@ package flux.layouts
 						
 			if ( allowProportional )
 			{
-				// Sum up the total height of all children with explicit widths.
-				// We can then share the remainder amongst children with percentWidth defined.
+				// Sum up the total height of all children with explicit heights.
+				// We can then share the remainder amongst children with percentHeight defined.
 				var totalExplicitSize:int = 0;
 				var numProportionalChildren:int = 0;
 				for ( var i:int = 0; i < content.numChildren; i++ )
 				{
-					var child:UIComponent = UIComponent(content.getChildAt(i));
-					if ( child.excludeFromLayout ) continue;
+					var child:DisplayObject = content.getChildAt(i);
+					var component:UIComponent = child as UIComponent;
+					if ( component )
+					{
+						if ( component.excludeFromLayout ) continue;
+						if ( isNaN(component.percentWidth) )
+						{
+							component.validateNow();
+							totalExplicitSize += child.width;
+						}
+						else
+						{
+							numProportionalChildren++;
+						}
+					}
 					
-					if ( isNaN(child.percentWidth) )
-					{
-						child.validateNow();
-						totalExplicitSize += child.width;
-					}
-					else
-					{
-						numProportionalChildren++;
-					}
 				}
 				var proportionalSpaceRemaining:int = (visibleWidth-(spacing*(content.numChildren-1))) - totalExplicitSize;
 				proportionalSlotSize = proportionalSpaceRemaining / numProportionalChildren;
@@ -80,54 +84,63 @@ package flux.layouts
 			var errorAccumulator:Number = 0; 
 			for ( i = 0; i < content.numChildren; i++ )
 			{
-				child = UIComponent(content.getChildAt(i));
-				if ( child.excludeFromLayout ) continue;
+				child = content.getChildAt(i);
+				component = child as UIComponent;
 				
-				var isProportionalWidth:Boolean = allowProportional && isNaN( child.percentWidth ) == false;
-				var isProportionalHeight:Boolean = allowProportional && isNaN( child.percentHeight ) == false;
+				var isProportionalWidth:Boolean = false;
+				var isProportionalHeight:Boolean = false;
+				if ( component )
+				{
+					if ( component.excludeFromLayout ) continue;
+					isProportionalWidth = allowProportional && isNaN( component.percentWidth ) == false;
+					isProportionalHeight = allowProportional && isNaN( component.percentHeight ) == false;
+				}
 				
 				switch ( verticalAlign )
 				{
 					case LayoutAlign.TOP :
-						child.x = 0;
+						child.y = 0;
 						if ( isProportionalHeight )
 						{
-							child.height = (visibleHeight - child.y) * child.percentHeight * 0.01;
+							child.height = (visibleHeight - child.y) * component.percentHeight * 0.01;
 						}
 						break;
 					case LayoutAlign.BOTTOM :
 						if ( isProportionalHeight )
 						{
-							child.height = visibleHeight * child.percentHeight * 0.01;
+							child.height = visibleHeight * component.percentHeight * 0.01;
 						}
-						child.x = visibleWidth - child.height;
+						child.y = visibleHeight - child.height;
 						
 						break;
 					case LayoutAlign.CENTRE :
 						if ( isProportionalHeight )
 						{
-							child.height = visibleHeight * child.percentHeight * 0.01;
+							child.height = visibleHeight * component.percentHeight * 0.01;
 						}
-						child.x = (visibleWidth - child.height) * 0.5;
+						child.y = (visibleHeight - child.height) * 0.5;
 						break;
 					default :
 						if ( isProportionalHeight )
 						{
-							child.height = (visibleHeight - child.y) * child.percentHeight * 0.01;
+							child.height = (visibleHeight - child.y) * component.percentHeight * 0.01;
 						}
 						break;
 				}
 				
 				if ( isProportionalWidth )
 				{
-					var fractionalValue:Number = proportionalSlotSize * child.percentWidth * 0.01 + errorAccumulator;
+					var fractionalValue:Number = proportionalSlotSize * component.percentWidth * 0.01 + errorAccumulator;
 					var roundedValue:int = Math.round( fractionalValue );
 					child.width = roundedValue;
 					errorAccumulator = fractionalValue-roundedValue;
 				}
 				
 				child.x = pos;
-				child.validateNow();
+				if ( component )
+				{
+					component.validateNow();
+				}
 				pos += child.width + spacing;
 				
 				contentSize.width = child.x + child.width > contentSize.width ? child.x + child.width : contentSize.width;

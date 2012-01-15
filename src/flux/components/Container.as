@@ -28,6 +28,7 @@ package flux.components
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Rectangle;
+	
 	import flux.events.ContainerEvent;
 	import flux.layouts.AbsoluteLayout;
 	import flux.layouts.ILayout;
@@ -58,7 +59,7 @@ package flux.components
 		{
 			content.addChildAt(child, index);
 			invalidate();
-			onChildrenChanged( UIComponent(child), index, true );
+			onChildrenChanged( child, index, true );
 			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
 			return child;
 		}
@@ -67,7 +68,7 @@ package flux.components
 		{
 			content.addChild(child);
 			invalidate();
-			onChildrenChanged( UIComponent(child), content.numChildren - 1, true );
+			onChildrenChanged( child, content.numChildren - 1, true );
 			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
 			return child;
 		}
@@ -76,7 +77,7 @@ package flux.components
 		{
 			invalidate();
 			var child:DisplayObject = content.removeChildAt(index);
-			onChildrenChanged( UIComponent(child), index, false );
+			onChildrenChanged( child, index, false );
 			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
 			return child;
 		}
@@ -86,7 +87,7 @@ package flux.components
 			var index:int = content.getChildIndex(child);
 			content.removeChild(child);
 			invalidate();
-			onChildrenChanged( UIComponent(child), index, false );
+			onChildrenChanged( child, index, false );
 			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
 			return child;
 		}
@@ -156,7 +157,7 @@ package flux.components
 		 * @param	index The index of the child.
 		 * @param	added If true, the child has just been added, otherwise it's just been removed.
 		 */
-		protected function onChildrenChanged( child:UIComponent, index:int, added:Boolean ):void
+		protected function onChildrenChanged( child:DisplayObject, index:int, added:Boolean ):void
 		{
 			// Intentionally blank
 		}

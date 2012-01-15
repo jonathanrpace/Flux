@@ -51,7 +51,7 @@ package flux.components
 		protected var background	:Sprite;
 		protected var _controlBar	:Container;
 		protected var titleField	:TextField;
-		protected var closeBtn		:PushButton;
+		protected var closeBtn		:Button;
 		
 		public function Panel() 
 		{
@@ -78,7 +78,7 @@ package flux.components
 			titleField = TextStyles.createTextField( true );
 			addRawChild(titleField);
 			
-			closeBtn = new PushButton( PanelCloseBtnSkin );
+			closeBtn = new Button( PanelCloseBtnSkin );
 			addRawChild(closeBtn);
 			closeBtn.addEventListener(MouseEvent.CLICK, clickCloseBtnHandler);
 			
@@ -103,6 +103,7 @@ package flux.components
 			background.width = _width;
 			background.height = _height;
 			
+			titleField.text = _label;
 			titleField.x = 4;
 			titleField.width = _width - (_paddingLeft + _paddingRight);
 			titleField.height = Math.min(titleField.textHeight + 4, _height);
@@ -163,16 +164,6 @@ package flux.components
 		public function get titleBarHeight():int
 		{
 			return _titleBarHeight;
-		}
-		
-		public function set title( value:String ):void
-		{
-			titleField.text = value;
-		}
-		
-		public function get title():String
-		{
-			return titleField.text;
 		}
 		
 		public function set showCloseButton( value:Boolean ):void

@@ -24,15 +24,18 @@
 
 package flux.components 
 {
+	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
+	
 	import flux.events.PropertyChangeEvent;
 	import flux.events.TabNavigatorEvent;
 	import flux.layouts.HorizontalLayout;
 	import flux.layouts.LayoutAlign;
 	import flux.skins.TabNavigatorSkin;
+	import flux.util.BindingUtil;
 	
 	[Event( type="flux.events.TabNavigatorEvent", name="closeTab" )]
 	public class TabNavigator extends ViewStack 
@@ -104,37 +107,31 @@ package flux.components
 		// Event handlers
 		////////////////////////////////////////////////
 		
-		override protected function onChildrenChanged( child:UIComponent, index:int, added:Boolean ):void
+		override protected function onChildrenChanged( child:DisplayObject, index:int, added:Boolean ):void
 		{
 			super.onChildrenChanged( child, index, added );
 			
 			if ( added )
 			{
-				child.addEventListener( "propertyChange_label", childPropertyChangeHandler );
-				child.addEventListener( "propertyChange_icon", childPropertyChangeHandler );
 				var tab:TabNavigatorTab = new TabNavigatorTab();
 				tab.width = 100;
 				tab.percentHeight = 100;
-				tab.label = child.label;
-				tab.icon = child.icon;
+				if ( child is IUIComponent )
+				{
+					BindingUtil.bind( child, "label", tab, "label" );
+					BindingUtil.bind( child, "icon", tab, "icon" );
+				}
 				tabBar.addChildAt( tab, index );
 			}
 			else
 			{
-				child.removeEventListener( "propertyChange_label", childPropertyChangeHandler );
-				child.removeEventListener( "propertyChange_icon", childPropertyChangeHandler );
+				if ( child is IUIComponent )
+				{
+					BindingUtil.unbind( child, "label", tab, "label" );
+					BindingUtil.unbind( child, "icon", tab, "icon" );
+				}
 				tabBar.removeChildAt(index);
 			}
-		}
-		
-		protected function childPropertyChangeHandler( event:PropertyChangeEvent ):void
-		{
-			var child:UIComponent = UIComponent(event.target);
-			var childIndex:int = content.getChildIndex(child);
-			var tab:TabNavigatorTab = TabNavigatorTab(tabBar.getChildAt(childIndex));
-			tab.icon = child.icon;
-			tab.label = child.label;
-			tabBar.invalidate();
 		}
 		
 		private function mouseDownTabHandler( event:MouseEvent ):void

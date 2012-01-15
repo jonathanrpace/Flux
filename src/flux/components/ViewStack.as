@@ -26,6 +26,7 @@ package flux.components
 {
 	import flash.display.DisplayObject;
 	import flash.events.Event;
+	
 	import flux.events.IndexChangeEvent;
 	
 	[Event( type="flash.events.Event", name="change" )]
@@ -61,7 +62,7 @@ package flux.components
 		// Event handlers
 		////////////////////////////////////////////////
 		
-		override protected function onChildrenChanged( child:UIComponent, index:int, added:Boolean ):void
+		override protected function onChildrenChanged( child:DisplayObject, index:int, added:Boolean ):void
 		{
 			if ( added && content.numChildren == 1 && _visibleIndex == -1 )
 			{
@@ -72,10 +73,11 @@ package flux.components
 				var temp:int = _visibleIndex;
 				if ( numChildren == 0 )
 				{
-					temp = -1;
+					visibleIndex = -1;
+					return;
 				}
 				_visibleIndex = -1;
-				visibleIndex = added ? temp + 1 : temp;
+				visibleIndex = added ? temp+1: temp-1;
 			}
 		}
 		
