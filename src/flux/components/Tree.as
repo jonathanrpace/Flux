@@ -52,10 +52,26 @@ package flux.components
 		// Public methods
 		////////////////////////////////////////////////
 		
+		public function openToItem( item:Object ):void
+		{
+			var parent:Object = getParent(item, false);
+			while ( parent )
+			{
+				setItemOpened( parent, true );
+				parent = getParent(parent,false);
+			}
+		}
+		
 		public function setItemOpened( item:Object, opened:Boolean, dispatchEvent:Boolean = false ):void
 		{
 			if ( isOpenedTable[item] == opened ) return;
 			isOpenedTable[item] = opened;
+			
+			var itemRenderer:ITreeItemRenderer = ITreeItemRenderer(getItemRendererForData(item));
+			if ( itemRenderer != null )
+			{
+				itemRenderer.opened = opened;
+			}
 			invalidate();
 			
 			if ( dispatchEvent )
