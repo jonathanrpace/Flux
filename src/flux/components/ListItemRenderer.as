@@ -28,7 +28,7 @@ package flux.components
 	import flash.text.TextFormatAlign;
 	import flux.skins.ListItemRendererSkin;
 	
-	public class ListItemRenderer extends PushButton implements IItemRenderer
+	public class ListItemRenderer extends Button implements IItemRenderer
 	{
 		// Internal vars
 		protected var _list			:List;

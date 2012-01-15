@@ -53,9 +53,9 @@ package flux.components
 		
 		// Child elements
 		private var track					:Sprite;
-		private var thumb					:PushButton;
-		private var upBtn					:PushButton;
-		private var downBtn					:PushButton;
+		private var thumb					:Button;
+		private var upBtn					:Button;
+		private var downBtn					:Button;
 		
 		// Internal vars
 		private var repeatSpeed				:int;
@@ -83,17 +83,17 @@ package flux.components
 			_height = track.height;
 			track.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownTrackHandler);
 			
-			thumb = new PushButton( ScrollBarThumbSkin );
+			thumb = new Button( ScrollBarThumbSkin );
 			thumb.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownThumbHandler);
 			thumb.focusEnabled = false;
 			addChild( thumb );
 			
-			upBtn = new PushButton( ScrollBarUpButtonSkin );
+			upBtn = new Button( ScrollBarUpButtonSkin );
 			upBtn.focusEnabled = false;
 			defaultUpBtnHeight = upBtn.height;
 			addChild( upBtn );
 			
-			downBtn = new PushButton( ScrollBarDownButtonSkin );
+			downBtn = new Button( ScrollBarDownButtonSkin );
 			downBtn.focusEnabled = false;
 			defaultDownBtnHeight = downBtn.height;
 			addChild( downBtn );

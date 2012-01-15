@@ -31,7 +31,7 @@ package flux.components
 	import flash.text.TextFormatAlign;
 	import flux.skins.CheckBoxSkin;
 	
-	public class CheckBox extends PushButton 
+	public class CheckBox extends Button 
 	{
 		// Properties
 		protected var _indeterminate		:Boolean = false;

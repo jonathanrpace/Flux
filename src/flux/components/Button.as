@@ -1,5 +1,5 @@
 /**
- * PushButton.as
+ * Button.as
  * 
  * Copyright (c) 2011 Jonathan Pace
  * 
@@ -40,9 +40,13 @@ package flux.components
 	import flash.text.TextFormatAlign;
 	import flash.text.TextLineMetrics;
 	import flash.ui.Keyboard;
-	import flux.skins.PushButtonSkin;
+	import flux.events.PropertyChangeEvent;
+	import flux.events.SelectEvent;
+	import flux.skins.ButtonSkin;
 	
-	public class PushButton extends UIComponent 
+	[Event( type = "flash.events.Event", name = "change" )]
+	[Event( type = "flux.events.SelectEvent", name = "select" )]
+	public class Button extends UIComponent 
 	{
 		// Properties
 		protected var _over				:Boolean = false;
@@ -50,6 +54,7 @@ package flux.components
 		protected var _selected			:Boolean = false;
 		protected var _toggle			:Boolean = false;
 		protected var _labelAlign		:String = TextFormatAlign.CENTER;
+		public    var selectMode		:String = ButtonSelectMode.CLICK;
 		public    var userData			:*;
 		
 		// Child elements
@@ -60,7 +65,7 @@ package flux.components
 		// Internal vars
 		protected var skinClass			:Class;
 		
-		public function PushButton( skinClass:Class = null ) 
+		public function Button( skinClass:Class = null ) 
 		{
 			this.skinClass = skinClass;
 			super();
@@ -74,7 +79,7 @@ package flux.components
 		{
 			focusEnabled = true;
 			
-			skin = skinClass == null ? new PushButtonSkin() : new skinClass();
+			skin = skinClass == null ? new ButtonSkin() : new skinClass();
 			_width = skin.width;
 			_height = skin.height;
 			skin.mouseEnabled = false;
@@ -96,7 +101,14 @@ package flux.components
 		override protected function validate():void
 		{
 			iconImage.validateNow();
-			iconImage.x = 6;
+			if ( labelField.text == "" )
+			{
+				iconImage.x = (_width - iconImage.width) >> 1;
+			}
+			else
+			{
+				iconImage.x = 6;
+			}
 			iconImage.y = (_height - iconImage.height) >> 1;
 			
 			labelField.x = iconImage.x + iconImage.width + 4;
@@ -170,15 +182,44 @@ package flux.components
 			if ( event.target != this ) return;
 			_down = true;
 			focusManager.setFocus(this);
+			
+			if ( selectMode == ButtonSelectMode.MOUSE_DOWN )
+			{
+				if ( toggle )
+				{
+					selected = !_selected;
+					if ( _selected )
+					{
+						dispatchEvent( new SelectEvent( SelectEvent.SELECT ) );
+					}
+				}
+				else
+				{
+					dispatchEvent( new SelectEvent( SelectEvent.SELECT ) );
+				}
+				
+			}
+			
 			_selected ? skin.gotoAndPlay( "SelectedDown" ) : skin.gotoAndPlay( "Down" );
 			stage.addEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
 		}
 
 		protected function mouseUpHandler(event:MouseEvent):void
 		{
-			if(_toggle && over)
+			if ( selectMode == ButtonSelectMode.CLICK )
 			{
-				selected = !_selected;
+				if ( toggle && _over )
+				{
+					selected = !_selected;
+					if ( _selected )
+					{
+						dispatchEvent( new SelectEvent( SelectEvent.SELECT ) );
+					}
+				}
+				else
+				{
+					dispatchEvent( new SelectEvent( SelectEvent.SELECT ) );
+				}
 			}
 			_down = false;
 			
@@ -227,6 +268,7 @@ package flux.components
 			}
 			
 			_selected ? skin.gotoAndPlay( "SelectedUp" ) : skin.gotoAndPlay( "Up" );
+			dispatchEvent( new PropertyChangeEvent( "propertyChange_selected", oldValue, _selected ) );
 			
 		}
 		public function get selected():Boolean

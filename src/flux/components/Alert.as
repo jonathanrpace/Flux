@@ -44,7 +44,7 @@ package flux.components
 		public static function show( title:String, text:String, buttons:Array, icon:Class = null, modal:Boolean = true, closeHandler:Function = null ):void
 		{
 			var alert:Alert = new Alert();
-			alert.title = title;
+			alert.label = title;
 			alert.text = text;
 			alert.mainIcon = icon;
 			if ( closeHandler != null )
@@ -56,7 +56,7 @@ package flux.components
 			
 			for ( var i:int = 0; i < buttons.length; i++ )
 			{
-				var btn:PushButton = new PushButton();
+				var btn:Button = new Button();
 				btn.label = buttons[i];
 				alert.controlBar.addChild(btn);
 			}
@@ -123,7 +123,7 @@ package flux.components
 		
 		private function clickControlBarHandler( event:MouseEvent ):void
 		{
-			var button:PushButton = event.target as PushButton;
+			var button:Button = event.target as Button;
 			if ( button == null ) return;
 			PopUpManager.removePopUp(this);
 			dispatchEvent( new AlertEvent( AlertEvent.ALERT_CLOSE, button.label ) );

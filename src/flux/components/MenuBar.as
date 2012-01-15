@@ -92,16 +92,16 @@ package flux.components
 			for ( var i:int = 0; i < dataProviderLength; i++ )
 			{
 				var data:Object = _dataProvider[i];
-				var btn:PushButton;
+				var btn:Button;
 				
 				// Re-use existing button if possible
 				if ( buttonBar.numChildren > i )
 				{
-					btn = PushButton(buttonBar.getChildAt(i));
+					btn = Button(buttonBar.getChildAt(i));
 				}
 				else
 				{
-					btn = new PushButton(MenuBarButtonSkin);
+					btn = new Button(MenuBarButtonSkin);
 					btn.focusEnabled = false;
 					btn.resizeToContent = true;
 					buttonBar.addChild(btn);
@@ -126,7 +126,7 @@ package flux.components
 		
 		protected function openList():void
 		{
-			var selectedBtn:PushButton = PushButton(buttonBar.getChildAt( _dataProvider.source.indexOf(selectedData) ));
+			var selectedBtn:Button = Button(buttonBar.getChildAt( _dataProvider.source.indexOf(selectedData) ));
 			
 			if ( list.stage == null )
 			{
@@ -143,7 +143,7 @@ package flux.components
 			
 			for ( var i:int = 0; i < buttonBar.numChildren; i++ )
 			{
-				var child:PushButton = PushButton(buttonBar.getChildAt(i));
+				var child:Button = Button(buttonBar.getChildAt(i));
 				child.selected = child == selectedBtn;
 			}
 			
@@ -160,7 +160,7 @@ package flux.components
 			
 			for ( var i:int = 0; i < buttonBar.numChildren; i++ )
 			{
-				var child:PushButton = PushButton(buttonBar.getChildAt(i));
+				var child:Button = Button(buttonBar.getChildAt(i));
 				child.selected = false;
 			}
 			
@@ -176,7 +176,7 @@ package flux.components
 		
 		private function mouseDownButtonBarHandler( event:MouseEvent ):void
 		{
-			var btn:PushButton = event.target as PushButton;
+			var btn:Button = event.target as Button;
 			if ( !btn ) return;
 			
 			focusManager.setFocus(this);
@@ -195,7 +195,7 @@ package flux.components
 		
 		private function mouseOverButtonBarHandler( event:MouseEvent ):void
 		{
-			var btn:PushButton = event.target as PushButton;
+			var btn:Button = event.target as Button;
 			if ( !btn ) return;
 			
 			var index:int = buttonBar.getChildIndex(btn);

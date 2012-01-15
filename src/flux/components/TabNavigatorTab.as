@@ -30,13 +30,13 @@ package flux.components
 	import flux.skins.TabNavigatorTabSkin;
 	import flux.skins.TabNavigatorTabCloseBtnSkin;
 	
-	public class TabNavigatorTab extends PushButton
+	public class TabNavigatorTab extends Button
 	{
 		// Properties
 		private var _showCloseBtn	:Boolean = true;
 		
 		// Child elements
-		private var closeBtn		:PushButton;
+		private var closeBtn		:Button;
 		
 		public function TabNavigatorTab() 
 		{
@@ -52,7 +52,7 @@ package flux.components
 			super.init();
 			focusEnabled = false;
 			_resizeToContent = true;
-			closeBtn = new PushButton( TabNavigatorTabCloseBtnSkin );
+			closeBtn = new Button( TabNavigatorTabCloseBtnSkin );
 			closeBtn.addEventListener(MouseEvent.CLICK, clickCloseHandler);
 			addChild(closeBtn);
 		}

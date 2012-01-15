@@ -31,6 +31,7 @@ package flux.components
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
+	import flux.events.PropertyChangeEvent;
 	import flux.skins.NumericStepperDownBtnSkin;
 	import flux.skins.NumericStepperUpBtnSkin;
 	
@@ -48,8 +49,8 @@ package flux.components
 		
 		// Child elements
 		private var inputField			:NumberInput;
-		private var upBtn				:PushButton;
-		private var downBtn				:PushButton;
+		private var upBtn				:Button;
+		private var downBtn				:Button;
 		
 		// Internal vars
 		private var delayTimer			:Timer;
@@ -76,11 +77,11 @@ package flux.components
 			_width = inputField.width;
 			_height = inputField.height;
 			
-			upBtn = new PushButton(NumericStepperUpBtnSkin);
+			upBtn = new Button(NumericStepperUpBtnSkin);
 			upBtn.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownButtonHandler);
 			addChild(upBtn);
 			
-			downBtn = new PushButton(NumericStepperDownBtnSkin);
+			downBtn = new Button(NumericStepperDownBtnSkin);
 			downBtn.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownButtonHandler);
 			addChild(downBtn);
 			
@@ -158,8 +159,12 @@ package flux.components
 		
 		public function set value( v:Number ):void
 		{
+			if ( v == inputField.value ) return;
+			var oldValue:Number = inputField.value;
 			inputField.value = v;
+			if ( inputField.value == oldValue ) return;
 			dispatchEvent( new Event( Event.CHANGE ) );
+			dispatchEvent( new PropertyChangeEvent( "propertyChange_value", oldValue, inputField.value ) );
 		}
 		
 		public function get value():Number

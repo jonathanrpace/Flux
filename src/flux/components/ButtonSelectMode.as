@@ -1,5 +1,5 @@
 /**
- * RadioButton.as
+ * ButtonSelectMode.as
  * 
  * Copyright (c) 2011 Jonathan Pace
  * 
@@ -24,39 +24,9 @@
 
 package flux.components 
 {
-	import flash.text.TextFieldAutoSize;
-	import flash.text.TextFormat;
-	import flash.text.TextFormatAlign;
-	import flux.skins.RadioButtonSkin;
-	
-	public class RadioButton extends Button 
+	public class ButtonSelectMode 
 	{
-		public function RadioButton() 
-		{
-			super( RadioButtonSkin );
-		}
-		
-		override protected function init():void
-		{
-			super.init();
-			toggle = true;
-			
-			var textFormat:TextFormat = labelField.defaultTextFormat;
-			textFormat.align = TextFormatAlign.LEFT;
-			labelField.defaultTextFormat = textFormat;
-			labelField.autoSize = TextFieldAutoSize.LEFT;
-			
-			iconImage.visible = false;
-		}
-		
-		override protected function validate():void
-		{
-			_height = labelField.height;
-			skin.y = (_height - skin.height) >> 1;
-			labelField.x = skin.x + skin.width + 4;
-			labelField.height = Math.min(labelField.textHeight + 4, _height);
-			labelField.y = (_height - (labelField.height)) >> 1;
-			_width = labelField.x + labelField.width;
-		}
+		public static const CLICK		:String = "click";
+		public static const MOUSE_DOWN	:String = "mouseDown";
 	}
 }
