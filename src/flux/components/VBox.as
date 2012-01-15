@@ -24,6 +24,7 @@
 
 package flux.components 
 {
+	import flux.layouts.HorizontalLayout;
 	import flux.layouts.VerticalLayout;
 	
 	public class VBox extends Container 
@@ -58,14 +59,24 @@ package flux.components
 			return VerticalLayout(_layout).spacing;
 		}
 		
-		public function set align( value:String ):void
+		public function set verticalAlign( value:String ):void
 		{
 			VerticalLayout(_layout).verticalAlign = value;
 		}
 		
-		public function get align():String
+		public function get verticalAlign():String
 		{
 			return VerticalLayout(_layout).verticalAlign;
+		}
+		
+		public function set horizontalAlign( value:String ):void
+		{
+			VerticalLayout(_layout).horizontalAlign = value;
+		}
+		
+		public function get horizontalAlign():String
+		{
+			return VerticalLayout(_layout).horizontalAlign;
 		}
 	}
 

@@ -58,14 +58,24 @@ package flux.components
 			return HorizontalLayout(_layout).spacing;
 		}
 		
-		public function set align( value:String ):void
+		public function set verticalAlign( value:String ):void
 		{
 			HorizontalLayout(_layout).verticalAlign = value;
 		}
 		
-		public function get align():String
+		public function get verticalAlign():String
 		{
 			return HorizontalLayout(_layout).verticalAlign;
+		}
+		
+		public function set horizontalAlign( value:String ):void
+		{
+			HorizontalLayout(_layout).horizontalAlign = value;
+		}
+		
+		public function get horizontalAlign():String
+		{
+			return HorizontalLayout(_layout).horizontalAlign;
 		}
 	}
 
