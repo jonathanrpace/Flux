@@ -42,11 +42,13 @@ package flux.components
 	import flux.events.SelectEvent;
 	import flux.layouts.VerticalLayout;
 	import flux.skins.ListDropIndicatorSkin;
+	import flux.skins.ListSkin;
 	
 	[Event( type = "flash.events.Event", name = "change" )]
+	[Event( type = "flux.events.SelectEvent", name = "select" )]
 	[Event( type = "flux.events.DragAndDropEvent", name = "drop" )]
 	
-	public class List extends Canvas 
+	public class List extends Container
 	{
 		// Properties
 		protected var _dataProvider				:Object;;
@@ -61,6 +63,7 @@ package flux.components
 		protected var _allowDragAndDrop			:Boolean = false;
 		
 		// Child elements
+		protected var background				:Sprite;
 		protected var vScrollBar				:ScrollBar;
 		protected var visibleItemRenderers		:Vector.<IItemRenderer>;
 		protected var itemRendererPool			:Vector.<IItemRenderer>;
@@ -85,6 +88,14 @@ package flux.components
 		// Public methods
 		////////////////////////////////////////////////
 		
+		public function scrollToItem( item:Object ):void
+		{
+			validateNow();
+			var index:int = flattenedData.indexOf(item);
+			if ( index == -1 ) return;
+			vScrollBar.value = index * _itemRendererHeight;
+		}
+		
 		public function getItemRendererForData( data:Object ):IItemRenderer
 		{
 			for each ( var itemRenderer:IItemRenderer in visibleItemRenderers )
@@ -100,6 +111,9 @@ package flux.components
 		
 		override protected function init():void
 		{
+			background = new ListSkin();
+			addRawChild(background);
+			
 			super.init();
 			
 			focusEnabled = true;
@@ -746,6 +760,16 @@ package flux.components
 		{
 			_filterFunction = value;
 			invalidate();
+		}
+		
+		public function set showBorder( value:Boolean ):void
+		{
+			background.visible = value;
+		}
+		
+		public function get showBorder():Boolean
+		{
+			return background.visible;
 		}
 	}
 }
