@@ -82,8 +82,10 @@ package flux.components
 			border.height = _height;
 			
 			bar.x = bar.y = indeterminateBar.x = indeterminateBar.y = _borderThickness;
-			bar.width = indeterminateBar.width = _width - (_borderThickness << 1);
+			indeterminateBar.width = _width - (_borderThickness << 1);
 			bar.height = indeterminateBar.height = _height - (_borderThickness << 1);
+			
+			bar.width = _progress * indeterminateBar.width;
 		}
 		
 		////////////////////////////////////////////////
