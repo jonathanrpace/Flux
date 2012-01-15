@@ -155,6 +155,7 @@ package flux.util
 		RadioButton;
 		RadioButtonGroup;
 		ScrollPane;
+		HSlider;
 		TabNavigator;
 		TextArea;
 		Tree;
