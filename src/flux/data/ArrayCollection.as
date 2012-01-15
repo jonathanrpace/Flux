@@ -32,6 +32,7 @@ package flux.data
 	import flash.events.IEventDispatcher;
 	import flash.utils.Proxy;
 	import flash.utils.flash_proxy;
+	
 	import flux.events.ArrayCollectionChangeKind;
 	import flux.events.ArrayCollectionEvent;
 	
@@ -105,13 +106,14 @@ package flux.data
 		
 		public function set source( value:Array ):void
 		{
+			var oldValue:Array = array;
 			array = value;
-			dispatcher.dispatchEvent( new ArrayCollectionEvent( ArrayCollectionEvent.CHANGE, ArrayCollectionChangeKind.RESET ) );
+			dispatcher.dispatchEvent( new ArrayCollectionEvent( ArrayCollectionEvent.CHANGE, ArrayCollectionChangeKind.RESET, 0, oldValue ) );
 		}
 		
 		public function get source():Array
 		{
-			return array;
+			return array.slice();
 		}
 		
 		override flash_proxy function getProperty(name:*):*
@@ -148,6 +150,21 @@ package flux.data
 			dispatcher.dispatchEvent( new ArrayCollectionEvent( ArrayCollectionEvent.CHANGE, changeKind, index, value ) );
 		}
 		
+		override flash_proxy function nextNameIndex(index:int):int
+		{
+			return index < length ? index + 1 : 0;
+		}
+		
+		override flash_proxy function nextName(index:int):String
+		{
+			return (index - 1).toString();
+		}
+		
+		override flash_proxy function nextValue(index:int):*
+		{
+			return getItemAt(index - 1);
+		}
+
 		public function get length():int
 		{
 			return array.length;
