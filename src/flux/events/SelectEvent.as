@@ -32,7 +32,7 @@ package flux.events
 		
 		private var _selectedItem		:Object;
 		
-		public function SelectEvent( type:String, selectedItem:Object, bubbles:Boolean = false, cancelable:Boolean = false ):void
+		public function SelectEvent( type:String, selectedItem:Object = null, bubbles:Boolean = false, cancelable:Boolean = false ):void
 		{
 			super( type, bubbles, cancelable );
 			_selectedItem = selectedItem;
