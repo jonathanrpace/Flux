@@ -26,6 +26,9 @@ package flux.data
 {
 	public class DefaultDataDescriptor implements IDataDescriptor 
 	{
+		public var labelField		:String = "label";
+		public var iconField		:String = "icon";
+		
 		public function DefaultDataDescriptor() 
 		{
 			
@@ -33,7 +36,7 @@ package flux.data
 		
 		public function getLabel(data:Object):String 
 		{
-			if ( data.hasOwnProperty("label") )
+			if ( data.hasOwnProperty(labelField) )
 			{
 				return String(data.label);
 			}
@@ -42,7 +45,7 @@ package flux.data
 		
 		public function getIcon(data:Object):Class 
 		{
-			if ( data.hasOwnProperty("icon") )
+			if ( data.hasOwnProperty(iconField) )
 			{
 				return data.icon;
 			}
