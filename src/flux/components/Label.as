@@ -26,8 +26,15 @@ package flux.components
 {
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
+	import flash.text.TextFormat;
+
 	public class Label extends UIComponent 
 	{
+		// Properties
+		private var _fontColor		:uint;
+		private var _fontSize		:Number;
+		private var _bold			:Boolean;
+		
 		// Child elements
 		private var textField		:TextField;
 		
@@ -43,6 +50,9 @@ package flux.components
 		override protected function init():void
 		{
 			textField = TextStyles.createTextField();
+			_fontColor = uint(textField.defaultTextFormat.color);
+			_fontSize = Number(textField.defaultTextFormat.size);
+			_bold = textField.defaultTextFormat.bold;
 			textField.multiline = false;
 			textField.autoSize = TextFieldAutoSize.LEFT;
 			addChild(textField);
@@ -67,6 +77,48 @@ package flux.components
 		public function get text():String
 		{
 			return textField.text;
+		}
+
+		public function get fontColor():uint
+		{
+			return _fontColor;
+		}
+
+		public function set fontColor(value:uint):void
+		{
+			_fontColor = value;
+			var tf:TextFormat = textField.defaultTextFormat;
+			tf.color = _fontColor;
+			textField.defaultTextFormat = tf;
+			textField.setTextFormat(tf);
+		}
+
+		public function get fontSize():Number
+		{
+			return _fontSize;
+		}
+
+		public function set fontSize(value:Number):void
+		{
+			_fontSize = value;
+			var tf:TextFormat = textField.defaultTextFormat;
+			tf.size = _fontSize;
+			textField.defaultTextFormat = tf;
+			textField.setTextFormat(tf);
+		}
+
+		public function get bold():Boolean
+		{
+			return _bold;
+		}
+
+		public function set bold(value:Boolean):void
+		{
+			_bold = value;
+			var tf:TextFormat = textField.defaultTextFormat;
+			tf.bold = _bold;
+			textField.defaultTextFormat = tf;
+			textField.setTextFormat(tf);
 		}
 	}
 }
