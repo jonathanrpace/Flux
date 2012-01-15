@@ -31,12 +31,13 @@ package flux.components
 	import flash.events.Event;
 	import flash.events.FocusEvent;
 	import flash.events.MouseEvent;
+	
 	import flux.events.PropertyChangeEvent;
 	import flux.managers.FocusManager;
 	import flux.skins.FocusRectSkin;
 	
 	[Event( type="flash.events.Event", name="resize" )]
-	public class UIComponent extends Sprite
+	public class UIComponent extends Sprite implements IUIComponent
 	{
 		static private var focusRectSkin	:Sprite;
 		static protected var focusManager	:FocusManager;
@@ -55,6 +56,7 @@ package flux.components
 		protected var _focusEnabled		:Boolean = false;
 		protected var _drawFocusRect	:Boolean = false;
 		protected var _isFocused		:Boolean = false;
+		protected var _toolTip			:String = "";
 		
 		public function UIComponent() 
 		{
@@ -215,6 +217,7 @@ package flux.components
 			if ( _label == value ) return;
 			var oldValue:String = _label;
 			_label = value;
+			invalidate();
 			dispatchEvent( new PropertyChangeEvent( "propertyChange_label", oldValue, value ) );
 		}
 		
@@ -309,6 +312,16 @@ package flux.components
 		flux_internal function get isFocused():Boolean
 		{
 			return _isFocused;
+		}
+
+		public function get toolTip():String
+		{
+			return _toolTip;
+		}
+
+		public function set toolTip(value:String):void
+		{
+			_toolTip = value;
 		}
 	}
 }
