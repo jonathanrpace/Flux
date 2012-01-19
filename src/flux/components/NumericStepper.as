@@ -31,7 +31,9 @@ package flux.components
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
+	import flux.events.ItemEditorEvent;
 	import flux.events.PropertyChangeEvent;
+	import flux.managers.FocusManager;
 	import flux.skins.NumericStepperDownBtnSkin;
 	import flux.skins.NumericStepperUpBtnSkin;
 	
@@ -72,6 +74,7 @@ package flux.components
 			
 			inputField = new NumberInput();
 			inputField.focusEnabled = false;
+			inputField.addEventListener(ItemEditorEvent.COMMIT_VALUE, onInputFieldCommitValue);
 			addChild(inputField);
 			
 			_width = inputField.width;
@@ -79,18 +82,18 @@ package flux.components
 			
 			upBtn = new Button(NumericStepperUpBtnSkin);
 			upBtn.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownButtonHandler);
+			upBtn.focusEnabled = false;
 			addChild(upBtn);
 			
 			downBtn = new Button(NumericStepperDownBtnSkin);
 			downBtn.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownButtonHandler);
+			downBtn.focusEnabled = false;
 			addChild(downBtn);
 			
 			delayTimer = new Timer( DELAY_TIME, 1 );
 			delayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, delayCompleteHandler);
 			repeatTimer = new Timer( REPEAT_TIME, 0 );
 			repeatTimer.addEventListener(TimerEvent.TIMER, repeatHandler);
-			
-			addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
 		}
 		
 		override protected function validate():void
@@ -107,12 +110,22 @@ package flux.components
 			downBtn.y = upBtn.height;
 		}
 		
+		override public function onGainComponentFocus():void
+		{
+			inputField.onGainComponentFocus();
+		}
+		
+		override public function onLoseComponentFocus():void
+		{
+			inputField.onLoseComponentFocus();
+		}
+		
 		////////////////////////////////////////////////
 		// Event Handlers
 		////////////////////////////////////////////////
-		private function mouseDownHandler( event:MouseEvent ):void
+		private function onInputFieldCommitValue( event:ItemEditorEvent ):void
 		{
-			focusManager.setFocus(this);
+			dispatchEvent( new ItemEditorEvent( ItemEditorEvent.COMMIT_VALUE, event.value, "value" ) );
 		}
 		
 		private function mouseDownButtonHandler( event:MouseEvent ):void

@@ -1,18 +1,18 @@
 /**
  * PropertyInspector.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.events.Event;
 	import flash.events.FocusEvent;
@@ -31,13 +31,18 @@ package flux.components
 	import flash.geom.Rectangle;
 	import flash.utils.describeType;
 	import flash.utils.getDefinitionByName;
+	
 	import flux.data.ArrayCollection;
 	import flux.data.PropertyInspectorField;
 	import flux.events.ArrayCollectionEvent;
+	import flux.events.ItemEditorEvent;
 	import flux.events.PropertyInspectorEvent;
+	import flux.events.ScrollEvent;
+	import flux.events.SelectEvent;
+	import flux.managers.FocusManager;
 	
 	[Event( type = "flux.events.PropertyInspectorEvent", name = "commitValue" )]
-	public class PropertyInspector extends UIComponent 
+	public class PropertyInspector extends UIComponent
 	{
 		// Properties
 		private var _dataProvider			:ArrayCollection;
@@ -52,7 +57,7 @@ package flux.components
 		private var editorDescriptor		:EditorDescriptor;
 		private var fieldBeingEdited		:PropertyInspectorField;
 		
-		public function PropertyInspector() 
+		public function PropertyInspector()
 		{
 			
 		}
@@ -62,7 +67,7 @@ package flux.components
 		////////////////////////////////////////////////
 		
 		/**
-		 * 
+		 *
 		 * @param	id					The id of the editor. This is how the property inspector matches up inspectable properties with an editor.
 		 * 								For example, the metatdata
 		 * 								[Inspectable(editor="ColorPicker")]
@@ -70,8 +75,8 @@ package flux.components
 		 * @param	type				The type of the editor.
 		 * @param	valueField			The name of the property on the editor that contains the value being edited (eg NumericStepper's is "value"))
 		 * @param	labelFunction		(Optional) A function used to transform the value of an object to a string. Defaults to String(value);
-		 * @param	itemField			(Optional) The name of the property on the editor that should be set with a reference to the item being edited. 
-		 * @param	itemPropertyField	(Optional) The name of the property on the editor that should be set with the name of the property on the item being edited . 
+		 * @param	itemField			(Optional) The name of the property on the editor that should be set with a reference to the item being edited.
+		 * @param	itemPropertyField	(Optional) The name of the property on the editor that should be set with the name of the property on the item being edited .
 		 */
 		public function registerEditor( id:String, type:Class, valueField:String, labelFunction:Function = null, itemField:String = null, itemPropertyField:String = null ):void
 		{
@@ -94,10 +99,11 @@ package flux.components
 			registerEditor( "TextInput", TextInput, "text" );
 			registerEditor( "NumberInput", NumberInput, "value" );
 			registerEditor( "DropDownMenu", DropDownMenu, "selectedItem" );
+			registerEditor( "NumericStepper", NumericStepper, "value" );
+			registerEditor( "Slider", HSlider, "value" );
 			
-			list.addEventListener( Event.CHANGE, changeListHandler );
-			addEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
-			addEventListener(Event.REMOVED_FROM_STAGE, removedFromStageHandler);
+			list.addEventListener( SelectEvent.SELECT, selectListItemHandler );
+			list.addEventListener( ScrollEvent.CHANGE_SCROLL, changeListScrollHandler );
 		}
 		
 		override protected function validate():void
@@ -125,33 +131,29 @@ package flux.components
 			}
 		}
 		
+		override public function onLoseComponentFocus():void
+		{
+			commitEditorValue();
+			disposeEditor();
+		}
+		
 		////////////////////////////////////////////////
 		// Event handlers
 		////////////////////////////////////////////////
 		
-		private function addedToStageHandler( event:Event ):void
-		{
-			
-		}
-		
-		private function removedFromStageHandler( event:Event ):void
-		{
-			disposeEditor();
-		}
-		
-		private function editorFocusOutHandler( event:FocusEvent ):void
+		private function changeListScrollHandler( event:ScrollEvent ):void
 		{
 			commitEditorValue();
 			disposeEditor();
 		}
 		
-		private function mouseDownStageHandler( event:MouseEvent ):void
+		private function commitValueHandler( event:ItemEditorEvent ):void
 		{
 			commitEditorValue();
 			disposeEditor();
 		}
 		
-		private function changeListHandler( event:Event ):void
+		private function selectListItemHandler( event:SelectEvent ):void
 		{
 			var selectedItem:Object = list.selectedItems[0];
 			
@@ -161,6 +163,7 @@ package flux.components
 				disposeEditor();
 				
 				var selectedItemRenderer:PropertyInspectorItemRenderer = PropertyInspectorItemRenderer(list.getItemRendererForData(selectedItem));
+				
 				fieldBeingEdited = PropertyInspectorField(selectedItem);
 				
 				editorDescriptor = editorDescriptorTable[fieldBeingEdited.editorID];
@@ -173,18 +176,23 @@ package flux.components
 				}
 				
 				editor[ editorDescriptor.valueField ] = fieldBeingEdited.value;
-				stage.addChild(editor);
+				addChild(editor);
 				
 				var pt:Point = new Point();
 				pt = selectedItemRenderer.localToGlobal( pt );
+				pt = globalToLocal(pt);
 				var rect:Rectangle = selectedItemRenderer.editorRect;
 				editor.x = pt.x + rect.x;
 				editor.y = pt.y + rect.y;
 				editor.width = rect.width;
 				editor.height = rect.height;
-				focusManager.setFocus(editor);
+				FocusManager.setFocus(editor);
 				
-				editor.addEventListener(FocusEvent.FOCUS_OUT, editorFocusOutHandler);
+				editor.addEventListener(ItemEditorEvent.COMMIT_VALUE, commitValueHandler);
+			}
+			else
+			{
+				FocusManager.setFocus(this);
 			}
 		}
 		
@@ -212,14 +220,16 @@ package flux.components
 			}
 			
 			fieldBeingEdited.value = value;
+			var itemRenderer:PropertyInspectorItemRenderer = PropertyInspectorItemRenderer(list.getItemRendererForData(fieldBeingEdited));
+			itemRenderer.data = fieldBeingEdited;
 		}
 		
 		private function disposeEditor():void
 		{
 			if ( !editor ) return;
 			
-			editor.removeEventListener(FocusEvent.FOCUS_OUT, editorFocusOutHandler);
-			stage.removeChild(editor);
+			editor.removeEventListener(ItemEditorEvent.COMMIT_VALUE, commitValueHandler);
+			removeChild(editor);
 			editor = null;
 		}
 		

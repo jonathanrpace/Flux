@@ -29,6 +29,7 @@ package flux.components
 	import flash.events.KeyboardEvent;
 	import flash.events.TextEvent;
 	import flash.ui.Keyboard;
+	import flux.events.ItemEditorEvent;
 	
 	public class NumberInput extends TextInput 
 	{
@@ -51,27 +52,27 @@ package flux.components
 		{
 			super.init();
 			textField.restrict = "\-0-9.";
-			textField.addEventListener(FocusEvent.FOCUS_OUT, focusOutInputFieldHandler);
 			textField.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
 			
 			value = 0;
+		}
+		
+		override protected function commitValue():void
+		{
+			if ( textField.text == "" ) textField.text = "0";
+			value = Number( textField.text );
+			dispatchEvent( new ItemEditorEvent( ItemEditorEvent.COMMIT_VALUE, _value, "value" ) );
 		}
 		
 		////////////////////////////////////////////////
 		// Event Handlers
 		////////////////////////////////////////////////
 		
-		private function focusOutInputFieldHandler( event:FocusEvent ):void
-		{
-			if ( textField.text == "" ) textField.text = "0";
-			value = Number( textField.text );
-		}
-		
 		private function keyDownHandler( event:KeyboardEvent ):void
 		{
 			if ( event.keyCode == Keyboard.ENTER )
 			{
-				value = Number( textField.text );
+				commitValue();
 			}
 		}
 		

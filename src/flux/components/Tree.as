@@ -175,6 +175,7 @@ package flux.components
 			{
 				var itemRenderer:ITreeItemRenderer = ITreeItemRenderer(visibleItemRenderers[i]);
 				itemRenderer.depth = depthTable[itemRenderer.data] + (showRoot ? 0 : -1);
+				itemRenderer.opened = isOpenedTable[itemRenderer.data];
 			}
 		}
 		

@@ -28,6 +28,7 @@ package flux.data
 	{
 		public var labelField		:String = "label";
 		public var iconField		:String = "icon";
+		public var enabledField		:String = "enabled";
 		
 		public function DefaultDataDescriptor() 
 		{
@@ -38,7 +39,7 @@ package flux.data
 		{
 			if ( data.hasOwnProperty(labelField) )
 			{
-				return String(data.label);
+				return String(data[labelField]);
 			}
 			return String(data);
 		}
@@ -47,9 +48,18 @@ package flux.data
 		{
 			if ( data.hasOwnProperty(iconField) )
 			{
-				return data.icon;
+				return data[iconField];
 			}
 			return null;
+		}
+		
+		public function getEnabled(data:Object):Boolean 
+		{
+			if ( data.hasOwnProperty(enabledField) )
+			{
+				return data[enabledField];
+			}
+			return true;
 		}
 		
 		public function hasChildren(data:Object):Boolean 

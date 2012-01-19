@@ -33,12 +33,16 @@ package flux.components
 		function get y():Number;
 		function set label( value:String ):void;
 		function get label():String;
+		function set toolTip( value:String ):void;
+		function get toolTip():String;
 		function set icon( value:Class ):void;
 		function get icon():Class;
 		function set width( value:Number ):void;
 		function get width():Number;
 		function set height( value:Number ):void;
 		function get height():Number;
+		function set enabled( value:Boolean ):void;
+		function get enabled():Boolean;
 		function set percentWidth( value:Number ):void;
 		function get percentWidth():Number;
 		function set percentHeight( value:Number ):void;

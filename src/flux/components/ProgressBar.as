@@ -1,18 +1,18 @@
 /**
  * ProgressBar.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
@@ -30,10 +30,10 @@ package flux.components
 	import flux.skins.ProgressBarBorderSkin;
 	import flux.skins.ProgressBarIndeterminateSkin;
 	
-	public class ProgressBar extends UIComponent 
+	public class ProgressBar extends UIComponent
 	{
 		// Styles
-		public static var styleBorderThickness	:int = 3;
+		public static var styleBorderThickness	:int = 2;
 		
 		// Properties
 		private var _progress			:Number = 0;
@@ -43,9 +43,9 @@ package flux.components
 		// Child elements
 		private var border				:Sprite;
 		private var bar					:Sprite;
-		private var indeterminateBar	:Sprite;
+		private var indeterminateBar	:MovieClip;
 		
-		public function ProgressBar() 
+		public function ProgressBar()
 		{
 			
 		}
@@ -66,6 +66,7 @@ package flux.components
 			addChild(bar);
 			
 			indeterminateBar = new ProgressBarIndeterminateSkin();
+			indeterminateBar.stop();
 			addChild(indeterminateBar);
 			
 			_borderThickness = styleBorderThickness;
@@ -75,9 +76,6 @@ package flux.components
 		
 		override protected function validate():void
 		{
-			bar.visible = !_indeterminate;
-			indeterminateBar.visible = _indeterminate;
-			
 			border.width = _width;
 			border.height = _height;
 			
@@ -85,7 +83,7 @@ package flux.components
 			indeterminateBar.width = _width - (_borderThickness << 1);
 			bar.height = indeterminateBar.height = _height - (_borderThickness << 1);
 			
-			bar.width = _progress * indeterminateBar.width;
+			bar.width = int(_progress * indeterminateBar.width);
 		}
 		
 		////////////////////////////////////////////////
@@ -109,7 +107,17 @@ package flux.components
 		{
 			if ( _indeterminate == v ) return;
 			_indeterminate = v;
-			invalidate();
+			if ( _indeterminate )
+			{
+				indeterminateBar.visible = false;
+				indeterminateBar.gotoAndPlay(1);
+			}
+			else
+			{
+				indeterminateBar.stop();
+				indeterminateBar.visible = false;
+			}
+			bar.visible = !_indeterminate;
 		}
 		
 		public function get indeterminate():Boolean

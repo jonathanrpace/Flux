@@ -1,20 +1,20 @@
 /**
  * UIComponent.as
- * 
+ *
  * Base class for all components
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.display.Shape;
 	import flash.display.Sprite;
@@ -36,41 +36,32 @@ package flux.components
 	import flux.managers.FocusManager;
 	import flux.skins.FocusRectSkin;
 	
-	[Event( type="flash.events.Event", name="resize" )]
+	[Event( type = "flash.events.Event", name = "resize" )]
+	[Event( type = "flux.events.ComponentFocusEvent", name = "componentFocusIn" )]
+	[Event( type = "flux.events.ComponentFocusEvent", name = "componentFocusOut" )]
 	public class UIComponent extends Sprite implements IUIComponent
 	{
-		static private var focusRectSkin	:Sprite;
-		static protected var focusManager	:FocusManager;
-		
 		// Properties
 		protected var _width			:Number = 0;
 		protected var _height			:Number = 0;
-		protected var _percentWidth		:Number;
-		protected var _percentHeight	:Number;
+		protected var _percentWidth		:Number = NaN;
+		protected var _percentHeight	:Number = NaN;
 		protected var _label			:String = "";
+		protected var _toolTip			:String;
 		protected var _icon				:Class;
 		protected var _excludeFromLayout:Boolean = false;
 		protected var _resizeToContent	:Boolean = false;
 		protected var _enabled			:Boolean = true;
 		protected var _isInvalid		:Boolean = false;
 		protected var _focusEnabled		:Boolean = false;
-		protected var _drawFocusRect	:Boolean = false;
-		protected var _isFocused		:Boolean = false;
-		protected var _toolTip			:String = "";
 		
-		public function UIComponent() 
+		public function UIComponent()
 		{
 			_init();
 		}
 		
 		private function _init():void
 		{
-			if ( !focusManager )
-			{
-				focusRectSkin = new FocusRectSkin();
-				focusManager = new FocusManager();
-			}
-			
 			init();
 			invalidate();
 		}
@@ -94,17 +85,14 @@ package flux.components
 		public function validateNow():void
 		{
 			if ( _isInvalid == false ) return;
+			if ( stage == null ) return;
 			validate();
-			
-			if ( _isFocused )
-			{
-				focusRectSkin.visible = _drawFocusRect;
-				focusRectSkin.width = _width;
-				focusRectSkin.height = _height;
-			}
 			_isInvalid = false;
 			removeEventListener( Event.ENTER_FRAME, onInvalidateHandler );
 		}
+		
+		public function onGainComponentFocus():void {}
+		public function onLoseComponentFocus():void {}
 		
 		////////////////////////////////////////////////
 		// Protected methods
@@ -124,6 +112,14 @@ package flux.components
 		// Event Handlers
 		////////////////////////////////////////////////
 		
+		private function mouseDownHandler( event:MouseEvent ):void
+		{
+			if ( FocusManager.isFocusedItemAChildOf(this) ) return;
+			var target:UIComponent = event.target as UIComponent
+			if ( target && target != this && target.focusEnabled ) return;
+			FocusManager.setFocus(this);
+		}
+		
 		private function onInvalidateHandler( event:Event ):void
 		{
 			validateNow();
@@ -142,8 +138,8 @@ package flux.components
 		}
 		
 		override public function get width():Number
-		{ 
-			return _width; 
+		{
+			return _width;
 		}
 		
 		override public function set height( value:Number ):void
@@ -175,8 +171,8 @@ package flux.components
 		}
 		
 		public function get percentWidth():Number
-		{ 
-			return _percentWidth; 
+		{
+			return _percentWidth;
 		}
 		
 		public function set percentHeight( value:Number ):void
@@ -194,8 +190,8 @@ package flux.components
 		}
 		
 		public function get percentHeight():Number
-		{ 
-			return _percentHeight; 
+		{
+			return _percentHeight;
 		}
 		
 		override public function set x(value:Number):void
@@ -278,40 +274,24 @@ package flux.components
 			return _excludeFromLayout;
 		}
 		
-		public function set focusEnabled(value:Boolean):void 
+		public function set focusEnabled(value:Boolean):void
 		{
 			if ( _focusEnabled == value ) return;
 			_focusEnabled = value;
+			
+			if ( _focusEnabled )
+			{
+				addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
+			}
+			else
+			{
+				removeEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
+			}
 		}
 		
-		public function get focusEnabled():Boolean 
+		public function get focusEnabled():Boolean
 		{
 			return _focusEnabled;
-		}
-		
-		public function set drawFocusRect(value:Boolean):void 
-		{
-			_drawFocusRect = value;
-		}
-		
-		public function get drawFocusRect():Boolean 
-		{
-			return _drawFocusRect;
-		}
-		
-		flux_internal function set isFocused( value:Boolean ):void
-		{
-			_isFocused = value;
-			if ( _isFocused )
-			{
-				super.addChild(focusRectSkin);
-			}
-			invalidate();
-		}
-		
-		flux_internal function get isFocused():Boolean
-		{
-			return _isFocused;
 		}
 
 		public function get toolTip():String

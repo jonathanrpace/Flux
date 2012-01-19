@@ -87,7 +87,7 @@ package flux.components
 		public function set selectedIndex( value:int ):void
 		{
 			var child:Button = Button(getChildAt(value));
-			_selectedChild.selected = true;
+			child.selected = true;
 		}
 		
 		public function get selectedIndex():int

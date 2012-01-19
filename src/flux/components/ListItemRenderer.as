@@ -1,18 +1,18 @@
 /**
  * ListItemRenderer.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
@@ -34,7 +34,7 @@ package flux.components
 		protected var _list			:List;
 		protected var _data			:Object;
 		
-		public function ListItemRenderer(skinClass:Class = null) 
+		public function ListItemRenderer(skinClass:Class = null)
 		{
 			super(skinClass == null ? ListItemRendererSkin : skinClass );
 		}
@@ -46,6 +46,7 @@ package flux.components
 		override protected function init():void
 		{
 			super.init();
+			doubleClickEnabled = true;
 			focusEnabled = false;
 			_labelAlign = TextFormatAlign.LEFT;
 		}
@@ -61,10 +62,13 @@ package flux.components
 			{
 				label = list.dataDescriptor.getLabel(_data);
 				icon = list.dataDescriptor.getIcon(_data);
+				enabled = list.dataDescriptor.getEnabled(_data);
 			}
 			else
 			{
 				label = "";
+				icon = null;
+				enabled = true;
 			}
 		}
 		

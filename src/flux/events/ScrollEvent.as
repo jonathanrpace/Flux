@@ -1,18 +1,18 @@
 /**
- * ContainerEvent.as
- *
+ * ScrollEvent.as
+ * 
  * Copyright (c) 2011 Jonathan Pace
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,34 +22,23 @@
  * THE SOFTWARE.
  */
 
-package flux.events
+package flux.events 
 {
-	import flash.display.DisplayObject;
 	import flash.events.Event;
 	
-	public class ContainerEvent extends Event
+	
+	public class ScrollEvent extends Event 
 	{
-		public static const CHILD_ADDED			:String = "childAdded";
-		public static const CHILD_REMOVED		:String = "childRemoved";
+		public static const CHANGE_SCROLL	:String = "changeScroll";
 		
-		private var _child	:DisplayObject;
-		private var _index	:int;
-		
-		public function ContainerEvent( type:String, child:DisplayObject, index:int, bubbles:Boolean = false, cancelable:Boolean = false)
+		public function ScrollEvent( type:String, bubbles:Boolean = false, cancelable:Boolean = false ) 
 		{
-			super(type, bubbles, cancelable);
-			_child = child;
-			_index = index;
+			super( type, bubbles, cancelable );
 		}
 		
-		public function get child():DisplayObject
+		override public function clone():Event
 		{
-			return _child;
-		}
-		
-		public function get index():int
-		{
-			return _index;
+			return new ScrollEvent( type, bubbles, cancelable );
 		}
 	}
 }

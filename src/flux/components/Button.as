@@ -1,18 +1,18 @@
 /**
  * Button.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -42,11 +42,12 @@ package flux.components
 	import flash.ui.Keyboard;
 	import flux.events.PropertyChangeEvent;
 	import flux.events.SelectEvent;
+	import flux.managers.FocusManager;
 	import flux.skins.ButtonSkin;
 	
 	[Event( type = "flash.events.Event", name = "change" )]
 	[Event( type = "flux.events.SelectEvent", name = "select" )]
-	public class Button extends UIComponent 
+	public class Button extends UIComponent
 	{
 		// Properties
 		protected var _over				:Boolean = false;
@@ -65,7 +66,7 @@ package flux.components
 		// Internal vars
 		protected var skinClass			:Class;
 		
-		public function Button( skinClass:Class = null ) 
+		public function Button( skinClass:Class = null )
 		{
 			this.skinClass = skinClass;
 			super();
@@ -111,7 +112,7 @@ package flux.components
 			}
 			iconImage.y = (_height - iconImage.height) >> 1;
 			
-			labelField.x = iconImage.x + iconImage.width + 4;
+			labelField.x = iconImage.source == null ? 4 : iconImage.x + iconImage.width + 4;
 			labelField.height = Math.min(labelField.textHeight + 4, _height);
 			labelField.y = (_height - (labelField.height)) >> 1;
 			
@@ -143,6 +144,12 @@ package flux.components
 			
 			skin.width = _width;
 			skin.height = _height;
+			
+			if ( (_down && _over) || _selected )
+			{
+				labelField.y += 1;
+				iconImage.y += 1;
+			}
 		}
 		
 		////////////////////////////////////////////////
@@ -162,26 +169,29 @@ package flux.components
 			if ( event.target != this ) return;
 			_over = true;
 			
-			_selected ? 
-			(_down ? skin.gotoAndPlay( "SelectedDown" ) 	: skin.gotoAndPlay("SelectedOver")) : 
+			_selected ?
+			(_down ? skin.gotoAndPlay( "SelectedDown" ) 	: skin.gotoAndPlay("SelectedOver")) :
 			(_down ? skin.gotoAndPlay( "Down" ) 			: skin.gotoAndPlay("Over"))
 				
 			addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
+			invalidate();
 		}
 
 		protected function rollOutHandler(event:MouseEvent):void
 		{
 			if ( event.target != this ) return;
 			_over = false;
-			_selected ? skin.gotoAndPlay( "SelectedOut" ) : skin.gotoAndPlay( "Out" );
+			_selected ? skin.gotoAndPlay( "SelectedUp" ) : skin.gotoAndPlay( "Up" );
 			removeEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
+			invalidate();
 		}
 
 		protected function mouseDownHandler(event:MouseEvent):void
 		{
 			if ( event.target != this ) return;
 			_down = true;
-			focusManager.setFocus(this);
+			
+			stage.addEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
 			
 			if ( selectMode == ButtonSelectMode.MOUSE_DOWN )
 			{
@@ -190,22 +200,24 @@ package flux.components
 					selected = !_selected;
 					if ( _selected )
 					{
-						dispatchEvent( new SelectEvent( SelectEvent.SELECT ) );
+						dispatchEvent( new SelectEvent( SelectEvent.SELECT, null, true ) );
 					}
 				}
 				else
 				{
-					dispatchEvent( new SelectEvent( SelectEvent.SELECT ) );
+					dispatchEvent( new SelectEvent( SelectEvent.SELECT, null, true ) );
 				}
 				
 			}
 			
 			_selected ? skin.gotoAndPlay( "SelectedDown" ) : skin.gotoAndPlay( "Down" );
-			stage.addEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
+			invalidate();
 		}
 
 		protected function mouseUpHandler(event:MouseEvent):void
 		{
+			stage.removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
+			
 			if ( selectMode == ButtonSelectMode.CLICK )
 			{
 				if ( toggle && _over )
@@ -213,21 +225,20 @@ package flux.components
 					selected = !_selected;
 					if ( _selected )
 					{
-						dispatchEvent( new SelectEvent( SelectEvent.SELECT ) );
+						dispatchEvent( new SelectEvent( SelectEvent.SELECT, null, true ) );
 					}
 				}
-				else
+				else if (_over)
 				{
-					dispatchEvent( new SelectEvent( SelectEvent.SELECT ) );
+					dispatchEvent( new SelectEvent( SelectEvent.SELECT, null, true ) );
 				}
 			}
 			_down = false;
 			
-			_selected ? 
-			(_over ? skin.gotoAndPlay( "SelectedOver" ) 	: skin.gotoAndPlay("SelectedUp")) : 
+			_selected ?
+			(_over ? skin.gotoAndPlay( "SelectedOver" ) 	: skin.gotoAndPlay("SelectedUp")) :
 			(_over ? skin.gotoAndPlay( "Over" ) 			: skin.gotoAndPlay("Up"))
-			
-			stage.removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
+			invalidate();
 		}
 		
 		////////////////////////////////////////////////
@@ -269,7 +280,7 @@ package flux.components
 			
 			_selected ? skin.gotoAndPlay( "SelectedUp" ) : skin.gotoAndPlay( "Up" );
 			dispatchEvent( new PropertyChangeEvent( "propertyChange_selected", oldValue, _selected ) );
-			
+			invalidate();
 		}
 		public function get selected():Boolean
 		{
@@ -286,12 +297,12 @@ package flux.components
 		}
 		
 		public function get over():Boolean
-		{ 
+		{
 			return _over;
 		}
 		
 		public function get down():Boolean
-		{ 
+		{
 			return _down;
 		}
 		

@@ -1,18 +1,18 @@
 /**
  * Container.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
@@ -34,7 +34,7 @@ package flux.components
 	import flux.layouts.ILayout;
 	
 	[Event( type="flux.events.ContainerEvent", name="childrenChanged" )]
-	public class Container extends UIComponent 
+	public class Container extends UIComponent
 	{
 		// Properties
 		protected var _paddingLeft		:int = 0;
@@ -46,7 +46,7 @@ package flux.components
 		// Child elements
 		protected var content			:Sprite;
 		
-		public function Container() 
+		public function Container()
 		{
 			
 		}
@@ -60,7 +60,7 @@ package flux.components
 			content.addChildAt(child, index);
 			invalidate();
 			onChildrenChanged( child, index, true );
-			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
+			dispatchEvent( new ContainerEvent( ContainerEvent.CHILD_ADDED, child, index ) );
 			return child;
 		}
 		
@@ -69,7 +69,7 @@ package flux.components
 			content.addChild(child);
 			invalidate();
 			onChildrenChanged( child, content.numChildren - 1, true );
-			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
+			dispatchEvent( new ContainerEvent( ContainerEvent.CHILD_ADDED, child, content.numChildren-1 ) );
 			return child;
 		}
 		
@@ -78,7 +78,7 @@ package flux.components
 			invalidate();
 			var child:DisplayObject = content.removeChildAt(index);
 			onChildrenChanged( child, index, false );
-			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
+			dispatchEvent( new ContainerEvent( ContainerEvent.CHILD_REMOVED, child, index ) );
 			return child;
 		}
 		
@@ -88,7 +88,7 @@ package flux.components
 			content.removeChild(child);
 			invalidate();
 			onChildrenChanged( child, index, false );
-			dispatchEvent( new ContainerEvent( ContainerEvent.CHILDREN_CHANGED ) );
+			dispatchEvent( new ContainerEvent( ContainerEvent.CHILD_REMOVED, child, content.numChildren ) );
 			return child;
 		}
 		
@@ -114,9 +114,6 @@ package flux.components
 		override protected function init():void
 		{
 			_layout = new AbsoluteLayout();
-			
-			_width = 100;
-			_height = 100;
 			
 			content = new Sprite();
 			content.scrollRect = new Rectangle();
@@ -194,7 +191,6 @@ package flux.components
 		////////////////////////////////////////////////
 		// Getters/Setters
 		////////////////////////////////////////////////
-		
 		public function set padding( value:int ):void
 		{
 			_paddingLeft = _paddingRight = _paddingTop = _paddingBottom = value;

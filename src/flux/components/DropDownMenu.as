@@ -1,18 +1,18 @@
 /**
  * DropDownMenu.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.display.MovieClip;
 	import flash.events.Event;
@@ -32,13 +32,15 @@ package flux.components
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
+	
+	import flux.components.DropDownListItemRenderer;
 	import flux.data.ArrayCollection;
+	import flux.events.ItemEditorEvent;
 	import flux.events.SelectEvent;
 	import flux.skins.DropDownMenuSkin;
-	import flux.components.DropDownListItemRenderer;
 	
 	[Event( type="flash.events.Event", name="change" )]
-	public class DropDownMenu extends UIComponent 
+	public class DropDownMenu extends UIComponent
 	{
 		// Settable properties
 		protected var _maxVisibleItems	:int = 8;
@@ -53,7 +55,7 @@ package flux.components
 		// Internal vars
 		protected var buttonWidth		:int;
 		
-		public function DropDownMenu() 
+		public function DropDownMenu()
 		{
 			
 		}
@@ -88,7 +90,6 @@ package flux.components
 			list.allowMultipleSelection = false;
 			list.clickSelect = true;
 			list.addEventListener( SelectEvent.SELECT, listSelectHandler );
-			addEventListener( Event.REMOVED_FROM_STAGE, removedFromStageHandler );
 		}
 		
 		override protected function validate():void
@@ -108,19 +109,14 @@ package flux.components
 			list.width = _width;
 			updateListHeight();
 			list.validateNow();
-			
-			if ( list.stage )
-			{
-				stage.addEventListener( MouseEvent.MOUSE_DOWN, mouseDownStageHandler );
-			}
 		}
 		
 		protected function updateListHeight():void
 		{
 			if ( list.stage == null ) return;
 			
-			var maxHeight:int = _maxVisibleItems * list.itemRendererHeight + list.paddingTop + list.paddingBottom;
-			var currentHeight:int = _dataProvider.length * list.itemRendererHeight + list.paddingTop + list.paddingBottom;
+			var maxHeight:int = _maxVisibleItems * list.itemRendererHeight + list.padding * 2;
+			var currentHeight:int = _dataProvider.length * list.itemRendererHeight + list.padding * 2;
 			list.height = Math.min( maxHeight, currentHeight );
 		}
 		
@@ -145,27 +141,29 @@ package flux.components
 		
 		protected function closeList():void
 		{
-			if ( list.stage == null ) return;
-			stage.removeChild(list);
+			if ( list.parent == null ) return;
+			list.parent.removeChild(list);
 			list.selectedItems = [];
-			stage.removeEventListener( MouseEvent.MOUSE_DOWN, mouseDownStageHandler );
+		}
+		
+		override public function onLoseComponentFocus():void
+		{
+			closeList();
+			dispatchEvent( new ItemEditorEvent( ItemEditorEvent.COMMIT_VALUE, _selectedItem, "selectedItem" ) );
 		}
 		
 		////////////////////////////////////////////////
 		// Event handlers
 		////////////////////////////////////////////////
 		
-		private function removedFromStageHandler( event:Event ):void
-		{
-			closeList();
-		}
-		
 		private function listSelectHandler( event:SelectEvent ):void
 		{
+			if ( event.target != list ) return;
 			_selectedItem = event.selectedItem;
-			dispatchEvent( new Event( Event.CHANGE ) );
 			updateLabel();
 			closeList();
+			dispatchEvent( new Event( Event.CHANGE ) );
+			dispatchEvent( new ItemEditorEvent( ItemEditorEvent.COMMIT_VALUE, _selectedItem, "selectedItem" ) );
 		}
 		
 		private function rollOverSkinHandler( event:MouseEvent ):void
@@ -175,20 +173,13 @@ package flux.components
 		
 		private function rollOutSkinHandler( event:MouseEvent ):void
 		{
-			skin.gotoAndPlay("Out");
+			skin.gotoAndPlay("Up");
 		}
 		
 		private function mouseDownSkinHandler( event:MouseEvent ):void
 		{
 			skin.gotoAndPlay("Down");
-			openList();
-		}
-		
-		private function mouseDownStageHandler( event:MouseEvent ):void
-		{
-			if ( !stage ) return;
-			if ( list.hitTestPoint( stage.mouseX, stage.mouseY ) ) return;
-			closeList();
+			list.stage ? closeList() : openList();
 		}
 		
 		////////////////////////////////////////////////

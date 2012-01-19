@@ -1,18 +1,18 @@
 /**
  * Container.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import adobe.utils.CustomActions;
 	import flash.display.BlendMode;
@@ -39,7 +39,7 @@ package flux.components
 	import flux.skins.ColorPickerColorCursorSkin;
 	import flux.skins.ColorPickerBrightnessCursorSkin;
 	
-	public class ColorPicker extends UIComponent 
+	public class ColorPicker extends UIComponent
 	{
 		// Styles
 		public static var stylePadding				:int = 4;
@@ -73,7 +73,7 @@ package flux.components
 		private var selectedSaturation		:Number;
 		private var selectedBrightness		:Number;
 		
-		public function ColorPicker() 
+		public function ColorPicker()
 		{
 			
 		}
@@ -84,6 +84,8 @@ package flux.components
 		
 		override protected function init():void
 		{
+			focusEnabled = true;
+			
 			border = new ColorPickerSkin();
 			addChild(border);
 			_width = border.width;
@@ -138,6 +140,7 @@ package flux.components
 			inputField.maxChars = 6;
 			inputField.width = 50;
 			inputField.addEventListener(Event.CHANGE, changeInputFieldHandler);
+			inputField.focusEnabled = true;
 			addChild(inputField);
 			
 			hexLabel = TextStyles.createTextField();
@@ -241,7 +244,9 @@ package flux.components
 			
 			selectedHue = xRatio;
 			selectedSaturation = 1 - yRatio;
+			inputField.removeEventListener(Event.CHANGE, changeInputFieldHandler);
 			updateInputField();
+			inputField.addEventListener(Event.CHANGE, changeInputFieldHandler);
 			invalidate();
 		}
 		
@@ -264,7 +269,9 @@ package flux.components
 			yRatio = yRatio < 0 ? 0 : yRatio > 1 ? 1 : yRatio;
 			
 			selectedBrightness = 1 - yRatio;
+			inputField.removeEventListener(Event.CHANGE, changeInputFieldHandler);
 			updateInputField();
+			inputField.addEventListener(Event.CHANGE, changeInputFieldHandler);
 			invalidate();
 		}
 		
@@ -291,6 +298,7 @@ package flux.components
 			selectedHue = hsl[0];
 			selectedSaturation = hsl[1];
 			selectedBrightness = hsl[2];
+			updateInputField();
 			invalidate();
 		}
 		

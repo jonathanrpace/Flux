@@ -29,6 +29,7 @@ package flux.components
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
+	import flux.managers.FocusManager;
 	
 	import flux.events.PropertyChangeEvent;
 	import flux.events.TabNavigatorEvent;
@@ -138,7 +139,6 @@ package flux.components
 		{
 			var tab:TabNavigatorTab = event.target as TabNavigatorTab;
 			if ( !tab ) return; // Looks like we've click the background, or some other chrome.
-			focusManager.setFocus(tabBar);
 			var index:int = tabBar.getChildIndex(tab);
 			visibleIndex = index;
 		}

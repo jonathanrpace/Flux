@@ -26,6 +26,7 @@ package flux.components
 {
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+	import flash.display.DisplayObject;
 	import flash.events.Event;
 	
 	public class Image extends UIComponent 
@@ -34,37 +35,46 @@ package flux.components
 		private var _source		:Class;
 		
 		// Child elements
-		private var bitmap		:Bitmap;
+		private var child		:DisplayObject;
 		
 		public function Image() 
 		{
 			
 		}
 		
-		override protected function init():void
-		{
-			bitmap = new Bitmap();
-			addChild(bitmap);
-		}
-		
 		override protected function validate():void
 		{
+			if ( child )
+			{
+				removeChild(child);
+				child = null;
+			}
+			
 			if ( _source == null )
 			{
-				if ( bitmap.bitmapData )
-				{
-					bitmap.bitmapData.dispose();
-				}
-				bitmap.bitmapData = null;
+				
+				_width = 0;
+				_height = 0;
+				return;
 			}
-			else
+			
+			
+			var instance:Object = new _source();
+			if ( instance is DisplayObject )
 			{
-				var instance:Object = new _source();
-				bitmap.bitmapData = instance is Bitmap ? Bitmap(instance).bitmapData : BitmapData(instance);
-				_width = bitmap.bitmapData.width;
-				_height = bitmap.bitmapData.height;
-				dispatchEvent( new Event( Event.RESIZE ) );
+				child = DisplayObject(instance);
+				
 			}
+			else if ( instance is BitmapData )
+			{
+				child = new Bitmap( BitmapData(instance) );
+			}
+			
+			addChild(child);
+			
+			_width = child.width;
+			_height = child.height;
+			dispatchEvent( new Event( Event.RESIZE ) );
 		}
 		
 		public function set source( value:Class ):void

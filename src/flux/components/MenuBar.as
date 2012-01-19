@@ -1,18 +1,18 @@
 /**
  * MenuBar.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
@@ -33,11 +33,12 @@ package flux.components
 	import flux.events.ArrayCollectionEvent;
 	import flux.events.SelectEvent;
 	import flux.layouts.HorizontalLayout;
+	import flux.managers.FocusManager;
 	import flux.skins.MenuBarButtonSkin;
 	import flux.skins.MenuBarSkin;
 	
 	[Event( type="flux.events.SelectEvent", name="select" )]
-	public class MenuBar extends UIComponent 
+	public class MenuBar extends UIComponent
 	{
 		// Properties
 		private var _dataProvider	:ArrayCollection;
@@ -51,7 +52,7 @@ package flux.components
 		// Internal vars
 		private var selectedData	:Object;
 		
-		public function MenuBar() 
+		public function MenuBar()
 		{
 			
 		}
@@ -77,11 +78,13 @@ package flux.components
 			list.itemRendererClass = DropDownListItemRenderer;
 			list.resizeToContent = true;
 			list.clickSelect = true;
+			list.focusEnabled = false;
 			
 			_dataDescriptor = new DefaultDataDescriptor();
 			list.dataDescriptor = _dataDescriptor;
 			
 			buttonBar.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownButtonBarHandler);
+			buttonBar.addEventListener(SelectEvent.SELECT, selectButtonBarHandler);
 		}
 		
 		override protected function validate():void
@@ -149,12 +152,12 @@ package flux.components
 			
 			buttonBar.addEventListener(MouseEvent.MOUSE_OVER, mouseOverButtonBarHandler );
 			list.addEventListener(MouseEvent.MOUSE_UP, mouseUpListHandler );
-			stage.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownStageHandler);
 		}
 		
 		protected function closeList():void
 		{
 			if ( selectedData == null ) return;
+			if ( list.stage == null ) return;
 			
 			stage.removeChild(list);
 			
@@ -167,19 +170,26 @@ package flux.components
 			selectedData = null;
 			buttonBar.removeEventListener(MouseEvent.MOUSE_OVER, mouseOverButtonBarHandler );
 			list.removeEventListener(MouseEvent.MOUSE_UP, mouseUpListHandler );
-			stage.removeEventListener(MouseEvent.MOUSE_DOWN, mouseDownStageHandler);
+		}
+		
+		override public function onLoseComponentFocus():void
+		{
+			closeList();
 		}
 		
 		////////////////////////////////////////////////
 		// Event handlers
 		////////////////////////////////////////////////
 		
+		private function selectButtonBarHandler( event:SelectEvent ):void
+		{
+			event.stopImmediatePropagation();
+		}
+		
 		private function mouseDownButtonBarHandler( event:MouseEvent ):void
 		{
 			var btn:Button = event.target as Button;
 			if ( !btn ) return;
-			
-			focusManager.setFocus(this);
 			
 			if ( selectedData )
 			{
@@ -207,16 +217,9 @@ package flux.components
 		{
 			var itemRenderer:IItemRenderer = event.target as IItemRenderer;
 			if ( itemRenderer == null ) return;
-			
+			if ( list.dataDescriptor.getEnabled(itemRenderer.data) == false ) return;
 			dispatchEvent( new SelectEvent( SelectEvent.SELECT, itemRenderer.data, true, false ) );
 			
-			closeList();
-		}
-		
-		private function mouseDownStageHandler( event:MouseEvent ):void
-		{
-			if ( list.hitTestPoint( event.stageX, event.stageY ) ) return;
-			if ( buttonBar.hitTestPoint( event.stageX, event.stageY ) ) return;
 			closeList();
 		}
 		

@@ -259,7 +259,7 @@ package flux.components
 		public function get editorRect():Rectangle
 		{
 			validateNow();
-			return new Rectangle( _width * 0.4, 0, _width * 0.6, _height);
+			return new Rectangle( valueLabelField.x, 0, valueLabelField.width, _height);
 		}
 	}
 }

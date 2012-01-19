@@ -27,6 +27,7 @@ package flux.components
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
+	import flash.text.TextFormatAlign;
 
 	public class Label extends UIComponent 
 	{
@@ -54,19 +55,43 @@ package flux.components
 			_fontSize = Number(textField.defaultTextFormat.size);
 			_bold = textField.defaultTextFormat.bold;
 			textField.multiline = false;
-			textField.autoSize = TextFieldAutoSize.LEFT;
+			
 			addChild(textField);
 		}
 		
 		override protected function validate():void
 		{
-			_width = textField.width;
+			if ( textAlign == TextFormatAlign.LEFT )
+			{
+				textField.autoSize = TextFieldAutoSize.LEFT;
+				_width = textField.width;
+			}
+			else
+			{
+				textField.width = _width;
+				textField.autoSize = TextFieldAutoSize.NONE;
+			}
+			
 			_height = textField.height;
 		}
 		
 		////////////////////////////////////////////////
 		// Getters/Setters
 		////////////////////////////////////////////////
+		
+		public function set textAlign( value:String ):void
+		{
+			if ( value == textField.defaultTextFormat.align ) return;
+			var tf:TextFormat = textField.defaultTextFormat;
+			tf.align = value;
+			textField.defaultTextFormat = tf;
+			textField.setTextFormat(tf);
+		}
+		
+		public function get textAlign():String
+		{
+			return textField.defaultTextFormat.align;
+		}
 		
 		public function set text( value:String ):void
 		{

@@ -31,7 +31,7 @@ package flux.util
 	
 	public class FluxDeserializer 
 	{
-		public static function deserialize( xml:XML, topLevel:UIComponent ):UIComponent
+		public static function deserialize( xml:XML, topLevel:UIComponent = null ):UIComponent
 		{
 			return parseComp( xml, topLevel, null, topLevel );
 		}
@@ -98,7 +98,10 @@ package flux.util
 				
 				if ( prop == "id" )
 				{
-					topLevel[value] = instance;
+					if ( topLevel.hasOwnProperty(value) )
+					{
+						topLevel[value] = instance;
+					}
 					continue;
 				}
 				
@@ -111,6 +114,8 @@ package flux.util
 					}
 					else
 					{
+						if ( prop == "width" ) instance.percentWidth = NaN;
+						if ( prop == "height" ) instance.percentHeight = NaN;
 						instance[prop] = Number(value);
 					}
 				}
@@ -144,7 +149,6 @@ package flux.util
 		HBox;
 		HorizontalLayout;
 		HRule;
-		TextInput;
 		Label;
 		NumericStepper;
 		MenuBar;
@@ -158,6 +162,7 @@ package flux.util
 		HSlider;
 		TabNavigator;
 		TextArea;
+		TextInput;
 		Tree;
 		VBox;
 		VerticalLayout;

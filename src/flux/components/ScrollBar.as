@@ -1,18 +1,18 @@
 /**
  * ScrollBar.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.display.Sprite;
 	import flash.events.Event;
@@ -35,7 +35,7 @@ package flux.components
 	import flux.skins.ScrollBarUpButtonSkin;
 	import flux.skins.ScrollBarDownButtonSkin;
 	
-	public class ScrollBar extends UIComponent 
+	public class ScrollBar extends UIComponent
 	{
 		private static const DELAY_TIME		:int = 400;
 		private static const REPEAT_TIME	:int = 80;
@@ -66,7 +66,7 @@ package flux.components
 		private var defaultUpBtnHeight		:Number;
 		private var defaultDownBtnHeight	:Number;
 		
-		public function ScrollBar() 
+		public function ScrollBar()
 		{
 			
 		}
@@ -102,6 +102,7 @@ package flux.components
 			upBtn.addEventListener(MouseEvent.ROLL_OUT, endScrollRepeatHandler);
 			downBtn.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownBtnHandler);
 			downBtn.addEventListener(MouseEvent.ROLL_OUT, endScrollRepeatHandler);
+			
 			
 			delayTimer = new Timer( DELAY_TIME, 1 );
 			delayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, delayCompleteHandler);
@@ -164,7 +165,7 @@ package flux.components
 			repeatTimer.stop();
 		}
 		
-		private function mouseDownThumbHandler( event:MouseEvent ):void 
+		private function mouseDownThumbHandler( event:MouseEvent ):void
 		{
 			dragStartValue = _value;
 			dragStartRatio = (mouseY - track.y) / (track.height - thumb.height);
@@ -184,6 +185,7 @@ package flux.components
 		
 		private function endThumbDragHandler( event:MouseEvent ):void
 		{
+			if ( stage == null ) return;
 			stage.removeEventListener( MouseEvent.MOUSE_MOVE, mouseMoveHandler );
 			stage.removeEventListener(MouseEvent.MOUSE_UP, endScrollRepeatHandler);
 			stage.removeEventListener(MouseEvent.MOUSE_UP, endThumbDragHandler);
@@ -209,7 +211,7 @@ package flux.components
 			if ( v == _value ) return;
 			_value = v;
 			invalidate();
-			dispatchEvent( new Event( Event.CHANGE, true ) );
+			dispatchEvent( new Event( Event.CHANGE ) );
 		}
 		
 		public function get value():Number
@@ -269,12 +271,12 @@ package flux.components
 			return _pageScrollSpeed;
 		}
 		
-		public function get thumbVerticalPadding():int 
+		public function get thumbVerticalPadding():int
 		{
 			return _thumbVerticalPadding;
 		}
 		
-		public function set thumbVerticalPadding(value:int):void 
+		public function set thumbVerticalPadding(value:int):void
 		{
 			if ( value == _thumbVerticalPadding ) return;
 			_thumbVerticalPadding = value;

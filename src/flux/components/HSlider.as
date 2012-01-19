@@ -1,18 +1,18 @@
 /**
  * HSlider.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,31 +22,35 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.geom.Point;
+	import flux.events.ItemEditorEvent;
 	import flux.events.PropertyChangeEvent;
 	import flux.skins.SliderTrackSkin;
 	import flux.skins.SliderThumbSkin;
 	import flux.skins.SliderMarkerSkin;
 	
-	public class HSlider extends UIComponent 
+	public class HSlider extends UIComponent
 	{
 		// Properties
-		private var _value		:Number = 0;
-		private var _min		:Number = 0;
-		private var _max		:Number = 10;
-		private var _stepSize	:Number = 1;
-		private var _showMarkers:Boolean = true;
+		private var _value			:Number = 0;
+		private var _min			:Number = 0;
+		private var _max			:Number = 10;
+		private var _snapInterval	:Number = 1;
+		private var _showMarkers	:Boolean = true;
 		
 		// Child elements
 		private var track		:Sprite;
 		private var thumb		:Sprite;
+		private var markerContainer:Sprite;
 		private var markers		:Array;
+		private var toolTipComp	:ToolTip;
 		
-		public function HSlider() 
+		public function HSlider()
 		{
 			
 		}
@@ -57,19 +61,25 @@ package flux.components
 		
 		override protected function init():void
 		{
+			focusEnabled = true;
+			
 			track = new SliderTrackSkin();
 			addChild(track);
 			
 			_width = track.width;
 			_height = track.height;
 			
+			markerContainer = new Sprite();
+			addChild(markerContainer);
+			
 			thumb = new SliderThumbSkin();
 			addChild(thumb);
+			
+			toolTipComp = new ToolTip();
 			
 			markers = [];
 			
 			addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
-			addEventListener(Event.REMOVED_FROM_STAGE, removedFromStageHandler);
 		}
 		
 		override protected function validate():void
@@ -80,39 +90,51 @@ package flux.components
 			var range:Number = (_max - _min);
 			thumb.x = int(_width * ((_value-_min) / range));
 			
-			var numMarkers:int = showMarkers ? range / _stepSize : 0;
-			var stepWidth:Number = (_stepSize / range) * _width;
+			var numMarkers:int = showMarkers ? range / _snapInterval : 0;
+			var stepWidth:Number = (_snapInterval / range) * _width;
+			var leftOver:Number = (range % _snapInterval) * stepWidth;
 			for ( var i:int = 0; i < numMarkers; i++ )
 			{
 				var marker:Sprite;
 				if ( i >= markers.length )
 				{
 					marker = markers[i] = new SliderMarkerSkin();
-					addChild(marker);
+					markerContainer.addChild(marker);
 				}
 				else
 				{
 					marker = markers[i];
 				}
-				marker.x = int((i+1) * stepWidth);
+				marker.x = int(leftOver + i * stepWidth);
 			}
 			
 			while ( markers.length > numMarkers )
 			{
-				removeChild(markers.pop());
+				markerContainer.removeChild(markers.pop());
 			}
+			
+			toolTipComp.text = String(int(_value*1000)/1000);
+			toolTipComp.validateNow();
+			var pt:Point = new Point(thumb.x, thumb.y);
+			pt = localToGlobal(pt);
+			pt = Application.getInstance().globalToLocal(pt);
+			toolTipComp.x = pt.x - (toolTipComp.width>>1);
+			toolTipComp.y = pt.y - toolTipComp.height;
 		}
 		
 		private function beginDrag():void
 		{
 			stage.addEventListener(MouseEvent.MOUSE_UP, stageMouseUpHandler);
 			stage.addEventListener(MouseEvent.MOUSE_MOVE, mouseMoveHandler);
+			Application.getInstance().toolTipContainer.addChild(toolTipComp);
+			invalidate();
 		}
 		
 		protected function endDrag():void
 		{
 			stage.removeEventListener(MouseEvent.MOUSE_UP, stageMouseUpHandler);
 			stage.removeEventListener(MouseEvent.MOUSE_MOVE, mouseMoveHandler);
+			toolTipComp.parent.removeChild(toolTipComp);
 		}
 		
 		protected function updateDrag():void
@@ -121,10 +143,14 @@ package flux.components
 			value = _min + ratio * (_max - _min);
 		}
 		
-		protected function snapToInterval( value:Number, interval:Number ):Number
+		protected function commitValue():void
 		{
-			var overshoot:Number = value % interval;
-			return overshoot < interval*0.5 ? value - overshoot : value + (interval-overshoot);
+			dispatchEvent( new ItemEditorEvent( ItemEditorEvent.COMMIT_VALUE, _value, "value" ) );
+		}
+		
+		override public function onLoseComponentFocus():void
+		{
+			commitValue();
 		}
 		
 		////////////////////////////////////////////////
@@ -147,43 +173,24 @@ package flux.components
 			endDrag();
 		}
 		
-		private function removedFromStageHandler( event:Event ):void
-		{
-			endDrag();
-		}
-		
 		////////////////////////////////////////////////
 		// Getters/Setters
 		////////////////////////////////////////////////
 		
-		public function get value():Number 
+		public function get value():Number
 		{
 			return _value;
 		}
 		
-		public function set value(v:Number):void 
+		public function set value(v:Number):void
 		{
-			if ( stepSize > 0 )
+			// Snap the value to the interval
+			if ( _snapInterval > 0 )
 			{
-				var ratio:Number = (v-_min) / (_max - _min);
-				ratio = ratio < 0 ? 0 : ratio > 1 ? 1 : ratio;
-				var stepSizeAsRatio:Number = _stepSize / (_max - _min);
-				var numSteps:int = 1 / stepSizeAsRatio;
-				var total:Number = (stepSizeAsRatio * numSteps);
-				var leftOver:Number = 1 - total;
-				if ( ratio > total + leftOver * 0.5 )
-				{
-					ratio = 1;
-				}
-				else
-				{
-					ratio = snapToInterval(ratio, stepSizeAsRatio);
-				}
-				
-				v = _min + (ratio * (_max - _min));
+				var a:Number = 1 / _snapInterval;
+				v = int(v * a) / a;
+				v = v < _min ? _min : v > _max ? _max : v;
 			}
-			
-			v = v < _min ? _min : v > _max ? _max : v;
 			if ( _value == v ) return;
 			var oldValue:Number = _value;
 			_value = v;
@@ -192,12 +199,12 @@ package flux.components
 			dispatchEvent( new PropertyChangeEvent( "propertyChange_value", oldValue, _value) );
 		}
 		
-		public function get min():Number 
+		public function get min():Number
 		{
 			return _min;
 		}
 		
-		public function set min(v:Number):void 
+		public function set min(v:Number):void
 		{
 			v = v > _max ? _max : v;
 			if ( _min == v ) return;
@@ -205,12 +212,12 @@ package flux.components
 			value = _value;
 		}
 		
-		public function get max():Number 
+		public function get max():Number
 		{
 			return _max;
 		}
 		
-		public function set max(v:Number):void 
+		public function set max(v:Number):void
 		{
 			v = v < _min ? _min : v;
 			if ( _max == v ) return;
@@ -218,31 +225,29 @@ package flux.components
 			value = _value;
 		}
 		
-		public function get stepSize():Number 
+		public function get snapInterval():Number
 		{
-			return _stepSize;
+			return _snapInterval;
 		}
 		
-		public function set stepSize(v:Number):void 
+		public function set snapInterval(v:Number):void
 		{
-			v = v <= 0 ? 0 : v;
-			if ( _stepSize == v ) return;
-			_stepSize = v;
+			v = v < 0 ? 0 : v;
+			if ( _snapInterval == v ) return;
+			_snapInterval = v;
 			value = _value;
 		}
 		
-		public function get showMarkers():Boolean 
+		public function get showMarkers():Boolean
 		{
 			return _showMarkers;
 		}
 		
-		public function set showMarkers(v:Boolean):void 
+		public function set showMarkers(v:Boolean):void
 		{
 			if ( _showMarkers == v ) return;
 			_showMarkers = v;
 			invalidate();
 		}
-		
 	}
-
 }

@@ -29,6 +29,7 @@ package flux.components
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
+	import flux.managers.FocusManager;
 	import flux.skins.CheckBoxSkin;
 	
 	public class CheckBox extends Button 
@@ -105,7 +106,6 @@ package flux.components
 
 		override protected function mouseDownHandler(event:MouseEvent):void
 		{
-			focusManager.setFocus(this);
 			_down = true;
 			updateSkinState();
 			stage.addEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);

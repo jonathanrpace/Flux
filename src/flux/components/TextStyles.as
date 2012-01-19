@@ -1,18 +1,18 @@
 /**
  * TextStyles.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,16 +20,16 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * 
+ *
  * Components with text make use of the font Pixel Arial by Max
  * This is a free font obtained from http://www.dafont.com/pixel-arial-11.font
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.text.TextField;
 	import flash.text.TextFormat;
-	public class TextStyles 
+	public class TextStyles
 	{
 		// NOTE: Flex 4 introduces DefineFont4, which is used by default and does not work in native text fields.
 		// Use the embedAsCFF="false" param to switch back to DefineFont4. In earlier Flex 4 SDKs this was cff="false".
@@ -43,8 +43,8 @@ package flux.components
 		public static var embedFonts		:Boolean = true;
 		public static var fontFace			:String = "Pixel Arial 11";
 		public static var fontSize			:int = 8;
-		public static var fontColor			:uint = 0xFFFFFF;
-		public static var fontColorDimmed	:uint = 0xCCCCCC;
+		public static var fontColor			:uint = 0xCCCCCC;
+		public static var fontColorDimmed	:uint = 0x999999;
 		
 		public static function createTextField( bold:Boolean = false ):TextField
 		{

@@ -24,21 +24,8 @@
 
 package flux.components 
 {
-	import flash.display.Sprite;
-	import flash.events.Event;
-	import flash.events.FocusEvent;
-	import flash.events.TextEvent;
-	import flash.text.TextField;
-	import flash.text.TextFieldType;
-	import flash.text.TextFormat;
-	import flux.skins.InputFieldSkin;
-	import flux.util.SelectionColor;
-	
-	public class TextInput extends UIComponent 
+	public class TextInput extends TextArea 
 	{
-		// Child elements
-		protected var skin				:Sprite;
-		protected var textField			:TextField;
 		
 		public function TextInput() 
 		{
@@ -51,110 +38,16 @@ package flux.components
 		
 		override protected function init():void
 		{
-			focusEnabled = true;
-			
-			skin = new InputFieldSkin();
-			addChild(skin);
-			
-			_width = skin.width;
-			_height = skin.height;
-			
-			textField = TextStyles.createTextField();
-			textField.multiline = false;
-			textField.selectable = true;
-			textField.type = TextFieldType.INPUT;
-			textField.mouseEnabled = true;
-			textField.addEventListener(Event.CHANGE, textFieldChangeHandler);
-			textField.addEventListener(FocusEvent.FOCUS_IN, textFieldFocusInHandler);
-			
-			SelectionColor.setFieldSelectionColor(textField, 0xCCCCCC);
-			
-			addChild( textField );
+			super.init();
+			editable = true;
+			multiline = false;
 		}
 		
-		override protected function validate():void
+		override public function onGainComponentFocus():void
 		{
-			if ( textField.multiline )
-			{
-				textField.height = _height;
-				textField.y = 0;
-			}
-			else
-			{
-				textField.height = Math.min(textField.textHeight + 4, _height);
-				textField.y = (_height - (textField.height)) >> 1;
-			}
-			
-			textField.x = 4;
-			textField.width = _width - 4;
-			
-			skin.width = _width;
-			skin.height = _height;
-		}
-		
-		////////////////////////////////////////////////
-		// Event Handlers
-		////////////////////////////////////////////////
-		
-		private function textFieldFocusInHandler( event:FocusEvent ):void
-		{
-			if ( _focusEnabled )
-			{
-				event.stopImmediatePropagation();
-				focusManager.setFocus(this);
-			}
-		}
-		
-		private function textFieldChangeHandler( event:Event ):void
-		{
-			event.stopImmediatePropagation();
-			dispatchEvent( new Event( Event.CHANGE ) );
-		}
-		
-		////////////////////////////////////////////////
-		// Getters/Setters
-		////////////////////////////////////////////////
-		
-		public function set restrict( value:String ):void
-		{
-			textField.restrict = value;
-		}
-		
-		public function get restrict():String
-		{
-			return textField.restrict;
-		}
-		
-		public function set maxChars( value:int ):void
-		{
-			textField.maxChars = value;
-		}
-		
-		public function get maxChars():int
-		{
-			return textField.maxChars;
-		}
-		
-		public function set text( value:String ):void
-		{
-			textField.text = value;
-		}
-		
-		public function get text():String
-		{
-			return textField.text;
-		}
-		
-		public function set multiline( value:Boolean ):void
-		{
-			if ( textField.multiline == value ) return;
-			textField.multiline = textField.wordWrap = value;
-			invalidate();
-		}
-		
-		public function get multiline():Boolean
-		{
-			return textField.multiline;
+			if ( !editable ) return;
+			stage.focus = textField;
+			textField.setSelection(textField.text.length, textField.text.length);
 		}
 	}
 }

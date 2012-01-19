@@ -1,18 +1,18 @@
 /**
  * List.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.display.DisplayObject;
 	import flash.display.InteractiveObject;
@@ -33,22 +33,29 @@ package flux.components
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
+	import flux.events.ListEvent;
+	
 	import flux.data.ArrayCollection;
 	import flux.data.DefaultDataDescriptor;
 	import flux.data.IDataDescriptor;
 	import flux.events.ArrayCollectionChangeKind;
 	import flux.events.ArrayCollectionEvent;
 	import flux.events.DragAndDropEvent;
+	import flux.events.ScrollEvent;
 	import flux.events.SelectEvent;
 	import flux.layouts.VerticalLayout;
+	import flux.managers.FocusManager;
 	import flux.skins.ListDropIndicatorSkin;
 	import flux.skins.ListSkin;
 	
 	[Event( type = "flash.events.Event", name = "change" )]
 	[Event( type = "flux.events.SelectEvent", name = "select" )]
+	[Event( type = "flux.events.ScrollEvent", name = "scrollChange" )]
 	[Event( type = "flux.events.DragAndDropEvent", name = "drop" )]
+	[Event( type = "flux.events.ListEvent", name = "itemRollOver" )]
+	[Event( type = "flux.events.ListEvent", name = "itemRollOut" )]
 	
-	public class List extends Container
+	public class List extends UIComponent
 	{
 		// Properties
 		protected var _dataProvider				:Object;;
@@ -61,9 +68,11 @@ package flux.components
 		protected var _itemRendererClass		:Class;
 		protected var _clickSelect				:Boolean = false;
 		protected var _allowDragAndDrop			:Boolean = false;
+		protected var _padding					:int = 4;
 		
 		// Child elements
 		protected var background				:Sprite;
+		protected var content					:Sprite;
 		protected var vScrollBar				:ScrollBar;
 		protected var visibleItemRenderers		:Vector.<IItemRenderer>;
 		protected var itemRendererPool			:Vector.<IItemRenderer>;
@@ -79,7 +88,7 @@ package flux.components
 		protected var draggedItemRenderer		:DisplayObject;
 		private var mouseDownDragStart			:Point;
 		
-		public function List() 
+		public function List()
 		{
 			
 		}
@@ -111,10 +120,16 @@ package flux.components
 		
 		override protected function init():void
 		{
-			background = new ListSkin();
-			addRawChild(background);
+			doubleClickEnabled = true;
 			
-			super.init();
+			background = new ListSkin();
+			addChild(background);
+			
+			content = new Sprite();
+			content.scrollRect = new Rectangle();
+			content.addEventListener(MouseEvent.MOUSE_OVER, rollOverContentHandler);
+			content.addEventListener(MouseEvent.MOUSE_OUT, rollOutContentHandler);
+			addChild(content);
 			
 			focusEnabled = true;
 			
@@ -122,8 +137,6 @@ package flux.components
 			itemRendererPool = new Vector.<IItemRenderer>();
 			_itemRendererClass = ListItemRenderer;
 			
-			padding = 4;
-			_layout = new VerticalLayout(0);
 			_dataDescriptor = new DefaultDataDescriptor();
 			
 			_selectedItems = [];
@@ -135,17 +148,16 @@ package flux.components
 			vScrollBar = new ScrollBar();
 			vScrollBar.scrollSpeed = _itemRendererHeight;
 			vScrollBar.pageScrollSpeed = _itemRendererHeight * 4;
-			addRawChild(vScrollBar);
+			addChild(vScrollBar);
 			
 			dropIndicator = new ListDropIndicatorSkin();
-			addRawChild(dropIndicator);
+			addChild(dropIndicator);
 			dropIndicator.visible = false;
 			
 			_clickSelect = true;
 			clickSelect = false;
 			content.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownContentHandler);
 			addEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelHandler);
-			addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
 		}
 		
 		override protected function validate():void
@@ -154,7 +166,7 @@ package flux.components
 			
 			if ( _resizeToContent )
 			{
-				_height = flattenedData.length * _itemRendererHeight + _paddingTop + _paddingBottom ;
+				_height = flattenedData.length * _itemRendererHeight + _padding * 2;
 			}
 			
 			calculateVisibleData();
@@ -196,9 +208,11 @@ package flux.components
 						itemRenderer = new _itemRendererClass();
 						itemRenderer.list = this;
 					}
+					visibleItemRenderersByData[data] = itemRenderer;
 					itemRenderer.data = data;
 					itemRenderer.resizeToContent = _resizeToContent;
 					itemRenderer.percentWidth = _resizeToContent ? NaN : 100;
+					
 				}
 				
 				visibleItemRenderers.push(itemRenderer);
@@ -208,6 +222,7 @@ package flux.components
 			
 			initVisibleItemRenderers();
 			
+			var layoutArea:Rectangle = getChildrenLayoutArea();
 			if ( _resizeToContent )
 			{
 				var maxWidth:int = 0;
@@ -221,14 +236,11 @@ package flux.components
 				{
 					itemRenderer = visibleItemRenderers[i];
 					itemRenderer.resizeToContent = false;
-					itemRenderer.width = maxWidth;
 				}
 				
-				_width = maxWidth + _paddingLeft + _paddingRight;
+				_width = maxWidth + _padding * 2;
+				layoutArea.width = maxWidth;
 			}
-			
-			
-			var layoutArea:Rectangle = getChildrenLayoutArea();
 			
 			if ( _resizeToContent == false )
 			{
@@ -239,7 +251,7 @@ package flux.components
 				vScrollBar.addEventListener(Event.CHANGE, onChangeVScrollBar );
 				
 				vScrollBar.visible = vScrollBar.thumbSizeRatio < 1;
-				if ( vScrollBar.visible ) layoutArea.width -= (vScrollBar.x + vScrollBar.width) - layoutArea.right;
+				if ( vScrollBar.visible ) layoutArea.right = vScrollBar.x + _padding;
 			}
 			else
 			{
@@ -255,10 +267,22 @@ package flux.components
 			scrollRect.y = -Math.round( -vScrollBar.value + firstVisibleDataIndex * _itemRendererHeight);
 			content.scrollRect = scrollRect;
 			
-			_layout.layout( content, layoutArea.width, layoutArea.height );
+			// Finally, layout the item renderers
+			for ( i = 0; i < visibleItemRenderers.length; i++ )
+			{
+				itemRenderer = visibleItemRenderers[i];
+				itemRenderer.y = i * _itemRendererHeight;
+				itemRenderer.width = layoutArea.width;
+				itemRenderer.validateNow();
+			}
 			
 			background.width = _width;
 			background.height = _height;
+		}
+		
+		protected function getChildrenLayoutArea():Rectangle
+		{
+			return new Rectangle( _padding, _padding, _width - _padding*2, _height - _padding*2 );
 		}
 		
 		protected function initVisibleItemRenderers():void {}
@@ -292,7 +316,7 @@ package flux.components
 		
 		protected function calculateVisibleData():void
 		{
-			if ( _resizeToContent ) 
+			if ( _resizeToContent )
 			{
 				vScrollBar.value = 0;
 				visibleData = flattenedData.slice();
@@ -416,6 +440,20 @@ package flux.components
 		// Event handlers
 		////////////////////////////////////////////////
 		
+		protected function rollOverContentHandler( event:MouseEvent ):void
+		{
+			var itemRenderer:IItemRenderer = event.target as IItemRenderer;
+			if ( itemRenderer == null ) return;
+			dispatchEvent( new ListEvent( ListEvent.ITEM_ROLL_OVER, itemRenderer.data ) );
+		}
+		
+		protected function rollOutContentHandler( event:MouseEvent ):void
+		{
+			var itemRenderer:IItemRenderer = event.target as IItemRenderer;
+			if ( itemRenderer == null ) return;
+			dispatchEvent( new ListEvent( ListEvent.ITEM_ROLL_OUT, itemRenderer.data ) );
+		}
+		
 		protected function dataProviderChangeHandler( event:ArrayCollectionEvent ):void
 		{
 			if ( event.kind == ArrayCollectionChangeKind.RESET )
@@ -440,6 +478,9 @@ package flux.components
 			var selectedVisibleIndex:int = (content.mouseY / _itemRendererHeight);
 			var index:int = firstVisibleDataIndex + selectedVisibleIndex;
 			if ( index < 0 || index >= flattenedData.length ) return;
+			
+			var item:Object = flattenedData[index];
+			if ( _dataDescriptor.getEnabled(item) == false ) return;
 			
 			// The following logic implements the behaviour we expect to see from lists
 			// with various combinations of clicking and CTRL and/or SHIFT.
@@ -480,7 +521,7 @@ package flux.components
 					{
 						_selectedItems.push( focusedItem );
 					}
-					// Single click 
+					// Single click
 					else
 					{
 						_selectedItems.splice(_selectedItems.indexOf(focusedItem), 1);
@@ -498,7 +539,6 @@ package flux.components
 			invalidate();
 			
 			dispatchEvent( new SelectEvent( SelectEvent.SELECT, flattenedData[index] ) );
-			dispatchEvent( new Event( Event.CHANGE ) );
 		}
 		
 		private function mouseWheelHandler( event:MouseEvent ):void
@@ -509,16 +549,7 @@ package flux.components
 		private function onChangeVScrollBar( event:Event ):void
 		{
 			invalidate();
-		}
-		
-		private function onChangeHScrollBar( event:Event ):void
-		{
-			invalidate();
-		}
-		
-		private function mouseDownHandler( event:MouseEvent ):void
-		{
-			focusManager.setFocus(this);
+			dispatchEvent( new ScrollEvent( ScrollEvent.CHANGE_SCROLL ) );
 		}
 		
 		private function mouseDownContentHandler( event:MouseEvent ):void
@@ -651,21 +682,23 @@ package flux.components
 			return _selectedItems.length == 0 ? null : _selectedItems[0];
 		}
 		
-		public function get maxScrollY():int 
-		{ 
-			return vScrollBar.max; 
+		public function get maxScrollY():int
+		{
+			return vScrollBar.max;
 		}
 		
 		public function set scrollY( value:int ):void
 		{
+			if ( value == vScrollBar.value ) return;
 			vScrollBar.removeEventListener( Event.CHANGE, onChangeVScrollBar );
 			vScrollBar.value = value;
 			vScrollBar.addEventListener( Event.CHANGE, onChangeVScrollBar );
 			invalidate();
+			dispatchEvent( new ScrollEvent( ScrollEvent.CHANGE_SCROLL ) );
 		}
-		public function get scrollY():int 
-		{ 
-			return vScrollBar.value; 
+		public function get scrollY():int
+		{
+			return vScrollBar.value;
 		}
 		
 		public function get itemRendererHeight():int
@@ -751,12 +784,12 @@ package flux.components
 			return _allowDragAndDrop;
 		}
 		
-		public function get filterFunction():Function 
+		public function get filterFunction():Function
 		{
 			return _filterFunction;
 		}
 		
-		public function set filterFunction(value:Function):void 
+		public function set filterFunction(value:Function):void
 		{
 			_filterFunction = value;
 			invalidate();
@@ -770,6 +803,17 @@ package flux.components
 		public function get showBorder():Boolean
 		{
 			return background.visible;
+		}
+		
+		public function set padding( value:int ):void
+		{
+			_padding = value;
+			invalidate();
+		}
+		
+		public function get padding():int
+		{
+			return _padding;
 		}
 	}
 }

@@ -1,20 +1,20 @@
 /**
  * Panel.as
- * 
+ *
  * Container component with a title bar and control bar.
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,36 +24,42 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
+	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+	import flash.ui.Keyboard;
+	import flux.events.ComponentFocusEvent;
+	import flux.events.SelectEvent;
 	import flux.layouts.HorizontalLayout;
 	import flux.layouts.LayoutAlign;
+	import flux.managers.FocusManager;
 	import flux.skins.PanelSkin;
 	import flux.skins.PanelCloseBtnSkin;
 	
 	[Event( type="flash.events.Event", name="close" )]
-	public class Panel extends Container 
+	public class Panel extends Container
 	{
-		// Styles
-		public static var styleTitleBarHeight	:int = 22;
-		
 		// Properties
 		public   var dragEnabled		:Boolean = false;
-		protected var _titleBarHeight	:int = Panel.styleTitleBarHeight;
+		protected var _titleBarHeight	:int;
+		protected var _defaultButton	:Button;
 		
 		// Child elements
-		protected var background	:Sprite;
+		protected var border		:MovieClip;
 		protected var _controlBar	:Container;
 		protected var titleField	:TextField;
 		protected var closeBtn		:Button;
+		protected var iconImage		:Image;
 		
-		public function Panel() 
+		public function Panel()
 		{
 			
 		}
@@ -64,8 +70,9 @@ package flux.components
 		
 		override protected function init():void
 		{
-			background = new PanelSkin();
-			addRawChild(background);
+			border = new PanelSkin();
+			_titleBarHeight = border.scale9Grid.top;
+			addRawChild(border);
 			
 			super.init();
 			
@@ -82,12 +89,21 @@ package flux.components
 			addRawChild(closeBtn);
 			closeBtn.addEventListener(MouseEvent.CLICK, clickCloseBtnHandler);
 			
-			_width = background.width;
-			_height = background.height;
+			iconImage = new Image();
+			addRawChild(iconImage);
 			
-			addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
+			_width = border.width;
+			_height = border.height;
 			
+			border.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownBackgroundHandler);
+			
+			showCloseButton = false;
 			padding = 4;
+			
+			FocusManager.getInstance().addEventListener(ComponentFocusEvent.COMPONENT_FOCUS_IN, componentFocusInHandler);
+			
+			addEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
+			addEventListener(Event.REMOVED_FROM_STAGE, removedFromStageHandler);
 		}
 		
 		override protected function validate():void
@@ -95,19 +111,24 @@ package flux.components
 			_controlBar.resizeToContent = true;
 			super.validate();
 			
+			iconImage.source = _icon;
+			iconImage.validateNow();
+			iconImage.y = (_titleBarHeight - iconImage.height) >> 1;
+			iconImage.x = iconImage.y;
+			
 			_controlBar.resizeToContent = false;
 			_controlBar.width = _width;
 			_controlBar.validateNow();
 			_controlBar.y = _height - _controlBar.height;
 			
-			background.width = _width;
-			background.height = _height;
+			border.width = _width;
+			border.height = _height;
 			
 			titleField.text = _label;
-			titleField.x = 4;
 			titleField.width = _width - (_paddingLeft + _paddingRight);
 			titleField.height = Math.min(titleField.textHeight + 4, _height);
 			titleField.y = (_titleBarHeight - (titleField.height)) >> 1;
+			titleField.x = iconImage.width > 0 ? iconImage.x + iconImage.width + 6 : titleField.y;
 			
 			closeBtn.x = _width - closeBtn.width;
 			closeBtn.y = (_titleBarHeight - closeBtn.height) >> 1;
@@ -122,16 +143,49 @@ package flux.components
 			return rect;
 		}
 		
+		public function componentFocusInHandler( event:ComponentFocusEvent ):void
+		{
+			if ( FocusManager.isFocusedItemAChildOf(this) )
+			{
+				border.gotoAndPlay("Active");
+			}
+			else
+			{
+				border.gotoAndPlay("Default");
+			}
+		}
+		
 		////////////////////////////////////////////////
 		// Event handlers
 		////////////////////////////////////////////////
 		
-		private function mouseDownHandler( event:MouseEvent ):void
+		private function addedToStageHandler( event:Event ):void
+		{
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
+		}
+		
+		private function removedFromStageHandler( event:Event ):void
+		{
+			stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
+		}
+		
+		private function keyDownHandler( event:KeyboardEvent ):void
+		{
+			if ( _defaultButton == null ) return;
+			if ( FocusManager.isFocusedItemAChildOf(this) == false ) return;
+			if ( event.keyCode == Keyboard.ENTER )
+			{
+				_defaultButton.dispatchEvent( new SelectEvent( SelectEvent.SELECT, null, true ) );
+			}
+		}
+		
+		private function mouseDownBackgroundHandler( event:MouseEvent ):void
 		{
 			if ( dragEnabled == false ) return;
-			if ( event.target == closeBtn ) return;
 			if ( mouseY > _titleBarHeight ) return;
-			startDrag(false);
+			var ptA:Point = new Point(0, 0);
+			ptA = parent.globalToLocal(ptA);
+			startDrag(false, new Rectangle(ptA.x, ptA.y, stage.width-_width, stage.height-_height));
 			stage.addEventListener( MouseEvent.MOUSE_UP, mouseUpStageHandler );
 		}
 		
@@ -149,6 +203,16 @@ package flux.components
 		////////////////////////////////////////////////
 		// Getters/Setters
 		////////////////////////////////////////////////
+		
+		public function set defaultButton( value:Button ):void
+		{
+			_defaultButton = value;
+		}
+		
+		public function get defaultButton():Button
+		{
+			return _defaultButton;
+		}
 		
 		public function get controlBar():Container
 		{

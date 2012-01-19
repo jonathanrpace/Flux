@@ -98,7 +98,7 @@ package flux.components
 			_visibleIndex = value
 			invalidate();
 			dispatchEvent( new IndexChangeEvent( IndexChangeEvent.INDEX_CHANGE, oldIndex, _visibleIndex, false, false ) );
-			dispatchEvent( new Event(Event.CHANGE, true) );
+			dispatchEvent( new Event(Event.CHANGE) );
 		}
 		
 		public function get visibleIndex():int
