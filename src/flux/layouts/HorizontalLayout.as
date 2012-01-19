@@ -36,7 +36,7 @@ package flux.layouts
 		public var horizontalAlign		:String;
 		public var verticalAlign		:String;
 		
-		public function HorizontalLayout( spacing:int = 0, horizontalAlign:String = "left", verticalAlign:String = "none" ) 
+		public function HorizontalLayout( spacing:int = 2, horizontalAlign:String = "left", verticalAlign:String = "none" ) 
 		{
 			this.spacing = spacing;
 			this.horizontalAlign = horizontalAlign;
