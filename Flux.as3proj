@@ -46,11 +46,11 @@
   </build>
   <!-- SWC Include Libraries -->
   <includeLibraries>
-    <element path="lib" />
+    <!-- example: <element path="..." /> -->
   </includeLibraries>
   <!-- SWC Libraries -->
   <libraryPaths>
-    <!-- example: <element path="..." /> -->
+    <element path="lib\FluxSkins.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>
