@@ -1,18 +1,18 @@
 /**
  * BindingUtil.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,18 +22,17 @@
  * THE SOFTWARE.
  */
 
-package flux.util 
+package flux.util
 {
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
-	
 	import flux.events.PropertyChangeEvent;
-	public class BindingUtil 
+	
+	public class BindingUtil
 	{
 		private static var propertiesForSourceTable	:Dictionary = new Dictionary(true);
 		
-		private static var ignoreObject:Object;
-		private static var ignoreProperty:String;
+		
 		
 		public static function bind( source:IEventDispatcher, sourceProperty:String, target:Object, targetProperty:String, handler:Function = null ):void
 		{
@@ -91,23 +90,52 @@ package flux.util
 			unbind(objectB, propertyB, objectA, propertyA);
 		}
 		
+		// This number is incremented each time we enter this function, and decremented when we leave.
+		// Because we may set a property that ends up calling this handler during a previous call, this number
+		// will reflect the length of the binding chain.
+		// We keep track of which objects we've already set which proeprties on, to protect against infinite loops.
+		// This table is cleared when the depth == 0 when exiting, as by this point we will have visited every object
+		// affected by the property change.
+		private static var depth:int;
+		private static var visitedObjects:Dictionary;
 		private static function propertyChangeHandler( event:PropertyChangeEvent ):void
 		{
-			if ( event.target == ignoreObject && event.propertyName == ignoreProperty ) return;
+			if ( visitedObjects == null )
+			{
+				visitedObjects = new Dictionary(true);
+				depth = 0;
+			}
+			
+			depth++;
 			
 			var propertiesForThisSource:Object = propertiesForSourceTable[event.target];
 			var targetDataForThisPropertyOnThisSource:Object = propertiesForThisSource[event.propertyName];
 			for each ( var targetData:Object in targetDataForThisPropertyOnThisSource )
 			{
-				ignoreObject = targetData.target;
-				ignoreProperty = targetData.targetProperty;
+				var setProperties:Object = visitedObjects[targetData.target];
+				if ( setProperties == null )
+				{
+					setProperties = visitedObjects[targetData.target] = {};
+				}
+				
+				if ( setProperties[targetData.targetProperty] )
+				{
+					continue;
+				}
+				
+				setProperties[targetData.targetProperty] = true;
 				targetData.target[targetData.targetProperty] = event.newValue;
-				ignoreObject = ignoreProperty = null
 			}
 			
 			if ( targetDataForThisPropertyOnThisSource.handler )
 			{
 				targetDataForThisPropertyOnThisSource.handler(event);
+			}
+			depth--;
+			
+			if ( depth == 0 )
+			{
+				visitedObjects = new Dictionary(true);
 			}
 		}
 	}
