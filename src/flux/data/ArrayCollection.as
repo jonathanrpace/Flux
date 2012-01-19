@@ -93,6 +93,7 @@ package flux.data
 		public function addItem( value:* ):void
 		{
 			this[array.length] = value;
+			dispatcher.dispatchEvent( new ArrayCollectionEvent( ArrayCollectionEvent.CHANGE, ArrayCollectionChangeKind.ADD, array.length, value ) );
 		}
 		
 		public function contains( item:* ):Boolean
