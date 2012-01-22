@@ -171,6 +171,11 @@ package flux.data
 			return array.length;
 		}
 		
+		public function toString():String
+		{
+			return String(array);
+		}
+		
 		////////////////////////////////////////////////
 		// Implement IEventDispatcher
 		////////////////////////////////////////////////
