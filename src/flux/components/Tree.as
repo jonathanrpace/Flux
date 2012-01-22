@@ -141,7 +141,7 @@ package flux.components
 			depthTable = new Dictionary(true);
 			while ( dataToParse.length > 0 )
 			{
-				var data:Object = dataToParse[0];
+				var data:Object = dataToParse.shift();
 				
 				if ( _filterFunction != null && _filterFunction( data ) == false )
 				{
@@ -149,7 +149,6 @@ package flux.components
 				}
 				
 				var depth:int = depthTable[data];
-				dataToParse.splice(0, 1);
 				if ( data != _dataProvider || showRoot )
 				{
 					flattenedData.push(data);
