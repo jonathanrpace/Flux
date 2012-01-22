@@ -24,6 +24,8 @@
 
 package flux.components 
 {
+	import flash.events.KeyboardEvent;
+	import flash.ui.Keyboard;
 	public class TextInput extends TextArea 
 	{
 		
@@ -41,6 +43,7 @@ package flux.components
 			super.init();
 			editable = true;
 			multiline = false;
+			textField.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
 		}
 		
 		override public function onGainComponentFocus():void
@@ -48,6 +51,18 @@ package flux.components
 			if ( !editable ) return;
 			stage.focus = textField;
 			textField.setSelection(textField.text.length, textField.text.length);
+		}
+		
+		////////////////////////////////////////////////
+		// Event handlers
+		////////////////////////////////////////////////
+		
+		private function keyDownHandler( event:KeyboardEvent ):void
+		{
+			if ( event.keyCode == Keyboard.ENTER )
+			{
+				commitValue();
+			}
 		}
 	}
 }
