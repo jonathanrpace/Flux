@@ -79,8 +79,8 @@ package
 					<HBox width="100%" height="100%" >
 					
 						<VBox width="100%" height="100%">
-							<PropertyInspector id="propertyInspector" width="100%" height="100" />
-							<TextArea id="textArea" width="100%" height="100%" resizeToContent="true" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla viverra ultricies velit, id porttitor felis laoreet vitae. Mauris blandit ullamcorper magna, vitae accumsan massa adipiscing eget. Mauris condimentum egestas magna ac tristique. Mauris et ante nulla. Cras eget nisi sit amet augue tempor elementum a vitae justo."/>
+							<PropertyInspector id="propertyInspector" width="100%" height="100%" />
+							<TextArea id="textArea" width="100%" height="100%" resizeToContentWidth="true" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla viverra ultricies velit, id porttitor felis laoreet vitae. Mauris blandit ullamcorper magna, vitae accumsan massa adipiscing eget. Mauris condimentum egestas magna ac tristique. Mauris et ante nulla. Cras eget nisi sit amet augue tempor elementum a vitae justo."/>
 							<TextArea width="100%" height="100%" editable="true" multiline="true" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla viverra ultricies velit, id porttitor felis laoreet vitae. Mauris blandit ullamcorper magna, vitae accumsan massa adipiscing eget. Mauris condimentum egestas magna ac tristique. Mauris et ante nulla. Cras eget nisi sit amet augue tempor elementum a vitae justo."/>
 						
 						</VBox>
@@ -95,7 +95,7 @@ package
 								<CheckBox label="Button 1" selected="false" indeterminate="true" />
 								<CheckBox label="Button 1" selected="true" width="100%" />
 								
-								<RadioButtonGroup resizeToContent="true">
+								<RadioButtonGroup resizeToContentWidth="true" resizeToContentHeight="true">
 									<RadioButton label="Radio Button A" selected="true" />
 									<RadioButton label="Radio Button B" selected="false" />
 									<RadioButton label="Radio Button C" selected="false" />
@@ -115,21 +115,19 @@ package
 							
 							<ScrollPane width = "100%" height = "100%" label="Collapsible Panels">
 								
-								<CollapsiblePanel label="Panel 1" width="100%" height="200"/>
-								<CollapsiblePanel label="Panel 2" width="100%" height="200"/>
-								<CollapsiblePanel label="Panel 3" width="100%" height="200"/>
-								<CollapsiblePanel label="Panel 4" width="100%" height="200"/>
-								
-								<layout>
-									<VerticalLayout/>
-								</layout>
+								<VDividedBox width="100%" resizeToContentHeight="true">
+									<CollapsiblePanel label="Panel 1" width="100%" height="100" showCloseButton="true"/>
+									<CollapsiblePanel label="Panel 2" width="100%" height="100"/>
+									<CollapsiblePanel label="Panel 3" width="100%" height="100"/>
+									<CollapsiblePanel label="Panel 4" width="100%" height="100"/>
+								</VDividedBox>
 								
 							</ScrollPane>
 						
 							<TextArea width="100%" label="TextArea" editable="true" />
 							<DropDownMenu id="dropDownMenu" width="100%" label="DropDownMenu" />
 							<Button label="Button 2 longer" toggle="false" />
-							<Button label="Button 3 with a really long label" toggle="true" resizeToContent="true" />
+							<Button label="Button 3 with a really long label" toggle="true" resizeToContentWidth="true" />
 						</TabNavigator>
 						
 						
@@ -220,6 +218,7 @@ package
 			stage.addEventListener( Event.ENTER_FRAME, enterFrameHandler );
 			
 			Alert.show("Alert", "This is an alert", ["Cancel", "OK"], "OK", Info32x32);
+			Alert.show("Alert", "This is another alert", ["Cancel", "OK"], "OK", Info32x32);
 			
 			BindingUtil.bind( inspectableObject, "string", textArea, "text" );
 			
