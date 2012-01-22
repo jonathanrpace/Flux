@@ -61,6 +61,7 @@ package flux.components
 			invalidate();
 			onChildrenChanged( child, index, true );
 			dispatchEvent( new ContainerEvent( ContainerEvent.CHILD_ADDED, child, index ) );
+			dispatchEvent( new Event( Event.RESIZE, true ) );
 			return child;
 		}
 		
@@ -69,7 +70,8 @@ package flux.components
 			content.addChild(child);
 			invalidate();
 			onChildrenChanged( child, content.numChildren - 1, true );
-			dispatchEvent( new ContainerEvent( ContainerEvent.CHILD_ADDED, child, content.numChildren-1 ) );
+			dispatchEvent( new ContainerEvent( ContainerEvent.CHILD_ADDED, child, content.numChildren - 1 ) );
+			dispatchEvent( new Event( Event.RESIZE, true ) );
 			return child;
 		}
 		
@@ -79,6 +81,7 @@ package flux.components
 			var child:DisplayObject = content.removeChildAt(index);
 			onChildrenChanged( child, index, false );
 			dispatchEvent( new ContainerEvent( ContainerEvent.CHILD_REMOVED, child, index ) );
+			dispatchEvent( new Event( Event.RESIZE, true ) );
 			return child;
 		}
 		
@@ -89,6 +92,7 @@ package flux.components
 			invalidate();
 			onChildrenChanged( child, index, false );
 			dispatchEvent( new ContainerEvent( ContainerEvent.CHILD_REMOVED, child, content.numChildren ) );
+			dispatchEvent( new Event( Event.RESIZE, true ) );
 			return child;
 		}
 		
@@ -126,15 +130,23 @@ package flux.components
 		{
 			var layoutArea:Rectangle = getChildrenLayoutArea();
 			
-			if ( _resizeToContent )
+			if ( _resizeToContentWidth || _resizeToContentHeight )
 			{
 				var contentSize:Rectangle = _layout.layout( content, layoutArea.width, layoutArea.height, false );
-				_width = contentSize.width + _paddingLeft + _paddingRight;
-				_height = contentSize.height + _paddingTop + _paddingBottom;
-				layoutArea.width = contentSize.width;
-				layoutArea.height = contentSize.height;
+				if ( _resizeToContentWidth )
+				{
+					_width = contentSize.width + _paddingLeft + _paddingRight;
+					layoutArea.width = contentSize.width;
+				}
+				if ( _resizeToContentHeight )
+				{
+					_height = contentSize.height + _paddingTop + _paddingBottom;
+					layoutArea.height = contentSize.height;
+				}
+				
+				
 			}
-			else
+			if ( !_resizeToContentWidth || !_resizeToContentHeight )
 			{
 				_layout.layout( content, layoutArea.width, layoutArea.height, true );
 			}
@@ -172,6 +184,12 @@ package flux.components
 		protected function addRawChild(child:DisplayObject):DisplayObject
 		{
 			super.addChild(child);
+			return child;
+		}
+		
+		protected function removeRawChild(child:DisplayObject):DisplayObject
+		{
+			super.removeChild(child);
 			return child;
 		}
 		

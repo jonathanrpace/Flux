@@ -34,15 +34,17 @@ package flux.components
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.text.TextField;
+	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	import flash.ui.Keyboard;
+	
 	import flux.events.ComponentFocusEvent;
 	import flux.events.SelectEvent;
 	import flux.layouts.HorizontalLayout;
 	import flux.layouts.LayoutAlign;
 	import flux.managers.FocusManager;
-	import flux.skins.PanelSkin;
 	import flux.skins.PanelCloseBtnSkin;
+	import flux.skins.PanelSkin;
 	
 	[Event( type="flash.events.Event", name="close" )]
 	public class Panel extends Container
@@ -72,6 +74,7 @@ package flux.components
 		{
 			border = new PanelSkin();
 			_titleBarHeight = border.scale9Grid.top;
+			_minHeight = _titleBarHeight;
 			addRawChild(border);
 			
 			super.init();
@@ -108,7 +111,8 @@ package flux.components
 		
 		override protected function validate():void
 		{
-			_controlBar.resizeToContent = true;
+			_controlBar.resizeToContentWidth = true;
+			_controlBar.resizeToContentHeight = true;
 			super.validate();
 			
 			iconImage.source = _icon;
@@ -116,7 +120,8 @@ package flux.components
 			iconImage.y = (_titleBarHeight - iconImage.height) >> 1;
 			iconImage.x = iconImage.y;
 			
-			_controlBar.resizeToContent = false;
+			_controlBar.resizeToContentWidth = false;
+			_controlBar.resizeToContentHeight = false;
 			_controlBar.width = _width;
 			_controlBar.validateNow();
 			_controlBar.y = _height - _controlBar.height;
@@ -124,14 +129,15 @@ package flux.components
 			border.width = _width;
 			border.height = _height;
 			
-			titleField.text = _label;
 			titleField.width = _width - (_paddingLeft + _paddingRight);
+			titleField.text = _label;
 			titleField.height = Math.min(titleField.textHeight + 4, _height);
 			titleField.y = (_titleBarHeight - (titleField.height)) >> 1;
 			titleField.x = iconImage.width > 0 ? iconImage.x + iconImage.width + 6 : titleField.y;
 			
-			closeBtn.x = _width - closeBtn.width;
+			
 			closeBtn.y = (_titleBarHeight - closeBtn.height) >> 1;
+			closeBtn.x = _width - closeBtn.width - closeBtn.y;
 		}
 		
 		override protected function getChildrenLayoutArea():Rectangle
@@ -139,7 +145,7 @@ package flux.components
 			var rect:Rectangle = new Rectangle( _paddingLeft, _paddingTop, _width - (_paddingRight+_paddingLeft), _height - (_paddingBottom+_paddingTop) );
 			_controlBar.validateNow();
 			rect.top += titleBarHeight;
-			rect.bottom -= _controlBar.height;
+			rect.bottom -= _controlBar.numChildren == 0 ? 0 : _controlBar.height;
 			return rect;
 		}
 		

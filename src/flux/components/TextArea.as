@@ -84,7 +84,7 @@ package flux.components
 			textField.x = textField.y = _padding;
 			textField.width = _width - _padding*2;
 			
-			if ( _resizeToContent )
+			if ( _resizeToContentHeight )
 			{
 				textField.autoSize = TextFieldAutoSize.LEFT;
 				_height = textField.height + _padding*2
@@ -143,7 +143,7 @@ package flux.components
 		
 		public function set text( value:String ):void
 		{
-			textField.text = value;
+			textField.text = String(value);
 			dispatchEvent( new Event( Event.CHANGE ) );
 		}
 		

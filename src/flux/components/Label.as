@@ -55,7 +55,7 @@ package flux.components
 			_fontSize = Number(textField.defaultTextFormat.size);
 			_bold = textField.defaultTextFormat.bold;
 			textField.multiline = false;
-			
+			_resizeToContentWidth = true;
 			addChild(textField);
 		}
 		
@@ -63,8 +63,16 @@ package flux.components
 		{
 			if ( textAlign == TextFormatAlign.LEFT )
 			{
-				textField.autoSize = TextFieldAutoSize.LEFT;
-				_width = textField.width;
+				if ( _resizeToContentWidth )
+				{
+					textField.autoSize = TextFieldAutoSize.LEFT;
+					_width = Math.max( _width, textField.width );
+				}
+				else
+				{
+					textField.autoSize = TextFieldAutoSize.NONE;
+					textField.width = _width;
+				}
 			}
 			else
 			{

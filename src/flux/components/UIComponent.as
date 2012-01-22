@@ -42,18 +42,21 @@ package flux.components
 	public class UIComponent extends Sprite implements IUIComponent
 	{
 		// Properties
-		protected var _width			:Number = 0;
-		protected var _height			:Number = 0;
-		protected var _percentWidth		:Number = NaN;
-		protected var _percentHeight	:Number = NaN;
-		protected var _label			:String = "";
-		protected var _toolTip			:String;
-		protected var _icon				:Class;
-		protected var _excludeFromLayout:Boolean = false;
-		protected var _resizeToContent	:Boolean = false;
-		protected var _enabled			:Boolean = true;
-		protected var _isInvalid		:Boolean = false;
-		protected var _focusEnabled		:Boolean = false;
+		protected var _width				:Number = 0;
+		protected var _height				:Number = 0;
+		protected var _minWidth				:Number = 0;
+		protected var _minHeight			:Number = 0;
+		protected var _percentWidth			:Number = NaN;
+		protected var _percentHeight		:Number = NaN;
+		protected var _label				:String = "";
+		protected var _toolTip				:String;
+		protected var _icon					:Class;
+		protected var _excludeFromLayout	:Boolean = false;
+		protected var _resizeToContentWidth	:Boolean = false;
+		protected var _resizeToContentHeight:Boolean = false;
+		protected var _enabled				:Boolean = true;
+		protected var _isInvalid			:Boolean = false;
+		protected var _focusEnabled			:Boolean = false;
 		
 		public function UIComponent()
 		{
@@ -130,7 +133,7 @@ package flux.components
 		
 		override public function set width( value:Number ):void
 		{
-			value = Math.round(value < 0 ? 0 : value);
+			value = Math.round(value < _minWidth ? _minWidth : value);
 			if ( value == _width ) return;
 			_width = value;
 			invalidate();
@@ -144,7 +147,7 @@ package flux.components
 		
 		override public function set height( value:Number ):void
 		{
-			value = Math.round(value < 0 ? 0 : value);
+			value = Math.round(value < _minHeight ? _minHeight : value);
 			if ( value == _height ) return;
 			_height = value;
 			invalidate();
@@ -250,16 +253,28 @@ package flux.components
 			return _enabled;
 		}
 		
-		public function set resizeToContent( value:Boolean ):void
+		public function set resizeToContentWidth( value:Boolean ):void
 		{
-			if ( value == _resizeToContent ) return;
-			_resizeToContent = value;
+			if ( value == _resizeToContentWidth ) return;
+			_resizeToContentWidth = value;
 			invalidate();
 		}
 		
-		public function get resizeToContent():Boolean
+		public function get resizeToContentWidth():Boolean
 		{
-			return _resizeToContent;
+			return _resizeToContentWidth;
+		}
+		
+		public function set resizeToContentHeight( value:Boolean ):void
+		{
+			if ( value == _resizeToContentHeight ) return;
+			_resizeToContentHeight = value;
+			invalidate();
+		}
+		
+		public function get resizeToContentHeight():Boolean
+		{
+			return _resizeToContentHeight;
 		}
 		
 		public function set excludeFromLayout( value:Boolean ):void

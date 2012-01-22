@@ -76,7 +76,8 @@ package flux.components
 			
 			list = new List();
 			list.itemRendererClass = DropDownListItemRenderer;
-			list.resizeToContent = true;
+			list.resizeToContentWidth = true;
+			list.resizeToContentHeight = true;
 			list.clickSelect = true;
 			list.focusEnabled = false;
 			
@@ -106,7 +107,7 @@ package flux.components
 				{
 					btn = new Button(MenuBarButtonSkin);
 					btn.focusEnabled = false;
-					btn.resizeToContent = true;
+					btn.resizeToContentWidth = true;
 					buttonBar.addChild(btn);
 				}
 				

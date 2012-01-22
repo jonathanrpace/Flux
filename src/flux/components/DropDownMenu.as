@@ -32,6 +32,7 @@ package flux.components
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
+	import flux.events.ListEvent;
 	
 	import flux.components.DropDownListItemRenderer;
 	import flux.data.ArrayCollection;
@@ -89,7 +90,7 @@ package flux.components
 			list.itemRendererClass = DropDownListItemRenderer;
 			list.allowMultipleSelection = false;
 			list.clickSelect = true;
-			list.addEventListener( SelectEvent.SELECT, listSelectHandler );
+			list.addEventListener( ListEvent.ITEM_SELECT, listSelectHandler );
 		}
 		
 		override protected function validate():void
@@ -156,10 +157,10 @@ package flux.components
 		// Event handlers
 		////////////////////////////////////////////////
 		
-		private function listSelectHandler( event:SelectEvent ):void
+		private function listSelectHandler( event:ListEvent ):void
 		{
 			if ( event.target != list ) return;
-			_selectedItem = event.selectedItem;
+			_selectedItem = event.item;
 			updateLabel();
 			closeList();
 			dispatchEvent( new Event( Event.CHANGE ) );

@@ -118,7 +118,7 @@ package flux.components
 			
 			var tf:TextFormat = labelField.defaultTextFormat;
 			tf.align = _labelAlign;
-			if ( _resizeToContent )
+			if ( _resizeToContentWidth )
 			{
 				tf.align = TextFormatAlign.LEFT;
 				labelField.autoSize = TextFieldAutoSize.LEFT;
@@ -249,7 +249,7 @@ package flux.components
 		{
 			_label = str;
 			labelField.text = _label ? _label : "";
-			if ( _resizeToContent )
+			if ( _resizeToContentWidth )
 			{
 				invalidate();
 			}
