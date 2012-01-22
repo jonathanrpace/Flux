@@ -63,7 +63,11 @@ package flux.managers
 			
 			if ( modal )
 			{
-				app.popUpContainer.addChildAt( modalCover, app.popUpContainer.numChildren - 1 );
+				if ( modalCover.parent )
+				{
+					modalCover.parent.removeChild(modalCover);
+				}
+				app.popUpContainer.addChildAt( modalCover, app.popUpContainer.getChildIndex(popUp) );
 				updateModalCover();
 				if ( popUp is UIComponent && UIComponent(popUp).focusEnabled )
 				{
