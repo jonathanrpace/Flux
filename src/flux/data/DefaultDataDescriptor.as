@@ -29,12 +29,12 @@ package flux.data
 		public var labelField		:String = "label";
 		public var iconField		:String = "icon";
 		public var enabledField		:String = "enabled";
-		
+
 		public function DefaultDataDescriptor() 
 		{
-			
+
 		}
-		
+
 		public function getLabel(data:Object):String 
 		{
 			if ( data.hasOwnProperty(labelField) )
@@ -43,7 +43,7 @@ package flux.data
 			}
 			return String(data);
 		}
-		
+
 		public function getIcon(data:Object):Class 
 		{
 			if ( data.hasOwnProperty(iconField) )
@@ -52,7 +52,7 @@ package flux.data
 			}
 			return null;
 		}
-		
+
 		public function getEnabled(data:Object):Boolean 
 		{
 			if ( data.hasOwnProperty(enabledField) )
@@ -61,15 +61,20 @@ package flux.data
 			}
 			return true;
 		}
-		
+
 		public function hasChildren(data:Object):Boolean 
 		{
 			return data.children != null;
 		}
-		
+
 		public function getChildren(data:Object):ArrayCollection 
 		{
 			return data.children;
+		}
+		
+		public function getChangeEventTypes( data:Object ):Array
+		{
+			return ["propertyChange_" + labelField, "propertyChange_" + iconField, "propertyChange_" + enabledField];
 		}
 	}
 }

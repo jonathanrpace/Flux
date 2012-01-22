@@ -24,6 +24,8 @@
 
 package flux.components
 {
+	import flash.events.Event;
+	import flash.events.IEventDispatcher;
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
 	import flux.skins.ListItemRendererSkin;
@@ -33,6 +35,8 @@ package flux.components
 		// Internal vars
 		protected var _list			:List;
 		protected var _data			:Object;
+		
+		protected var changeEventTypes	:Array;
 		
 		public function ListItemRenderer(skinClass:Class = null)
 		{
@@ -57,12 +61,28 @@ package flux.components
 		
 		public function set data( value:Object ):void
 		{
+			if ( _data && _data is IEventDispatcher )
+			{
+				for each ( var changeEventType:String in changeEventTypes )
+				{
+					IEventDispatcher(_data).removeEventListener( changeEventType, dataChangeHandler );
+				}
+			}
 			_data = value;
 			if ( _data != null )
 			{
 				label = list.dataDescriptor.getLabel(_data);
 				icon = list.dataDescriptor.getIcon(_data);
 				enabled = list.dataDescriptor.getEnabled(_data);
+				
+				if ( _data is IEventDispatcher )
+				{
+					changeEventTypes = list.dataDescriptor.getChangeEventTypes(_data);
+					for each ( changeEventType in changeEventTypes )
+					{
+						IEventDispatcher(_data).addEventListener( changeEventType, dataChangeHandler );
+					}
+				}
 			}
 			else
 			{
@@ -85,6 +105,11 @@ package flux.components
 		public function get list():List
 		{
 			return _list;
+		}
+		
+		private function dataChangeHandler( event:Event ):void
+		{
+			data = _data;
 		}
 	}
 }

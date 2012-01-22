@@ -28,8 +28,9 @@ package flux.data
 	{
 		function getLabel( data:Object ):String
 		function getIcon( data:Object ):Class
-		function getEnabled( data:Object ):Boolean
+		function getEnabled( data:Object ):Boolean;
 		function hasChildren( data:Object ):Boolean
 		function getChildren( data:Object ):ArrayCollection;
+		function getChangeEventTypes( data:Object ):Array;
 	}
 }
