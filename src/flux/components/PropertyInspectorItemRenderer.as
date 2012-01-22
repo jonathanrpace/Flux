@@ -25,14 +25,18 @@
 package flux.components 
 {
 	import flash.display.MovieClip;
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
+	import flash.geom.ColorTransform;
 	import flash.geom.Rectangle;
 	import flash.text.TextField;
+	import flash.text.TextFormat;
 	import flux.data.PropertyInspectorField;
 	import flux.events.PropertyChangeEvent;
 	import flux.skins.PropertyInspectorItemRendererSkin;
+	import flux.skins.PropertyInspectorItemRendererHeaderSkin;
 	
 	public class PropertyInspectorItemRenderer extends UIComponent implements IItemRenderer
 	{
@@ -44,6 +48,7 @@ package flux.components
 		
 		// Child elements
 		protected var skin				:MovieClip;
+		protected var headerSkin		:Sprite;
 		protected var propertyLabelField:TextField;
 		protected var valueLabelField	:TextField;
 		
@@ -67,6 +72,9 @@ package flux.components
 			skin.mouseEnabled = false;
 			addChild( skin );
 			
+			headerSkin = new PropertyInspectorItemRendererHeaderSkin();
+			addChild( headerSkin );
+			
 			propertyLabelField = TextStyles.createTextField();
 			addChild( propertyLabelField );
 			
@@ -81,27 +89,44 @@ package flux.components
 		
 		override protected function validate():void
 		{
-			var temp:PropertyInspector;
-			
+			var tf:TextFormat = propertyLabelField.defaultTextFormat;
 			if ( _data is PropertyInspectorField )
 			{
 				var field:PropertyInspectorField = PropertyInspectorField(_data);
 				
 				propertyLabelField.text = field.property;
-				propertyLabelField.x = 4;
-				propertyLabelField.height = Math.min(propertyLabelField.textHeight + 4, _height);
-				propertyLabelField.y = (_height - (propertyLabelField.height)) >> 1;
+				
 				propertyLabelField.width = (_width * 0.4) - (propertyLabelField.x + 4);
+				tf.bold = false;
+				propertyLabelField.setTextFormat(tf);
 				
 				valueLabelField.text = field.valueLabel;
 				valueLabelField.x = int(propertyLabelField.x + propertyLabelField.width + 4);
 				valueLabelField.y = propertyLabelField.y;
 				valueLabelField.height = propertyLabelField.height;
 				valueLabelField.width = _width - (valueLabelField.x + 4);
+				
+				headerSkin.visible = false;
+			}
+			else
+			{
+				propertyLabelField.width = _width - 8;
+				propertyLabelField.text = _data.label;
+				tf.bold = true;
+				propertyLabelField.setTextFormat(tf);
+				
+				valueLabelField.text = "";
+				
+				headerSkin.visible = true;
 			}
 			
-			skin.width = _width;
-			skin.height = _height;
+			propertyLabelField.x = 4;
+			propertyLabelField.height = Math.min(propertyLabelField.textHeight + 4, _height);
+			propertyLabelField.y = (_height - (propertyLabelField.height)) >> 1;
+			
+			
+			skin.width = headerSkin.width = _width;
+			skin.height = headerSkin.height = _height;
 		}
 		
 		////////////////////////////////////////////////
@@ -145,7 +170,7 @@ package flux.components
 		{
 			if ( event.target != this ) return;
 			_over = false;
-			_selected ? skin.gotoAndPlay( "SelectedOut" ) : skin.gotoAndPlay( "Out" );
+			_selected ? skin.gotoAndPlay( "SelectedUp" ) : skin.gotoAndPlay( "Up" );
 			removeEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
 		}
 
@@ -259,7 +284,7 @@ package flux.components
 		public function get editorRect():Rectangle
 		{
 			validateNow();
-			return new Rectangle( valueLabelField.x, 0, valueLabelField.width, _height);
+			return new Rectangle( valueLabelField.x, 0, valueLabelField.width+4, _height);
 		}
 	}
 }
