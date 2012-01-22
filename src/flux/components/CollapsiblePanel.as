@@ -1,20 +1,20 @@
 /**
  * Panel.as
- * 
+ *
  * Container component with a title bar and control bar.
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,11 +24,11 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-	public class CollapsiblePanel extends Panel 
+	public class CollapsiblePanel extends Panel
 	{
 		// Properties
 		private var _opened			:Boolean = true;
@@ -37,7 +37,7 @@ package flux.components
 		private var openedHeight		:int = 0;
 		
 		
-		public function CollapsiblePanel() 
+		public function CollapsiblePanel()
 		{
 			
 		}
@@ -59,6 +59,7 @@ package flux.components
 		
 		private function mouseClickHandler( event:MouseEvent ):void
 		{
+			if ( event.target != border ) return;
 			if ( mouseY < _titleBarHeight )
 			{
 				opened = !_opened;
@@ -86,8 +87,8 @@ package flux.components
 		override public function set height( value:Number ):void
 		{
 			super.height = value;
-			openedHeight = value;
-			_opened = true;
+			openedHeight = Math.max(_minHeight, value);
+			_opened = _height > _minHeight;
 		}
 	}
 }
