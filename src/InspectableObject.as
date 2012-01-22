@@ -10,6 +10,7 @@ package
 		private var _number		:Number;
 		private var _number2	:Number;
 		private var _number3	:Number;
+		private var _color		:uint;
 		private var _boolean	:Boolean;
 		
 		public function InspectableObject()
@@ -69,7 +70,7 @@ package
 			dispatchEvent( new PropertyChangeEvent( "propertyChange_number2", oldValue, _number2 ) );
 		}
 		
-		[Inspectable] [Inspectable( editor="Slider", min="-10", max="10", snapInterval="1" )]
+		[Inspectable( editor="Slider", min="-10", max="10", snapInterval="1" )]
 		public function get number3():Number
 		{
 			return _number3;
@@ -93,6 +94,18 @@ package
 			var oldValue:* = _boolean;
 			_boolean = value;
 			dispatchEvent( new PropertyChangeEvent( "propertyChange_boolean", oldValue, _boolean ) );
+		}
+		
+		[Inspectable( editor="ColorPicker" )]
+		public function get color():uint 
+		{
+			return _color;
+		}
+		
+		public function set color(value:uint):void 
+		{
+			_color = value;
+			dispatchEvent( new PropertyChangeEvent( "propertyChange_color", null, _color ) );
 		}
 	}
 }

@@ -36,6 +36,7 @@ package flux.components
 	import flux.data.PropertyInspectorField;
 	import flux.events.ArrayCollectionEvent;
 	import flux.events.ItemEditorEvent;
+	import flux.events.ListEvent;
 	import flux.events.PropertyInspectorEvent;
 	import flux.events.ScrollEvent;
 	import flux.events.SelectEvent;
@@ -101,8 +102,9 @@ package flux.components
 			registerEditor( "DropDownMenu", DropDownMenu, "selectedItem" );
 			registerEditor( "NumericStepper", NumericStepper, "value" );
 			registerEditor( "Slider", HSlider, "value" );
+			registerEditor( "ColorPicker", ColorPickerItemEditor, "color" );
 			
-			list.addEventListener( SelectEvent.SELECT, selectListItemHandler );
+			list.addEventListener( ListEvent.ITEM_SELECT, selectListItemHandler );
 			list.addEventListener( ScrollEvent.CHANGE_SCROLL, changeListScrollHandler );
 		}
 		
@@ -153,20 +155,24 @@ package flux.components
 			disposeEditor();
 		}
 		
-		private function selectListItemHandler( event:SelectEvent ):void
+		private function selectListItemHandler( event:ListEvent ):void
 		{
 			var selectedItem:Object = list.selectedItems[0];
+			commitEditorValue();
+			disposeEditor();
 			
 			if ( selectedItem is PropertyInspectorField )
 			{
-				commitEditorValue();
-				disposeEditor();
-				
 				var selectedItemRenderer:PropertyInspectorItemRenderer = PropertyInspectorItemRenderer(list.getItemRendererForData(selectedItem));
 				
 				fieldBeingEdited = PropertyInspectorField(selectedItem);
 				
 				editorDescriptor = editorDescriptorTable[fieldBeingEdited.editorID];
+				if ( editorDescriptor == null )
+				{
+					throw( new Error( "Unknown editor id : " + fieldBeingEdited.editorID ) );
+					return;
+				}
 				var editorType:Class = editorDescriptor.type;
 				editor = UIComponent( new editorType() );
 				
@@ -221,7 +227,7 @@ package flux.components
 			
 			fieldBeingEdited.value = value;
 			var itemRenderer:PropertyInspectorItemRenderer = PropertyInspectorItemRenderer(list.getItemRendererForData(fieldBeingEdited));
-			itemRenderer.data = fieldBeingEdited;
+			if ( itemRenderer != null ) itemRenderer.data = fieldBeingEdited;
 		}
 		
 		private function disposeEditor():void

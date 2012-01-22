@@ -149,7 +149,6 @@ package flux.components
 			addChild(hexLabel);
 			
 			swatchBorder = new ColorPickerSkin();
-			swatchBorder.x = _padding;
 			swatchBorder.height = inputField.height;
 			addChild(swatchBorder);
 			
@@ -207,21 +206,20 @@ package flux.components
 			hexLabel.x = inputField.x - hexLabel.width;
 			hexLabel.y = inputField.y + (( inputField.height - hexLabel.height ) >> 1);
 			
+			swatchBorder.x = _padding;
 			swatchBorder.y = inputField.y;
 			swatchBorder.width = hexLabel.x - _padding * 2;
 			
 			swatch.x = swatchBorder.x + _innerPadding;
 			swatch.y = swatchBorder.y + _innerPadding;
 			swatch.graphics.clear();
-			var rgb:uint = hsl2rgb( selectedHue, selectedSaturation, selectedBrightness );
-			swatch.graphics.beginFill(rgb);
+			swatch.graphics.beginFill(_color);
 			swatch.graphics.drawRect( 0, 0, swatchBorder.width - _innerPadding * 2, swatchBorder.height - _innerPadding * 2 );
 		}
 		
 		protected function updateInputField():void
 		{
-			var rgb:uint = hsl2rgb( selectedHue, selectedSaturation, selectedBrightness );
-			inputField.text = rgb.toString(16).toUpperCase();
+			inputField.text = _color.toString(16).toUpperCase();
 		}
 		
 		////////////////////////////////////////////////
@@ -244,10 +242,12 @@ package flux.components
 			
 			selectedHue = xRatio;
 			selectedSaturation = 1 - yRatio;
+			_color = hsl2rgb( selectedHue, selectedSaturation, selectedBrightness );
 			inputField.removeEventListener(Event.CHANGE, changeInputFieldHandler);
 			updateInputField();
 			inputField.addEventListener(Event.CHANGE, changeInputFieldHandler);
 			invalidate();
+			
 		}
 		
 		private function mouseUpColorAreaHandler( event:MouseEvent ):void
@@ -269,10 +269,12 @@ package flux.components
 			yRatio = yRatio < 0 ? 0 : yRatio > 1 ? 1 : yRatio;
 			
 			selectedBrightness = 1 - yRatio;
+			_color = hsl2rgb( selectedHue, selectedSaturation, selectedBrightness );
 			inputField.removeEventListener(Event.CHANGE, changeInputFieldHandler);
 			updateInputField();
 			inputField.addEventListener(Event.CHANGE, changeInputFieldHandler);
 			invalidate();
+			//color = hsl2rgb( selectedHue, selectedSaturation, selectedBrightness );
 		}
 		
 		private function mouseUpBrightnessAreaHandler( event:MouseEvent ):void
@@ -289,6 +291,16 @@ package flux.components
 		////////////////////////////////////////////////
 		// Getters/Setters
 		////////////////////////////////////////////////
+		
+		public function set showBorder( value:Boolean ):void
+		{
+			border.visible = value;
+		}
+		
+		public function get showBorder():Boolean
+		{
+			return border.visible;
+		}
 		
 		public function set color( value:uint ):void
 		{
@@ -409,7 +421,7 @@ package flux.components
 			if ( delta == 0 )
 			{
 				H = 0;
-				S = 0;
+				S = 1;
 			}
 			else
 			{
