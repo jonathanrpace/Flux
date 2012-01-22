@@ -42,16 +42,15 @@ package flux.components
 	import flux.events.ArrayCollectionEvent;
 	import flux.events.DragAndDropEvent;
 	import flux.events.ScrollEvent;
-	import flux.events.SelectEvent;
 	import flux.layouts.VerticalLayout;
 	import flux.managers.FocusManager;
 	import flux.skins.ListDropIndicatorSkin;
 	import flux.skins.ListSkin;
 	
 	[Event( type = "flash.events.Event", name = "change" )]
-	[Event( type = "flux.events.SelectEvent", name = "select" )]
 	[Event( type = "flux.events.ScrollEvent", name = "scrollChange" )]
 	[Event( type = "flux.events.DragAndDropEvent", name = "drop" )]
+	[Event( type = "flux.events.ListEvent", name = "itemSelect" )]
 	[Event( type = "flux.events.ListEvent", name = "itemRollOver" )]
 	[Event( type = "flux.events.ListEvent", name = "itemRollOut" )]
 	
@@ -164,7 +163,7 @@ package flux.components
 		{
 			calculateFlattenedData();
 			
-			if ( _resizeToContent )
+			if ( _resizeToContentHeight )
 			{
 				_height = flattenedData.length * _itemRendererHeight + _padding * 2;
 			}
@@ -210,8 +209,8 @@ package flux.components
 					}
 					visibleItemRenderersByData[data] = itemRenderer;
 					itemRenderer.data = data;
-					itemRenderer.resizeToContent = _resizeToContent;
-					itemRenderer.percentWidth = _resizeToContent ? NaN : 100;
+					itemRenderer.resizeToContentWidth = _resizeToContentWidth;
+					itemRenderer.percentWidth = _resizeToContentWidth ? NaN : 100;
 					
 				}
 				
@@ -223,7 +222,7 @@ package flux.components
 			initVisibleItemRenderers();
 			
 			var layoutArea:Rectangle = getChildrenLayoutArea();
-			if ( _resizeToContent )
+			if ( _resizeToContentWidth )
 			{
 				var maxWidth:int = 0;
 				for ( i = 0; i < visibleData.length; i++ )
@@ -235,14 +234,14 @@ package flux.components
 				for ( i = 0; i < visibleData.length; i++ )
 				{
 					itemRenderer = visibleItemRenderers[i];
-					itemRenderer.resizeToContent = false;
+					itemRenderer.resizeToContentWidth = false;
 				}
 				
 				_width = maxWidth + _padding * 2;
 				layoutArea.width = maxWidth;
 			}
 			
-			if ( _resizeToContent == false )
+			if ( _resizeToContentHeight == false )
 			{
 				vScrollBar.removeEventListener(Event.CHANGE, onChangeVScrollBar );
 				vScrollBar.x = _width - vScrollBar.width;
@@ -251,7 +250,7 @@ package flux.components
 				vScrollBar.addEventListener(Event.CHANGE, onChangeVScrollBar );
 				
 				vScrollBar.visible = vScrollBar.thumbSizeRatio < 1;
-				if ( vScrollBar.visible ) layoutArea.right = vScrollBar.x + _padding;
+				if ( vScrollBar.visible ) layoutArea.right = vScrollBar.x;
 			}
 			else
 			{
@@ -316,7 +315,7 @@ package flux.components
 		
 		protected function calculateVisibleData():void
 		{
-			if ( _resizeToContent )
+			if ( _resizeToContentHeight )
 			{
 				vScrollBar.value = 0;
 				visibleData = flattenedData.slice();
@@ -538,7 +537,7 @@ package flux.components
 			selectedItems = _selectedItems;
 			invalidate();
 			
-			dispatchEvent( new SelectEvent( SelectEvent.SELECT, flattenedData[index] ) );
+			dispatchEvent( new ListEvent( ListEvent.ITEM_SELECT, flattenedData[index] ) );
 		}
 		
 		private function mouseWheelHandler( event:MouseEvent ):void

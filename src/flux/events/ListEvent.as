@@ -28,6 +28,7 @@ package flux.events
 	
 	public class ListEvent extends Event
 	{
+		public static const ITEM_SELECT		:String = "itemSelect"
 		public static const ITEM_ROLL_OVER	:String = "itemRollOver"
 		public static const ITEM_ROLL_OUT	:String = "itemRollOut"
 		
