@@ -41,6 +41,8 @@ package flux.components
 		{
 			skin = new HRuleSkin();
 			addChild(skin);
+			_width = skin.width;
+			_height = skin.height;
 		}
 		
 		override protected function validate():void
