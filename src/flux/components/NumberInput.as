@@ -37,7 +37,7 @@ package flux.components
 		private var _value				:Number;
 		private var _min				:Number = -Number.MAX_VALUE;
 		private var _max				:Number = Number.MAX_VALUE;
-		private var _numDecimalPlaces	:uint = 2;
+		private var _numDecimalPlaces	:uint = 3;
 		
 		public function NumberInput() 
 		{
@@ -112,6 +112,7 @@ package flux.components
 		
 		public function get value():Number
 		{
+			value = Number( textField.text );
 			return _value;
 		}
 		
