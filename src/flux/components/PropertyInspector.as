@@ -98,14 +98,26 @@ package flux.components
 			
 			editorDescriptorTable = { };
 			registerEditor( "TextInput", TextInput, "text" );
-			registerEditor( "NumberInput", NumberInput, "value" );
+			registerEditor( "NumberInput", NumberInput, "value", numberLabelFunction );
 			registerEditor( "DropDownMenu", DropDownMenu, "selectedItem" );
-			registerEditor( "NumericStepper", NumericStepper, "value" );
-			registerEditor( "Slider", HSlider, "value" );
-			registerEditor( "ColorPicker", ColorPickerItemEditor, "color" );
+			registerEditor( "NumericStepper", NumericStepper, "value", numberLabelFunction );
+			registerEditor( "Slider", HSlider, "value", numberLabelFunction );
+			registerEditor( "ColorPicker", ColorPickerItemEditor, "color", hexLabelFunction );
 			
 			list.addEventListener( ListEvent.ITEM_SELECT, selectListItemHandler );
 			list.addEventListener( ScrollEvent.CHANGE_SCROLL, changeListScrollHandler );
+		}
+		
+		private function hexLabelFunction( item:uint ):String
+		{
+			return "#" + item.toString(16).toUpperCase();
+		}
+		
+		private function numberLabelFunction( item:Number ):String
+		{
+			var a:Number = 1 / 0.001;
+			item = int(item * a) / a;
+			return String(item);
 		}
 		
 		override protected function validate():void
@@ -128,6 +140,7 @@ package flux.components
 			}
 			else
 			{
+				disposeEditor();
 				var fields:Array = getFields( _dataProvider[0] );
 				list.dataProvider = new ArrayCollection( fields );
 			}
@@ -220,12 +233,11 @@ package flux.components
 			var event:PropertyInspectorEvent = new PropertyInspectorEvent( PropertyInspectorEvent.COMMIT_VALUE, [fieldBeingEdited.host], fieldBeingEdited.property, value, false, true );
 			dispatchEvent(event);
 			
-			if (event.isDefaultPrevented())
+			if (event.isDefaultPrevented() == false )
 			{
-				return;
+				fieldBeingEdited.value = value;
 			}
 			
-			fieldBeingEdited.value = value;
 			var itemRenderer:PropertyInspectorItemRenderer = PropertyInspectorItemRenderer(list.getItemRendererForData(fieldBeingEdited));
 			if ( itemRenderer != null ) itemRenderer.data = fieldBeingEdited;
 		}
@@ -310,6 +322,12 @@ package flux.components
 						{
 							field.editorID = "TextInput";
 						}
+					}
+					
+					var editorDescriptor:EditorDescriptor = editorDescriptorTable[field.editorID];
+					if ( editorDescriptor )
+					{
+						field.labelFunction = editorDescriptor.labelFunction;
 					}
 					
 					fields.push(field);
