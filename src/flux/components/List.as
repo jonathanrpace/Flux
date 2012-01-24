@@ -765,6 +765,10 @@ package flux.components
 			{
 				content.removeChildAt(0);
 			}
+			
+			var itemRenderer:IItemRenderer = new _itemRendererClass();
+			_itemRendererHeight = UIComponent(itemRenderer).height;
+			
 			invalidate();
 		}
 		
