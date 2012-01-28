@@ -13,16 +13,16 @@ A well rounded set of controls, including
 	PropertyInspector
 	List and Tree (including drag and drop)
 	Containers (HBox, VBox, Panel)
-	Buttons (Toggle, Checkbox, Radio
+	Buttons (Toggle, Checkbox, Radio)
 	Viewstacks (TabNavigator)
 	MenuBar
-	ComboxBox
+	ColorPicker
+	DropDownMenu
 	Slider
 	NumericStepper
 	TextArea
 	TextInput
 	NumberInput
-	ColorPicker
 	Tooltips
 	ProgressBar
 
