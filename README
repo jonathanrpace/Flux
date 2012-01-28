@@ -1,11 +1,13 @@
 Flux UI Framework
 
-Minimum Player Version 10.0
+A lightweight alternative to Flex. Somewhere between Keith Peter's excellent MinimalComps and Flex.
 
-A lightweight alternative to Flex. If you've used Flex, you should be right at home with this. 
 Flux is designed to be much easier to style and extend than Flex, but you lose some of the deeper features of Flex.
+If you've used Flex, you should be right at home.
 
 Features :-
+
+Small (~120K).
 
 A well rounded set of controls, including
 	PropertyInspector
