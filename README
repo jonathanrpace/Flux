@@ -2,7 +2,7 @@ Flux UI Framework
 
 A lightweight alternative to Flex. Somewhere between Keith Peter's excellent MinimalComps and Flex.
 
-Flux is designed to be much easier to style and extend than Flex, but you lose some of the deeper features of Flex.
+Flux is designed to be much easier to style and extend than Flex, but you lose some of its deeper features.
 If you've used Flex, you should be right at home.
 
 Features :-
