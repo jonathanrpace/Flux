@@ -1,3 +1,54 @@
 Flux UI Framework
 
-Minimum Player Version 10.0
+A lightweight alternative to Flex. Somewhere between Keith Peter's excellent MinimalComps and Flex.
+
+Flux is designed to be much easier to style and extend than Flex, but you lose some of its deeper features.
+If you've used Flex, you should be right at home.
+
+Features :-
+
+Small (~120K).
+
+A well rounded set of controls, including
+	PropertyInspector
+	List and Tree (including drag and drop)
+	Containers (HBox, VBox, Panel)
+	Buttons (Toggle, Checkbox, Radio)
+	Viewstacks (TabNavigator)
+	MenuBar
+	ColorPicker
+	DropDownMenu
+	Slider
+	NumericStepper
+	TextArea
+	TextInput
+	NumberInput
+	Tooltips
+	ProgressBar
+
+Simple styling mechanism 
+	Skin is provided via exported symbol SWC from flash.
+	Skins are 'baked' into a component when created - no dynamic changing allowed.
+
+Includes a deserializer to turn mxml-style declarative syntax into nested component instances at run-time. 
+CursorManager
+Component-level focus management
+Proportional layout support (100% height/width)
+Simple binding mechanism
+ArrayCollection (serves as the basis of all dataproviders).
+
+
+There are currently two examples showing most features (a sandbox and a simple code/design view app).
+This project is being actively developed fixed while integrating into a large, GUI heavy app.
+
+If you have any questions feel free to email me.
+
+
+
+
+
+
+
+
+
+
