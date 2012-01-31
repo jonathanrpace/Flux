@@ -27,22 +27,24 @@
 
 package flux.components
 {
+	import flash.text.AntiAliasType;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+
 	public class TextStyles
 	{
 		// NOTE: Flex 4 introduces DefineFont4, which is used by default and does not work in native text fields.
 		// Use the embedAsCFF="false" param to switch back to DefineFont4. In earlier Flex 4 SDKs this was cff="false".
 		// So if you are using the Flex 3.x sdk compiler, remove the embedAsCFF="false" parameter.
-		[Embed(source="../assets/PixelArial.ttf", embedAsCFF="false", fontName="Pixel Arial 11", mimeType="application/x-font")]
-		protected static var PixelArial:Class;
+		//[Embed(source="../assets/PixelArial.ttf", embedAsCFF="false", fontName="Pixel Arial 11", mimeType="application/x-font")]
+		//protected static var PixelArial:Class;
 		
-		[Embed(source="../assets/PixelArialBold.ttf", embedAsCFF="false", fontWeight="bold",  fontName="Pixel Arial 11", mimeType="application/x-font")]
-		protected static var PixelArialBold:Class;
+		//[Embed(source="../assets/PixelArialBold.ttf", embedAsCFF="false", fontWeight="bold",  fontName="Pixel Arial 11", mimeType="application/x-font")]
+		//protected static var PixelArialBold:Class;
 		
-		public static var embedFonts		:Boolean = true;
-		public static var fontFace			:String = "Pixel Arial 11";
-		public static var fontSize			:int = 8;
+		public static var embedFonts		:Boolean = false;
+		public static var fontFace			:String = "Verdana";
+		public static var fontSize			:int = 11;
 		public static var fontColor			:uint = 0xCCCCCC;
 		public static var fontColorDimmed	:uint = 0x999999;
 		
@@ -51,6 +53,7 @@ package flux.components
 			var field:TextField = new TextField();
 			field.defaultTextFormat = new TextFormat( fontFace, fontSize, fontColor, bold  );
 			field.embedFonts = embedFonts;
+			field.antiAliasType = AntiAliasType.ADVANCED;
 			field.selectable = false;
 			field.multiline = false;
 			field.tabEnabled = false;
