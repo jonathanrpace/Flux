@@ -88,7 +88,6 @@ package flux.components
 		public function validateNow():void
 		{
 			if ( _isInvalid == false ) return;
-			if ( stage == null ) return;
 			validate();
 			_isInvalid = false;
 			removeEventListener( Event.ENTER_FRAME, onInvalidateHandler );
