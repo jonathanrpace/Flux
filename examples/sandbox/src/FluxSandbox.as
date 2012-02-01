@@ -46,7 +46,7 @@ package
 	import icons.*
 	import flux.cursors.*;
 	
-	[SWF( backgroundColor="0x101010", frameRate="60" )]
+	[SWF( width="800", height="600", backgroundColor="0x101010", frameRate="60" )]
 	public class FluxSandbox extends Application
 	{
 		public var propertyInspector	:PropertyInspector;
@@ -165,8 +165,6 @@ package
 			BindingUtil.bind( inspectableObject, "number2", inspectableObject, "number3" );
 			BindingUtil.bind( inspectableObject, "number3", inspectableObject, "number" );
 			BindingUtil.bind( inspectableObject, "number", inspectableObject, "number3" );
-			//BindingUtil.bind( inspectableObject, "number2", inspectableObject, "number3" );
-			//BindingUtil.bind( inspectableObject, "number3", inspectableObject, "number2" );
 			
 			propertyInspectorDataProvider.addItem( inspectableObject );
 			propertyInspector.dataProvider = propertyInspectorDataProvider;

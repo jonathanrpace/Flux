@@ -1,18 +1,18 @@
 /**
  * PropertyInspectorItemRenderer.as
- * 
+ *
  * Copyright (c) 2011 Jonathan Pace
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
@@ -55,7 +55,7 @@ package flux.components
 		// Internal vars
 		private var _list				:List;
 		
-		public function PropertyInspectorItemRenderer( ) 
+		public function PropertyInspectorItemRenderer( )
 		{
 			
 		}
@@ -108,7 +108,7 @@ package flux.components
 				
 				headerSkin.visible = false;
 			}
-			else
+			else if ( _data != null )
 			{
 				propertyLabelField.width = _width - 8;
 				propertyLabelField.text = _data.label;
@@ -159,8 +159,8 @@ package flux.components
 			if ( event.target != this ) return;
 			_over = true;
 			
-			_selected ? 
-			(_down ? skin.gotoAndPlay( "SelectedDown" ) 	: skin.gotoAndPlay("SelectedOver")) : 
+			_selected ?
+			(_down ? skin.gotoAndPlay( "SelectedDown" ) 	: skin.gotoAndPlay("SelectedOver")) :
 			(_down ? skin.gotoAndPlay( "Down" ) 			: skin.gotoAndPlay("Over"))
 				
 			addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
@@ -186,8 +186,8 @@ package flux.components
 		{
 			_down = false;
 			
-			_selected ? 
-			(_over ? skin.gotoAndPlay( "SelectedOver" ) 	: skin.gotoAndPlay("SelectedUp")) : 
+			_selected ?
+			(_over ? skin.gotoAndPlay( "SelectedOver" ) 	: skin.gotoAndPlay("SelectedUp")) :
 			(_over ? skin.gotoAndPlay( "Over" ) 			: skin.gotoAndPlay("Up"))
 			
 			stage.removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
@@ -262,21 +262,21 @@ package flux.components
 		}
 
 		public function get over():Boolean
-		{ 
+		{
 			return _over;
 		}
 		
 		public function get down():Boolean
-		{ 
+		{
 			return _down;
 		}
 		
-		public function get list():List 
+		public function get list():List
 		{
 			return _list;
 		}
 		
-		public function set list(value:List):void 
+		public function set list(value:List):void
 		{
 			_list = value;
 		}

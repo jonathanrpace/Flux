@@ -295,7 +295,19 @@ package flux.components
 						// values then get passed to the editor when created.
 						else
 						{
-							if ( value.charAt(0) == "[" && value.charAt(value.length-1) == "]" )
+							if ( value == "true" )
+							{
+								field.editorParameters[key] = true;
+							}
+							else if ( value == "false" )
+							{
+								field.editorParameters[key] = false;
+							}
+							else if ( isNaN(Number(value)) == false )
+							{
+								field.editorParameters[key] = Number(value);
+							}
+							else if ( value.charAt(0) == "[" && value.charAt(value.length-1) == "]" )
 							{
 								value = value.substr(1, value.length-2);
 								field.editorParameters[key] = new ArrayCollection(value.split(","));
