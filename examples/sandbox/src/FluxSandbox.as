@@ -1,7 +1,14 @@
 /**
  * FluxSandbox.as
  *
- * Copyright (c) 2011 Jonathan Pace
+ * This isn't so much an 'example' as a place where I can stress test various
+ * combinations of Flux components. As such it doesn't have a single topic it's
+ * trying to explain. I've included it anyway as it still may provide useful
+ * reference for components I've not documented, or not provided examples for
+ * yet.
+ * 
+ * 
+ * Copyright (c) 2012 Jonathan Pace
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +56,6 @@ package
 	[SWF( width="800", height="600", backgroundColor="0x101010", frameRate="60" )]
 	public class FluxSandbox extends Application
 	{
-		public var propertyInspector	:PropertyInspector;
 		public var list					:List;
 		public var tree					:Tree;
 		public var tabNavigator			:TabNavigator;
@@ -58,8 +64,7 @@ package
 		public var panel				:Panel;
 		public var textArea				:TextArea;
 		public var progressBar			:ProgressBar;
-		
-		private var inspectableObject	:InspectableObject;
+		public var spawnAlertBtn		:Button;
 		
 		public function FluxSandbox()
 		{
@@ -79,10 +84,8 @@ package
 					<HBox width="100%" height="100%" >
 					
 						<VBox width="100%" height="100%">
-							<PropertyInspector id="propertyInspector" width="100%" height="100%" />
 							<TextArea id="textArea" width="100%" height="100%" resizeToContentWidth="true" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla viverra ultricies velit, id porttitor felis laoreet vitae. Mauris blandit ullamcorper magna, vitae accumsan massa adipiscing eget. Mauris condimentum egestas magna ac tristique. Mauris et ante nulla. Cras eget nisi sit amet augue tempor elementum a vitae justo."/>
 							<TextArea width="100%" height="100%" editable="true" multiline="true" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla viverra ultricies velit, id porttitor felis laoreet vitae. Mauris blandit ullamcorper magna, vitae accumsan massa adipiscing eget. Mauris condimentum egestas magna ac tristique. Mauris et ante nulla. Cras eget nisi sit amet augue tempor elementum a vitae justo."/>
-						
 						</VBox>
 						
 					
@@ -134,7 +137,7 @@ package
 					</HBox>
 					
 					<Panel id="panel" label="I'm a Panel" width="100%" height="120" >
-						<Button label="Button 2" toggle="false" width="100%" height="40" />
+						<Button label="Click me to show an alert" id="spawnAlertBtn" toggle="false" width="100%" height="40" />
 						<Button label="Button 3" toggle="true" width="100%" height="30" selectMode="mouseDown" />
 						<Button label="Button 4" toggle="false" width="100%" height="20" />
 						<Button label="Button 5" toggle="true" width="100%" height="40" />
@@ -157,19 +160,7 @@ package
 			
 			FluxDeserializer.deserialize( xml, this );
 			
-			// Create an inspectable data provider for the property inspector.
-			var propertyInspectorDataProvider:ArrayCollection = new ArrayCollection();
-			inspectableObject = new InspectableObject();
-			
-			BindingUtil.bind( inspectableObject, "number", inspectableObject, "number2" );
-			BindingUtil.bind( inspectableObject, "number2", inspectableObject, "number3" );
-			BindingUtil.bind( inspectableObject, "number3", inspectableObject, "number" );
-			BindingUtil.bind( inspectableObject, "number", inspectableObject, "number3" );
-			
-			propertyInspectorDataProvider.addItem( inspectableObject );
-			propertyInspector.dataProvider = propertyInspectorDataProvider;
-			
-			panel.icon = Info32x32;
+			spawnAlertBtn.addEventListener(MouseEvent.CLICK, clickSpawnAlertBtn);
 			
 			// Build an example data provider
 			var dp:Object = { label:"root" };
@@ -186,21 +177,16 @@ package
 				}
 			}
 			
-			// Bind multiple controls to the same data provider.
+			
 			list.dataProvider = dp.children;
 			list.filterFunction = function (item:Object):Boolean
 			{
 				return item.index > 2 && item.index < 7;
 			}
 			
-			
 			tree.dataProvider = dp;
 			dropDownMenu.dataProvider = dp.children;
 			menuBar.dataProvider = dp.children;
-			
-			list.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler);
-			
-			itemToOpenTo = dp.children[0];
 			
 			tree.addEventListener( DragAndDropEvent.DRAG_START, dragHandler);
 			tree.addEventListener( DragAndDropEvent.DRAG_OVER, dragHandler);
@@ -209,48 +195,24 @@ package
 			tree.addEventListener( TreeEvent.ITEM_CLOSE, itemCloseHandler);
 			
 			tabNavigator.addEventListener(TabNavigatorEvent.CLOSE_TAB, closeTabHandler);
-			stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandler );
 			
-			stage.addEventListener( FocusEvent.FOCUS_IN, stageFocusInHandler );
-			stage.addEventListener( FocusEvent.FOCUS_OUT, stageFocusOutHandler );
 			stage.addEventListener( Event.ENTER_FRAME, enterFrameHandler );
-			
-			Alert.show("Alert", "This is an alert", ["Cancel", "OK"], "OK", Info32x32);
-			Alert.show("Alert", "This is another alert", ["Cancel", "OK"], "OK", Info32x32);
-			
-			BindingUtil.bind( inspectableObject, "string", textArea, "text" );
-			
-			//CursorManager.setCursor( BusyCursor );
-			//enabled = false;
 			
 			validateNow();
 		}
 		
-		private function doubleClickHandler( event:MouseEvent ):void
+		private function clickSpawnAlertBtn( event:MouseEvent ):void
 		{
-			trace("!");
+			Alert.show("Alert", "This is an alert", ["Cancel", "OK"], "OK", Info32x32);
 		}
 		
 		private function enterFrameHandler( event:Event ):void
 		{
-			inspectableObject.number = stage.mouseX;
-			inspectableObject.string = String( stage.mouseX );
-			
 			progressBar.progress += 0.003;
 			if ( progressBar.progress == 1 )
 			{
 				progressBar.progress = 0;
 			}
-		}
-		
-		private function stageFocusInHandler( event:FocusEvent ):void
-		{
-			//trace("Focus in : " + event.target);
-		}
-		
-		private function stageFocusOutHandler( event:FocusEvent ):void
-		{
-			//trace("Focus out : " + event.target);
 		}
 		
 		private function itemOpenHandler( event:TreeEvent ):void
@@ -273,27 +235,6 @@ package
 			tabNavigator.removeChildAt(event.tabIndex);
 		}
 		
-		private var itemToOpenTo:Object;
-		private function keyDownHandler( event:KeyboardEvent ):void
-		{
-			if ( event.keyCode == Keyboard.DELETE )
-			{
-				var selectedItems:Array = tree.selectedItems;
-				for ( var i:int = 0; i < selectedItems.length; i++ )
-				{
-					var selectedItem:Object = selectedItems[i];
-					var parent:Object = tree.getParent(selectedItem, false);
-					parent.children.removeItem(selectedItem);
-				}
-			}
-			else if ( event.keyCode == Keyboard.SPACE )
-			{
-				tree.openToItem(itemToOpenTo);
-			}
-			
-			BindingUtil.unbind( inspectableObject, "string", textArea, "text" );
-		}
-		
 		private function createDataProvider( numItems:int ):ArrayCollection
 		{
 			var dp:ArrayCollection = new ArrayCollection();
@@ -303,7 +244,5 @@ package
 			}
 			return dp;
 		}
-		
-		
 	}
 }

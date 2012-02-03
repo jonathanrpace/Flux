@@ -1,4 +1,4 @@
-package
+package util
 {
 	import flash.events.EventDispatcher;
 	import flux.events.PropertyChangeEvent;
