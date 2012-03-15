@@ -100,7 +100,7 @@ package flux.components
 		override protected function rollOutHandler(event:MouseEvent):void
 		{
 			_over = false;
-			_indeterminate ? skin.gotoAndPlay("IndeterminateOut") : _selected ? skin.gotoAndPlay( "SelectedOut" ) : skin.gotoAndPlay( "Out" );
+			_indeterminate ? skin.gotoAndPlay("IndeterminateUp") : _selected ? skin.gotoAndPlay( "SelectedUp" ) : skin.gotoAndPlay( "Up" );
 			removeEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
 		}
 
