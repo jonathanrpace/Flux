@@ -112,7 +112,7 @@ package flux.components
 			popUpManager = new PopUpManager(this);
 			toolTipManager = new ToolTipManager(this);
 			cursorManager = new CursorManager(this);
-			focusManager = new FocusManager(this);
+			focusManager = new FocusManager();
 			
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;

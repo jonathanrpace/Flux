@@ -44,7 +44,7 @@ package flux.managers
 		
 		private var focusedComponent		:UIComponent;
 		
-		public function FocusManager( app:Application )
+		public function FocusManager()
 		{
 			if ( instance ) return;
 			instance = this;
