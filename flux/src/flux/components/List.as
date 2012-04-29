@@ -49,7 +49,9 @@ package flux.components
 	
 	[Event( type = "flash.events.Event", name = "change" )]
 	[Event( type = "flux.events.ScrollEvent", name = "scrollChange" )]
-	[Event( type = "flux.events.DragAndDropEvent", name = "drop" )]
+	[Event( type = "flux.events.DragAndDropEvent", name = "dragStart" )]
+	[Event( type = "flux.events.DragAndDropEvent", name = "dragOver" )]
+	[Event( type = "flux.events.DragAndDropEvent", name = "dragDrop" )]
 	[Event( type = "flux.events.ListEvent", name = "itemSelect" )]
 	[Event( type = "flux.events.ListEvent", name = "itemRollOver" )]
 	[Event( type = "flux.events.ListEvent", name = "itemRollOut" )]
@@ -372,7 +374,7 @@ package flux.components
 		protected function updateDropTarget():void
 		{
 			var newDropTargetCollection:ArrayCollection;
-			var newDropTargetIndex:int;
+			var newDropTargetIndex:int = -1;
 			for each ( var itemRenderer:IItemRenderer in visibleItemRenderers )
 			{
 				if ( DisplayObject(itemRenderer).hitTestPoint( stage.mouseX, stage.mouseY ) == false ) continue;
@@ -406,6 +408,7 @@ package flux.components
 			
 			var dropTargetData:Object = dropTargetCollection[after ? dropTargetIndex - 1 : dropTargetIndex];
 			var itemRenderer:IItemRenderer = getItemRendererForData( dropTargetData );
+			if ( !itemRenderer ) return;
 			
 			if ( after )
 			{
