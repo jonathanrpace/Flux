@@ -185,7 +185,7 @@ package flux.components
 		override protected function updateDropTarget():void
 		{
 			var newDropTargetCollection:ArrayCollection;
-			var newDropTargetIndex:int;
+			var newDropTargetIndex:int = -1;
 			
 			for each ( var itemRenderer:IItemRenderer in visibleItemRenderers )
 			{
@@ -241,7 +241,10 @@ package flux.components
 			var after:Boolean = dropTargetIndex >= dropTargetCollection.length;
 			var dropTargetData:Object = dropTargetCollection[after ? dropTargetIndex - 1 : dropTargetIndex];
 			var itemRenderer:ITreeItemRenderer = ITreeItemRenderer(getItemRendererForData( dropTargetData ));
-			dropIndicator.x = itemRenderer.depth * 16;
+			if ( itemRenderer != null )
+			{
+				dropIndicator.x = itemRenderer.depth * 16;
+			}
 			
 			super.updateDropIndicator( dropTargetCollection, dropTargetIndex );
 		}
