@@ -47,7 +47,7 @@ package flux.data
 		{
 			if ( labelFunction != null )
 			{
-				return labelFunction( value );
+				return labelFunction( value, host, property );
 			}
 			else
 			{

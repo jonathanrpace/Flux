@@ -78,10 +78,11 @@ package flux.components
 		 * @param	labelFunction		(Optional) A function used to transform the value of an object to a string. Defaults to String(value);
 		 * @param	itemField			(Optional) The name of the property on the editor that should be set with a reference to the item being edited.
 		 * @param	itemPropertyField	(Optional) The name of the property on the editor that should be set with the name of the property on the item being edited .
+		 * @param	autoCommitValue		(Optional) If true (default), the property inspector will automatically commit the editor's value to the object being edited. Set this to false if you want to handle this entirely within the editor.
 		 */
-		public function registerEditor( id:String, type:Class, valueField:String, labelFunction:Function = null, itemField:String = null, itemPropertyField:String = null ):void
+		public function registerEditor( id:String, type:Class, valueField:String, labelFunction:Function = null, itemField:String = null, itemPropertyField:String = null, autoCommitValue:Boolean = true ):void
 		{
-			var descriptor:EditorDescriptor = new EditorDescriptor( id, type, valueField, labelFunction, itemField, itemPropertyField );
+			var descriptor:EditorDescriptor = new EditorDescriptor( id, type, valueField, labelFunction, itemField, itemPropertyField, autoCommitValue );
 			editorDescriptorTable[id] = descriptor;
 		}
 		
@@ -108,12 +109,12 @@ package flux.components
 			list.addEventListener( ScrollEvent.CHANGE_SCROLL, changeListScrollHandler );
 		}
 		
-		private function hexLabelFunction( item:uint ):String
+		private function hexLabelFunction( item:uint, host:Object, property:String ):String
 		{
 			return "#" + item.toString(16).toUpperCase();
 		}
 		
-		private function numberLabelFunction( item:Number ):String
+		private function numberLabelFunction( item:Number, host:Object, property:String ):String
 		{
 			var a:Number = 1 / 0.001;
 			item = int(item * a) / a;
@@ -191,7 +192,18 @@ package flux.components
 				
 				for ( var editorParameterName:String in fieldBeingEdited.editorParameters )
 				{
+					if ( editorParameterName == "editorType" ) continue;
 					editor[editorParameterName] = fieldBeingEdited.editorParameters[editorParameterName];
+				}
+				
+				if ( editorDescriptor.itemField )
+				{
+					editor[editorDescriptor.itemField] = fieldBeingEdited.host;
+				}
+				
+				if ( editorDescriptor.itemPropertyField )
+				{
+					editor[editorDescriptor.itemPropertyField] = fieldBeingEdited.property;
 				}
 				
 				editor[ editorDescriptor.valueField ] = fieldBeingEdited.value;
@@ -228,14 +240,18 @@ package flux.components
 		private function commitEditorValue():void
 		{
 			if ( editor == null ) return;
-			var value:Object = editor[ editorDescriptor.valueField ];
-			
-			var event:PropertyInspectorEvent = new PropertyInspectorEvent( PropertyInspectorEvent.COMMIT_VALUE, [fieldBeingEdited.host], fieldBeingEdited.property, value, false, true );
-			dispatchEvent(event);
-			
-			if (event.isDefaultPrevented() == false )
+			if ( editorDescriptor.autoCommitValue )
 			{
-				fieldBeingEdited.value = value;
+			
+				var value:Object = editor[ editorDescriptor.valueField ];
+				
+				var event:PropertyInspectorEvent = new PropertyInspectorEvent( PropertyInspectorEvent.COMMIT_VALUE, [fieldBeingEdited.host], fieldBeingEdited.property, value, false, true );
+				dispatchEvent(event);
+				
+				if (event.isDefaultPrevented() == false )
+				{
+					fieldBeingEdited.value = value;
+				}
 			}
 			
 			var itemRenderer:PropertyInspectorItemRenderer = PropertyInspectorItemRenderer(list.getItemRendererForData(fieldBeingEdited));
@@ -347,6 +363,9 @@ package flux.components
 				
 			}
 			
+			
+			fields.sortOn( "property" );
+			
 			return fields;
 		}
 		
@@ -386,8 +405,9 @@ internal class EditorDescriptor
 	public var itemField			:String;
 	public var itemPropertyField	:String;
 	public var labelFunction		:Function;
-		
-	public function EditorDescriptor( id:String, type:Class, valueField:String, labelFunction:Function = null, itemField:String = null, itemPropertyField:String = null )
+	public var autoCommitValue		:Boolean;
+	
+	public function EditorDescriptor( id:String, type:Class, valueField:String, labelFunction:Function = null, itemField:String = null, itemPropertyField:String = null, autoCommitValue:Boolean = true )
 	{
 		this.id = id;
 		this.type =  type;
@@ -395,5 +415,6 @@ internal class EditorDescriptor
 		this.labelFunction = labelFunction;
 		this.itemField = itemField;
 		this.itemPropertyField = itemPropertyField;
+		this.autoCommitValue = autoCommitValue;
 	}
 }
