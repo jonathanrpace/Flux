@@ -204,6 +204,7 @@ package flux.components
 		
 		private function bindHosts():void
 		{
+			unbindHosts();
 			if ( _data == null ) return;
 			if ( _data is PropertyInspectorField == false ) return;
 			pollInterval = flash.utils.setInterval( updateValue, 250 );

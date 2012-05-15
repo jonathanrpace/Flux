@@ -287,7 +287,9 @@ package flux.components
 					{
 						var child:Object = collection[i];
 						fields.push({label:getClassName(child), header:true});
-						fields = fields.concat( getFields(child) );
+						var childFields:Array = getFields(child);
+						childFields = childFields.sortOn("property");
+						fields = fields.concat( childFields );
 					}
 				}
 				else
@@ -360,11 +362,7 @@ package flux.components
 					
 					fields.push(field);
 				}
-				
 			}
-			
-			
-			fields.sortOn( "property" );
 			
 			return fields;
 		}
