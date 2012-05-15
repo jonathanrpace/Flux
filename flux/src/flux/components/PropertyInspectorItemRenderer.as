@@ -33,10 +33,13 @@ package flux.components
 	import flash.geom.Rectangle;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+	import flash.utils.clearInterval;
+	import flash.utils.setInterval;
+	
 	import flux.data.PropertyInspectorField;
 	import flux.events.PropertyChangeEvent;
-	import flux.skins.PropertyInspectorItemRendererSkin;
 	import flux.skins.PropertyInspectorItemRendererHeaderSkin;
+	import flux.skins.PropertyInspectorItemRendererSkin;
 	
 	public class PropertyInspectorItemRenderer extends UIComponent implements IItemRenderer
 	{
@@ -54,6 +57,8 @@ package flux.components
 		
 		// Internal vars
 		private var _list				:List;
+		private var pollInterval		:int = -1;
+		private var cachedValue			:*;
 		
 		public function PropertyInspectorItemRenderer( )
 		{
@@ -193,11 +198,6 @@ package flux.components
 			stage.removeEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
 		}
 		
-		private function hostPropertyChangeHandler( event:PropertyChangeEvent ):void
-		{
-			invalidate();
-		}
-		
 		////////////////////////////////////////////////
 		// Private methods
 		////////////////////////////////////////////////
@@ -206,20 +206,25 @@ package flux.components
 		{
 			if ( _data == null ) return;
 			if ( _data is PropertyInspectorField == false ) return;
-			var field:PropertyInspectorField = PropertyInspectorField(_data);
-			if ( field.host is IEventDispatcher == false ) return;
-			IEventDispatcher(field.host).addEventListener( "propertyChange_" + field.property, hostPropertyChangeHandler);
+			pollInterval = flash.utils.setInterval( updateValue, 250 );
+			cachedValue = PropertyInspectorField(_data).value;
 		}
 		
 		private function unbindHosts():void
 		{
-			if ( _data == null ) return;
-			if ( _data is PropertyInspectorField == false ) return;
-			var field:PropertyInspectorField = PropertyInspectorField(_data);
-			if ( field.host is IEventDispatcher == false ) return;
-			IEventDispatcher(field.host).removeEventListener( "propertyChange_" + field.property, hostPropertyChangeHandler);
+			flash.utils.clearInterval(pollInterval);
+			pollInterval = -1;
 		}
 		
+		private function updateValue():void
+		{
+			var field:PropertyInspectorField = PropertyInspectorField(_data);
+			if ( field.value != cachedValue )
+			{
+				cachedValue = field.value;
+				invalidate();
+			}
+		}
 		
 		////////////////////////////////////////////////
 		// Getters/Setters
