@@ -604,7 +604,10 @@ package flux.components
 		{
 			if ( draggedItemRenderer )
 			{
-				handleDrop(IItemRenderer(draggedItemRenderer).data, dropTargetCollection, dropTargetIndex);
+				if ( dropTargetCollection )
+				{
+					handleDrop(IItemRenderer(draggedItemRenderer).data, dropTargetCollection, dropTargetIndex);
+				}
 				
 				Sprite(draggedItemRenderer).stopDrag();
 				stage.removeChild( draggedItemRenderer );
