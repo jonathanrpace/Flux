@@ -22,19 +22,20 @@
  * THE SOFTWARE.
  */
 
-package flux.components 
+package flux.components
 {
 	import flash.events.Event;
 	import flash.events.FocusEvent;
 	import flash.events.KeyboardEvent;
 	import flash.events.TextEvent;
 	import flash.ui.Keyboard;
+	
 	import flux.events.ItemEditorEvent;
 	
-	public class NumberInput extends TextInput 
+	public class NumberInput extends TextInput
 	{
 		// Properties
-		private var _value				:Number;
+		private var _value				:String = "0";
 		private var _min				:Number = -Number.MAX_VALUE;
 		private var _max				:Number = Number.MAX_VALUE;
 		private var _numDecimalPlaces	:uint = 3;
@@ -53,20 +54,65 @@ package flux.components
 			super.init();
 			textField.restrict = "\-0-9.";
 			textField.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
-			
+			textField.addEventListener(TextEvent.TEXT_INPUT, onTextInput);
 			value = 0;
 		}
 		
 		override protected function commitValue():void
 		{
-			if ( textField.text == "" ) textField.text = "0";
+			if ( textField.text == "" )
+			{
+				value = 0;
+				return;
+			}
+			var oldValue:String = _value;
 			value = Number( textField.text );
-			dispatchEvent( new ItemEditorEvent( ItemEditorEvent.COMMIT_VALUE, _value, "value" ) );
+			textField.text = _value;
+			if ( _value != oldValue )
+			{
+				dispatchEvent( new ItemEditorEvent( ItemEditorEvent.COMMIT_VALUE, _value, "value" ) );
+			}
 		}
 		
 		////////////////////////////////////////////////
 		// Event Handlers
 		////////////////////////////////////////////////
+		
+		override public function onLoseComponentFocus():void
+		{
+			commitValue();
+		}
+		
+		private function onTextInput( event:TextEvent ):void
+		{
+			// Stop two '.' characters from entering the field.
+			if ( event.text.indexOf(".") != -1 )
+			{
+				if ( textField.text.indexOf(".") != -1 )
+				{
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					return;
+				}
+			}
+			
+			// Stop two '-' characters from entering the field, and ensure it can only appear at the start of the string
+			if ( event.text.indexOf("-") != -1 )
+			{
+				if ( textField.text.indexOf("-") != -1 )
+				{
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					return;
+				}
+				if ( textField.caretIndex != 0 )
+				{
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					return;
+				}
+			}
+		}
 		
 		private function keyDownHandler( event:KeyboardEvent ):void
 		{
@@ -78,30 +124,27 @@ package flux.components
 		
 		public function set value( v:Number ):void
 		{
-			var previousValue:Number = _value;
-			
-			if ( isNaN(v) ) v = _value;
+			if ( isNaN(v) ) v = 0;
 			v = v < _min ? _min : v > _max ? _max : v;
-			_value = v;
 			
-			var str:String = String(_value);
+			var newValue:String = String(v);
 			
-			if ( _numDecimalPlaces > 0 && str.indexOf(".") != -1 )
+			if ( _numDecimalPlaces > 0 && newValue.indexOf(".") != -1 )
 			{
-				var index:int = str.indexOf(".");
-				var wholeNumber:String = str.substring( 0, index );
-				var fraction:String = str.substr( index, _numDecimalPlaces+1 );
-				str = wholeNumber + fraction;
+				var index:int = newValue.indexOf(".");
+				var wholeNumber:String = newValue.substring( 0, index );
+				var fraction:String = newValue.substr( index, _numDecimalPlaces+1 );
+				newValue = wholeNumber + fraction;
 			}
 			else
 			{
-				str = String(int(_value));
+				newValue = String(int(v));
 			}
 			
-			textField.text = str;
-			
-			if ( previousValue != _value )
+			if ( newValue != _value )
 			{
+				_value = newValue;
+				textField.text = _value;
 				dispatchEvent( new Event( Event.CHANGE ) );
 			}
 		}
@@ -112,14 +155,13 @@ package flux.components
 		
 		public function get value():Number
 		{
-			value = Number( textField.text );
-			return _value;
+			return Number(_value);
 		}
 		
 		public function set min( v:Number ):void
 		{
 			_min = v;
-			value = _value;
+			value = v < _min ? _min : v;
 		}
 		
 		public function get min():Number
@@ -130,7 +172,7 @@ package flux.components
 		public function set max( v:Number ):void
 		{
 			_max = v;
-			value = _value;
+			value = v > _max ? _max : v;
 		}
 		
 		public function get max():Number
@@ -141,7 +183,7 @@ package flux.components
 		public function set numDecimalPlaces( v:uint ):void
 		{
 			_numDecimalPlaces = v;
-			value = _value;
+			value = value;
 		}
 		
 		public function get numDecimalPlaces():uint
