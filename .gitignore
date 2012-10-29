@@ -1,0 +1,16 @@
+# Build and Release Folders
+*.swf
+*.swc
+
+# Project property files
+.actionScriptProperties
+.flexLibProperties
+.project
+.settings/
+
+# OS X folders
+.DS_Store
+
+# Windows
+Thumbs.db
+
