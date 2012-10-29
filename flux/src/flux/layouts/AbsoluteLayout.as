@@ -66,8 +66,10 @@ package flux.layouts
 					component.validateNow();
 				}
 				
-				contentSize.width = child.x + child.width > contentSize.width ? child.x + child.width : contentSize.width;
-				contentSize.height = child.y + child.height > contentSize.height ? child.x + child.height : contentSize.height;
+				if ( child.x + child.width > contentSize.width )
+					contentSize.width += child.width; 
+				if ( child.y + child.height > contentSize.height )
+					contentSize.height += child.height;
 			}
 			
 			return contentSize;
